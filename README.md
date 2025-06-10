@@ -50,3 +50,7 @@ docker-compose up -d
 ```
 
 Hasura exposes a GraphQL API at `http://localhost:8080` and uses the same JWT secret as the NestJS backend (`secretKey`).
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
