@@ -1,0 +1,29 @@
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  username TEXT NOT NULL UNIQUE,
+  password TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS locations (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  address TEXT
+);
+
+CREATE TABLE IF NOT EXISTS products (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  unit TEXT
+);
+
+CREATE TABLE IF NOT EXISTS inventory_transactions (
+  id SERIAL PRIMARY KEY,
+  product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+  location_id INTEGER REFERENCES locations(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  quantity INTEGER NOT NULL,
+  transaction_type TEXT NOT NULL,
+  occurred_at TIMESTAMP DEFAULT NOW()
+);
+
