@@ -1,3 +1,5 @@
+import { getToken } from './authStore';
+
 export interface InventoryItem {
   id: number;
   product: {
@@ -9,14 +11,14 @@ export interface InventoryItem {
 }
 
 const HASURA_URL = 'http://localhost:8080/v1/graphql';
-const ADMIN_SECRET = 'secretKey';
 
 async function graphql<T>(query: string, variables?: Record<string, any>): Promise<T> {
+  const token = await getToken();
   const res = await fetch(HASURA_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-hasura-admin-secret': ADMIN_SECRET,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify({ query, variables }),
   });
