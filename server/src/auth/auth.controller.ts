@@ -1,6 +1,7 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
+import type { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -14,8 +15,9 @@ export class AuthController {
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req) {
-    return this.authService.oauthLogin(req.user);
+  async googleAuthRedirect(@Req() req, @Res() res: Response) {
+    const token = await this.authService.oauthLogin(req.user);
+    res.send(`<script>window.opener.postMessage({ token: '${token}' }, '*');window.close();</script>`);
   }
 
   @Get('github')
@@ -26,7 +28,8 @@ export class AuthController {
 
   @Get('github/redirect')
   @UseGuards(AuthGuard('github'))
-  async githubAuthRedirect(@Req() req) {
-    return this.authService.oauthLogin(req.user);
+  async githubAuthRedirect(@Req() req, @Res() res: Response) {
+    const token = await this.authService.oauthLogin(req.user);
+    res.send(`<script>window.opener.postMessage({ token: '${token}' }, '*');window.close();</script>`);
   }
 }

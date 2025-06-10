@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 tauri = { version = "^2.0.0-beta.17" }
+tauri-plugin-store = "2.0.0"
 
 [build-dependencies]
 

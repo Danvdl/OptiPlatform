@@ -1,16 +1,14 @@
-import { ReactNode } from 'react';
+import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import './MainLayout.css';
 
-interface Props {
-  children: ReactNode;
-}
-
-export default function MainLayout({ children }: Props) {
+export default function MainLayout() {
   return (
     <div className="layout">
       <Sidebar />
-      <main className="content">{children}</main>
+      <main className="content">
+        <Outlet />
+      </main>
     </div>
   );
 }
