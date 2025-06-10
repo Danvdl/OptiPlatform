@@ -1,12 +1,14 @@
 import { createClient } from 'graphql-ws';
 import { InventoryItem } from './hasuraInventory';
+import { getToken } from './authStore';
 
 const client = createClient({
   url: 'ws://localhost:8080/v1/graphql',
-  connectionParams: {
-    headers: {
-      'x-hasura-admin-secret': 'secretKey',
-    },
+  connectionParams: async () => {
+    const token = await getToken();
+    return {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    };
   },
 });
 
