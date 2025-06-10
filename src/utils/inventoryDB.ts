@@ -7,7 +7,7 @@ export interface InventoryRecord {
 }
 
 const localDB = new PouchDB<InventoryRecord>('inventory');
-const remoteURL = 'http://localhost:5984/inventory';
+const remoteURL = import.meta.env.VITE_POUCHDB_REMOTE;
 let remoteDB: PouchDB.Database<InventoryRecord> | null = null;
 
 export async function addRecord(record: Omit<InventoryRecord, '_id'>) {

@@ -12,8 +12,11 @@ export class InventoryTransactionResolver {
 
   @Mutation(() => InventoryTransaction)
   @UseGuards(JwtAuthGuard)
-  createTransaction(@Args('data') data: CreateInventoryTransactionInput) {
-    return this.service.createTransaction(data);
+  createTransaction(
+    @Args('data') data: CreateInventoryTransactionInput,
+    @Context() ctx: any,
+  ) {
+    return this.service.createTransaction({ ...data, userId: ctx.req.user.userId });
   }
 
   @Mutation(() => InventoryTransaction)

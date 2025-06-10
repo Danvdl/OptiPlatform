@@ -67,17 +67,20 @@ Hasura exposes a GraphQL API at `http://localhost:8080` and uses the same JWT se
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and fill in the values for your environment. Key variables include:
+Copy `.env.example` to `.env` and fill in the values for your environment. Important keys include:
 
 - `JWT_SECRET` – secret used to sign JWT tokens
 - `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_NAME` – PostgreSQL connection settings
-- `VITE_HASURA_URL` – Hasura GraphQL endpoint used by the frontend
-- `VITE_HASURA_ADMIN_SECRET` – admin secret for Hasura
-- `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_PUBLIC_VAPID_KEY` – Firebase configuration
+- `HASURA_ADMIN_SECRET` and `HASURA_GRAPHQL_JWT_SECRET`
+- OAuth credentials: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
+- `GOOGLE_APPLICATION_CREDENTIALS` pointing to a Firebase service account JSON
+- `VITE_HASURA_URL` and `VITE_HASURA_ADMIN_SECRET`
+- Firebase client keys: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_PUBLIC_VAPID_KEY`
+- `VITE_BACKEND_URL` – base URL for the NestJS backend used by the frontend
+- `VITE_POUCHDB_REMOTE` – remote CouchDB URL for syncing
+- `SERVER_URL` – public URL of the backend used for OAuth callbacks
 
-
-
-Hasura exposes a GraphQL API at `http://localhost:8080` and uses the same JWT secret as the NestJS backend (`secretKey`).
+Hasura exposes a GraphQL API at `http://localhost:8080` and uses the same JWT secret as the NestJS backend (`JWT_SECRET`).
 
 
 ## User Creation
@@ -111,17 +114,6 @@ FIREBASE_SERVICE_ACCOUNT='{"project_id":"..."}' npm run start:dev
 If neither variable is provided, the server falls back to Google application
 default credentials.
 
-
-## Environment Variables
-
-Copy `.env.example` to `.env` and adjust the values for your setup. Important keys include:
-
-- `JWT_SECRET` – secret used to sign JWT tokens
-- Database configuration: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
-- `HASURA_ADMIN_SECRET` and `HASURA_GRAPHQL_JWT_SECRET`
-- OAuth credentials: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
-- Firebase client keys: `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_APP_ID`, `VAPID_PUBLIC_KEY`
-- `GOOGLE_APPLICATION_CREDENTIALS` pointing to a Firebase service account JSON
 
 ## Troubleshooting
 
