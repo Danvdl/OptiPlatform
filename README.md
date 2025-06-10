@@ -58,6 +58,7 @@ docker-compose up -d
 
 Hasura exposes a GraphQL API at `http://localhost:8080` and uses the same JWT secret as the NestJS backend (`secretKey`).
 
+
 ## Environment Variables
 
 Copy `.env.example` to `.env` and adjust the values for your setup. Important keys include:
@@ -76,3 +77,8 @@ Copy `.env.example` to `.env` and adjust the values for your setup. Important ke
 - **`tauri` build failures** – ensure dependencies are installed with `npm install` and Rust targets are up to date.
 - **Authentication errors** – verify values in your `.env` file match those in `docker-compose.yml`.
 - **No FCM notifications** – confirm `GOOGLE_APPLICATION_CREDENTIALS` points to a valid service account file.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
