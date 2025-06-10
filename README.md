@@ -50,3 +50,15 @@ docker-compose up -d
 ```
 
 Hasura exposes a GraphQL API at `http://localhost:8080` and uses the same JWT secret as the NestJS backend (`secretKey`).
+
+## User Creation
+
+Clients can create accounts using the `register` GraphQL mutation exposed by the NestJS server. Example mutation:
+
+```graphql
+mutation {
+  register(data: { username: "myuser", password: "secret" })
+}
+```
+
+The mutation returns a JWT which can be used for authenticated requests.
