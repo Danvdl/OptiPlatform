@@ -12,7 +12,7 @@ Install dependencies and run the server:
 ```bash
 cd server
 npm install
-npm run build       # compile TypeScript
+
 npm run start:dev
 ```
 
