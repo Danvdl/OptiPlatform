@@ -5,6 +5,7 @@ import App from './App';
 import './index.css';
 import { sync } from './utils/inventoryDB';
 import { registerFCM } from './utils/firebaseClient';
+import { getToken } from './utils/authStore';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -16,9 +17,13 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 
 sync();
 registerFCM(async (token) => {
+  const jwt = await getToken();
   await fetch('http://localhost:3001/graphql', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(jwt ? { Authorization: `Bearer ${jwt}` } : {}),
+    },
     body: JSON.stringify({
       query: 'mutation Register($token: String!) { registerDeviceToken(token: $token) }',
       variables: { token },
