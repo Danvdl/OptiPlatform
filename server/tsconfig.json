@@ -9,6 +9,7 @@
     "target": "ES2018",
     "sourceMap": true,
     "outDir": "dist",
+    "skipLibCheck": true,
     "baseUrl": "./",
     "incremental": true
   },

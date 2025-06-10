@@ -8,6 +8,7 @@ import { User } from './user/user.entity';
 import { InventoryModule } from './inventory/inventory.module';
 import { Product } from './inventory/entities/product.entity';
 import { InventoryTransaction } from './inventory/entities/inventory-transaction.entity';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { InventoryTransaction } from './inventory/entities/inventory-transaction
     }),
     AuthModule,
     InventoryModule,
+    NotificationsModule,
     TypeOrmModule.forFeature([User, Product, InventoryTransaction]),
   ],
   providers: [AppResolver],
