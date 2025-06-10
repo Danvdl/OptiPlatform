@@ -62,6 +62,19 @@ Start both services with:
 docker-compose up -d
 ```
 
+
+Hasura exposes a GraphQL API at `http://localhost:8080` and uses the same JWT secret as the NestJS backend (`JWT_SECRET`).
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and fill in the values for your environment. Key variables include:
+
+- `JWT_SECRET` – secret used to sign JWT tokens
+- `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_NAME` – PostgreSQL connection settings
+- `VITE_HASURA_URL` – Hasura GraphQL endpoint used by the frontend
+- `VITE_HASURA_ADMIN_SECRET` – admin secret for Hasura
+- `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_PUBLIC_VAPID_KEY` – Firebase configuration
+
 Hasura exposes a GraphQL API at `http://localhost:8080` and uses the same JWT secret as the NestJS backend (`secretKey`).
 
 
@@ -119,6 +132,7 @@ Copy `.env.example` to `.env` and adjust the values for your setup. Important ke
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
 
 
 
