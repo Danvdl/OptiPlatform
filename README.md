@@ -75,6 +75,8 @@ Copy `.env.example` to `.env` and fill in the values for your environment. Key v
 - `VITE_HASURA_ADMIN_SECRET` – admin secret for Hasura
 - `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_PUBLIC_VAPID_KEY` – Firebase configuration
 
+
+
 Hasura exposes a GraphQL API at `http://localhost:8080` and uses the same JWT secret as the NestJS backend (`secretKey`).
 
 
@@ -132,6 +134,7 @@ Copy `.env.example` to `.env` and adjust the values for your setup. Important ke
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
 
 
 
