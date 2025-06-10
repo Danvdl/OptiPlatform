@@ -1,7 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { saveToken } from '../utils/authStore';
 
 export default function Login() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   useEffect(() => {
     const handler = async (e: MessageEvent) => {
       if (e.data && e.data.token) {
@@ -12,6 +14,23 @@ export default function Login() {
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
   }, []);
+
+  const login = async () => {
+    const res = await fetch('http://localhost:3001/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: 'mutation Login($data: LoginInput!) { login(data: $data) }',
+        variables: { data: { username, password } },
+      }),
+    });
+    const json = await res.json();
+    const token = json.data?.login;
+    if (token) {
+      await saveToken(token);
+      window.location.assign('/dashboard');
+    }
+  };
 
   const openOAuth = (provider: 'google' | 'github') => {
     const w = 500;
@@ -28,6 +47,20 @@ export default function Login() {
   return (
     <div>
       <h1>Login</h1>
+      <div>
+        <input
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button onClick={login}>Login</button>
+      </div>
       <button onClick={() => openOAuth('google')}>Login with Google</button>
       <button onClick={() => openOAuth('github')}>Login with GitHub</button>
     </div>
