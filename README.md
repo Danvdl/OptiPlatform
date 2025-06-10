@@ -17,6 +17,14 @@ To run the Tauri application (requires Rust toolchain):
 npm run tauri dev
 ```
 
+To build the production frontend:
+
+```bash
+npm run build
+```
+
+The built files will be output to the `dist/` directory and are used by Tauri when bundling the application.
+
 ## Project Structure
 
 - `src-tauri/` - Tauri backend source code and configuration
