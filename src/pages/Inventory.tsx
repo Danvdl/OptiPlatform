@@ -1,26 +1,33 @@
 import { useEffect, useState } from 'react';
-import { addRecord, getAllRecords, InventoryRecord, sync } from '../utils/inventoryDB';
+import { fetchItems, addItem, updateItem, InventoryItem } from '../utils/hasuraInventory';
 
 export default function Inventory() {
-  const [product, setProduct] = useState('');
+  const [productId, setProductId] = useState(0);
   const [quantity, setQuantity] = useState(0);
-  const [records, setRecords] = useState<InventoryRecord[]>([]);
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [editing, setEditing] = useState<{ [id: number]: number }>({});
 
   const load = async () => {
-    const docs = await getAllRecords();
-    setRecords(docs);
+    const docs = await fetchItems();
+    setItems(docs);
   };
 
   useEffect(() => {
     load();
-    sync();
   }, []);
 
   const add = async () => {
-    if (!product) return;
-    await addRecord({ product, quantity });
-    setProduct('');
+    if (!productId) return;
+    await addItem(productId, quantity, 'add');
+    setProductId(0);
     setQuantity(0);
+    await load();
+  };
+
+  const save = async (id: number) => {
+    const qty = editing[id];
+    await updateItem(id, qty);
+    setEditing((e) => ({ ...e, [id]: qty }));
     await load();
   };
 
@@ -29,9 +36,10 @@ export default function Inventory() {
       <h1>Inventory</h1>
       <div>
         <input
-          placeholder="Product"
-          value={product}
-          onChange={(e) => setProduct(e.target.value)}
+          type="number"
+          placeholder="Product ID"
+          value={productId || ''}
+          onChange={(e) => setProductId(parseInt(e.target.value, 10) || 0)}
         />
         <input
           type="number"
@@ -42,8 +50,18 @@ export default function Inventory() {
         <button onClick={add}>Add</button>
       </div>
       <ul>
-        {records.map((r) => (
-          <li key={r._id}>{r.product}: {r.quantity}</li>
+        {items.map((r) => (
+          <li key={r.id}>
+            {r.product.name} - {r.quantity}
+            <input
+              type="number"
+              value={editing[r.id] ?? r.quantity}
+              onChange={(e) =>
+                setEditing({ ...editing, [r.id]: parseInt(e.target.value, 10) || 0 })
+              }
+            />
+            <button onClick={() => save(r.id)}>Save</button>
+          </li>
         ))}
       </ul>
     </div>

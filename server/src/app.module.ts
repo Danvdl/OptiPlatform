@@ -5,6 +5,9 @@ import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { AppResolver } from './app.resolver';
 import { User } from './user/user.entity';
+import { InventoryModule } from './inventory/inventory.module';
+import { Product } from './inventory/entities/product.entity';
+import { InventoryTransaction } from './inventory/entities/inventory-transaction.entity';
 
 @Module({
   imports: [
@@ -18,11 +21,12 @@ import { User } from './user/user.entity';
       username: 'postgres',
       password: 'postgres',
       database: 'mydb',
-      entities: [User],
+      entities: [User, Product, InventoryTransaction],
       synchronize: true,
     }),
     AuthModule,
-    TypeOrmModule.forFeature([User]),
+    InventoryModule,
+    TypeOrmModule.forFeature([User, Product, InventoryTransaction]),
   ],
   providers: [AppResolver],
 })
