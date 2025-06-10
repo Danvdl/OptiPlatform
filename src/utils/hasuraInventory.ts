@@ -8,8 +8,8 @@ export interface InventoryItem {
   transaction_type: string;
 }
 
-const HASURA_URL = 'http://localhost:8080/v1/graphql';
-const ADMIN_SECRET = 'secretKey';
+const HASURA_URL = import.meta.env.VITE_HASURA_URL;
+const ADMIN_SECRET = import.meta.env.VITE_HASURA_ADMIN_SECRET;
 
 async function graphql<T>(query: string, variables?: Record<string, any>): Promise<T> {
   const res = await fetch(HASURA_URL, {
