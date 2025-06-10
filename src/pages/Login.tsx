@@ -16,7 +16,7 @@ export default function Login() {
   }, []);
 
   const login = async () => {
-    const res = await fetch('http://localhost:3001/graphql', {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/graphql`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -38,7 +38,7 @@ export default function Login() {
     const y = window.top ? (window.outerHeight - h) / 2 : 0;
     const x = window.top ? (window.outerWidth - w) / 2 : 0;
     window.open(
-      `http://localhost:3001/auth/${provider}`,
+      `${import.meta.env.VITE_BACKEND_URL}/auth/${provider}`,
       'oauth',
       `width=${w},height=${h},left=${x},top=${y}`
     );

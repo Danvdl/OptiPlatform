@@ -6,6 +6,12 @@ export class CreateInventoryTransactionInput {
   productId: number;
 
   @Field(() => Int)
+  locationId: number;
+
+  @Field(() => Int, { nullable: true })
+  userId?: number;
+
+  @Field(() => Int)
   quantity: number;
 
   @Field()

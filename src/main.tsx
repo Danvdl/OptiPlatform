@@ -18,7 +18,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 sync();
 registerFCM(async (token) => {
   const jwt = await getToken();
-  await fetch('http://localhost:3001/graphql', {
+  await fetch(`${import.meta.env.VITE_BACKEND_URL}/graphql`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

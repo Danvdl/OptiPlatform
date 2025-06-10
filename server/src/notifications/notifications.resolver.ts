@@ -1,4 +1,6 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Context } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { NotificationsService } from './notifications.service';
 
 @Resolver()
@@ -6,8 +8,10 @@ export class NotificationsResolver {
   constructor(private readonly notifications: NotificationsService) {}
 
   @Mutation(() => Boolean)
-  registerDeviceToken(@Args('token') token: string) {
-    this.notifications.registerToken(token);
+  @UseGuards(JwtAuthGuard)
+  registerDeviceToken(@Args('token') token: string, @Context() ctx: any) {
+    const userId = ctx.req.user?.userId;
+    this.notifications.registerToken(token, userId);
     return true;
   }
 }

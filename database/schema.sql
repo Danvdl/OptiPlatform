@@ -27,3 +27,9 @@ CREATE TABLE IF NOT EXISTS inventory_transactions (
   occurred_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS device_tokens (
+  id SERIAL PRIMARY KEY,
+  token TEXT UNIQUE NOT NULL,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL
+);
+

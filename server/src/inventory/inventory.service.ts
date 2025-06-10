@@ -46,6 +46,8 @@ export class InventoryService {
     const tx = this.transactions.create({
       ...data,
       productId: data.productId,
+      locationId: data.locationId,
+      userId: data.userId,
     });
     const saved = await this.transactions.save(tx);
     const stock = await this.getCurrentStock(data.productId);
