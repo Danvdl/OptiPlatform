@@ -9,6 +9,9 @@ export default function Sidebar() {
         <li>
           <NavLink to="/dashboard">Dashboard</NavLink>
         </li>
+        <li>
+          <NavLink to="/inventory">Inventory</NavLink>
+        </li>
       </ul>
     </nav>
   );

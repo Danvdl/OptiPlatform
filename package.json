@@ -10,14 +10,16 @@
     "tauri": "tauri dev"
   },
   "dependencies": {
+    "@tauri-apps/plugin-store": "^2.2.0",
+    "pouchdb-browser": "^9.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.17.0"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0",
     "@vitejs/plugin-react": "^4.0.0",
     "typescript": "^5.0.0",
-    "vite": "^5.0.0",
-    "@tauri-apps/cli": "^2.0.0"
+    "vite": "^5.0.0"
   }
 }

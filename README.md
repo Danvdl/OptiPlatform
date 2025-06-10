@@ -38,3 +38,15 @@ npm run tauri dev
 - `server/` - NestJS GraphQL API
 
 The React application features a simple sidebar layout and a dashboard page using React Router.
+
+## Database and Hasura
+
+A `docker-compose.yml` configuration is included to launch PostgreSQL along with Hasura. The schema for the inventory system resides in `database/schema.sql` and defines tables for `users`, `products`, `locations` and `inventory_transactions`.
+
+Start both services with:
+
+```bash
+docker-compose up -d
+```
+
+Hasura exposes a GraphQL API at `http://localhost:8080` and uses the same JWT secret as the NestJS backend (`secretKey`).
