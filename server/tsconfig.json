@@ -11,8 +11,23 @@
     "outDir": "dist",
     "skipLibCheck": true,
     "baseUrl": "./",
-    "incremental": true
+    "incremental": true,
+    "lib": [
+      "es2018",
+      "dom"
+    ],
+    "downlevelIteration": true,
+    "types": [
+      "node",
+      "jest"
+    ]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*",
+    "test/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

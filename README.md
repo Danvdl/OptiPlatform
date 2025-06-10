@@ -22,6 +22,13 @@ npm install
 npm run start:dev
 ```
 
+Run backend tests:
+
+```bash
+cd server
+npm test
+```
+
 ## Development
 
 Install dependencies and start the development server:
