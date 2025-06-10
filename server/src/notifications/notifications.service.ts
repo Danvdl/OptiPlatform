@@ -6,14 +6,21 @@ export class NotificationsService implements OnModuleInit {
   private tokens = new Set<string>();
 
   onModuleInit() {
-    if (!admin.apps.length) {
-      try {
-        admin.initializeApp({
-          credential: admin.credential.applicationDefault(),
-        });
-      } catch (e) {
-        console.error('Firebase init failed', e);
+    if (admin.apps.length) return;
+    try {
+      const credsJson = process.env.FIREBASE_SERVICE_ACCOUNT;
+      const credsPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+      let credential: admin.credential.Credential;
+      if (credsJson) {
+        credential = admin.credential.cert(JSON.parse(credsJson));
+      } else if (credsPath) {
+        credential = admin.credential.cert(credsPath);
+      } else {
+        credential = admin.credential.applicationDefault();
       }
+      admin.initializeApp({ credential });
+    } catch (e) {
+      console.error('Firebase init failed', e);
     }
   }
 

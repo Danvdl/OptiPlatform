@@ -50,3 +50,21 @@ docker-compose up -d
 ```
 
 Hasura exposes a GraphQL API at `http://localhost:8080` and uses the same JWT secret as the NestJS backend (`secretKey`).
+
+## Firebase Notifications
+
+The backend can send push notifications using Firebase Cloud Messaging. A service
+account JSON file is required for the Firebase Admin SDK. Create a new service
+account key from the Firebase console and download the JSON credentials. Supply
+the file path or JSON contents when starting the server:
+
+```bash
+# Path to JSON file
+FIREBASE_SERVICE_ACCOUNT_PATH=path/to/service-account.json npm run start:dev
+
+# Alternatively provide the JSON directly
+FIREBASE_SERVICE_ACCOUNT='{"project_id":"..."}' npm run start:dev
+```
+
+If neither variable is provided, the server falls back to Google application
+default credentials.
