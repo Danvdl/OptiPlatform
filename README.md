@@ -7,6 +7,12 @@ This repository contains a basic Tauri + React application scaffolded with Vite 
 The `server` directory holds a NestJS API with GraphQL, PostgreSQL via TypeORM
 and simple JWT authentication.
 
+### Authentication
+
+All GraphQL mutations and queries require a valid JWT issued by the `login`
+mutation or one of the OAuth flows. Include the token in the `Authorization`
+header when communicating with the backend.
+
 Install dependencies and run the server:
 
 ```bash
