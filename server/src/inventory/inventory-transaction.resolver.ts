@@ -5,6 +5,7 @@ import { InventoryTransaction } from './entities/inventory-transaction.entity';
 import { CreateInventoryTransactionInput } from './dto/create-inventory-transaction.input';
 import { UpdateInventoryTransactionInput } from './dto/update-inventory-transaction.input';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Context } from '@nestjs/graphql';
 
 @Resolver(() => InventoryTransaction)
 export class InventoryTransactionResolver {
@@ -43,3 +44,5 @@ export class InventoryTransactionResolver {
     return this.service.findTransaction(id);
   }
 }
+
+
