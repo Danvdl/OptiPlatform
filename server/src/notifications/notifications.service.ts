@@ -52,7 +52,7 @@ export class NotificationsService implements OnModuleInit {
       tokens: Array.from(this.tokens),
     };
     try {
-      await admin.messaging().sendMulticast(message);
+      await admin.messaging().sendEachForMulticast(message);
     } catch (err) {
       console.error('Failed to send FCM message', err);
     }
