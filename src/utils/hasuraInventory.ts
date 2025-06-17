@@ -11,8 +11,7 @@ export interface InventoryItem {
 }
 
 
-const HASURA_URL = import.meta.env.VITE_HASURA_URL;
-const ADMIN_SECRET = import.meta.env.VITE_HASURA_ADMIN_SECRET;
+const HASURA_URL = 'http://localhost:8080/v1/graphql';
 
 
 

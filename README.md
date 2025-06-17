@@ -81,7 +81,6 @@ Copy `.env.example` to `.env` and fill in the values for your environment. Impor
 - `HASURA_ADMIN_SECRET` and `HASURA_GRAPHQL_JWT_SECRET`
 - OAuth credentials: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
 - `GOOGLE_APPLICATION_CREDENTIALS` pointing to a Firebase service account JSON
-- `VITE_HASURA_URL` and `VITE_HASURA_ADMIN_SECRET`
 - Firebase client keys: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_PUBLIC_VAPID_KEY`
 - `VITE_BACKEND_URL` – base URL for the NestJS backend used by the frontend
 - `VITE_POUCHDB_REMOTE` – remote CouchDB URL for syncing
