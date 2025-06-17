@@ -41,7 +41,7 @@ export class AuthService {
 
   async oauthLogin(user: any) {
     const payload = {
-      sub: user.email || user.username,
+      sub: user.id,
       ...user,
     };
     return this.jwtService.sign(payload);
