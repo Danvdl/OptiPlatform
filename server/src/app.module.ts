@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -22,15 +22,27 @@ import { DeviceToken } from './notifications/entities/device-token.entity';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'schema.gql'),
     }),
-    TypeOrmModule.forRoot({
-  type: 'postgres',
-  url: process.env.DB_URL,   // full connection string with transaction pooler
-  entities: [User, Product, InventoryTransaction, Location, DeviceToken],
-  synchronize: true,
-  ssl: {
-    rejectUnauthorized: false,  // required for Supabase SSL connection
-  },
-}),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const ormConfig: any = {
+          type: 'postgres',
+          url: config.get<string>('DB_URL'),
+          entities: [User, Product, InventoryTransaction, Location, DeviceToken],
+          synchronize: config.get<string>('NODE_ENV') === 'development',
+        };
+
+        const rejectUnauthorized = config.get<string>('DB_SSL_REJECT_UNAUTHORIZED');
+        if (rejectUnauthorized !== undefined) {
+          ormConfig.ssl = {
+            rejectUnauthorized: rejectUnauthorized === 'true',
+          };
+        }
+
+        return ormConfig;
+      },
+    }),
 
     AuthModule,
     InventoryModule,
