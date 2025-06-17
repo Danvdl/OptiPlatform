@@ -18,8 +18,11 @@ Install dependencies and run the server:
 ```bash
 cd server
 npm install
-
+# start the server on port 3001 by default
 npm run start:dev
+
+# or specify a custom port
+# PORT=4000 npm run start:dev
 ```
 
 Run backend tests:
@@ -81,6 +84,7 @@ Copy `.env.example` to `.env` and fill in the values for your environment. Impor
 - `VITE_BACKEND_URL` – base URL for the NestJS backend used by the frontend
 - `VITE_POUCHDB_REMOTE` – remote CouchDB URL for syncing
 - `SERVER_URL` – public URL of the backend used for OAuth callbacks
+- `PORT` – port number for the NestJS server (defaults to 3001)
 
 
 
