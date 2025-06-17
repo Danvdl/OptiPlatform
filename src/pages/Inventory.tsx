@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react';
-import { fetchItems, addItem, updateItem, InventoryItem } from '../utils/hasuraInventory';
-import { subscribeInventory } from '../utils/inventorySubscription';
-import Snackbar from '../components/Snackbar';
+import { fetchItems, addItem, updateItem, InventoryItem } from '../utils/inventoryApi';
 
 export default function Inventory() {
   const [productId, setProductId] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [editing, setEditing] = useState<{ [id: number]: number }>({});
-  const [alert, setAlert] = useState<string | null>(null);
 
   const load = async () => {
     const docs = await fetchItems();
@@ -17,14 +14,8 @@ export default function Inventory() {
 
   useEffect(() => {
     load();
-    const sub = subscribeInventory((item) => {
-      setAlert(`Inventory updated: ${item.product.name}`);
-      load();
-    });
-    return () => {
-      // sub returns a dispose function
-      if (typeof sub === 'function') sub();
-    };
+    const id = setInterval(load, 5000);
+    return () => clearInterval(id);
   }, []);
 
   const add = async () => {
@@ -75,7 +66,6 @@ export default function Inventory() {
           </li>
         ))}
       </ul>
-      {alert && <Snackbar message={alert} onClose={() => setAlert(null)} />}
     </div>
   );
 }
