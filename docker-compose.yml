@@ -12,16 +12,3 @@ services:
     ports:
       - "5432:5432"
 
-  hasura:
-    image: hasura/graphql-engine:v2.36.2
-    restart: always
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@db:5432/mydb
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
-      HASURA_GRAPHQL_JWT_SECRET: '{"type":"HS256","key":"secretKey"}'
-      HASURA_GRAPHQL_ADMIN_SECRET: secretKey
-
