@@ -59,18 +59,15 @@ npm run tauri build
 
 The React application features a simple sidebar layout and a dashboard page using React Router.
 
-## Database and Hasura
+## Database
 
-A `docker-compose.yml` configuration is included to launch PostgreSQL along with Hasura. The schema for the inventory system resides in `database/schema.sql` and defines tables for `users`, `products`, `locations` and `inventory_transactions`.
+A `docker-compose.yml` configuration is included to launch a PostgreSQL instance. The schema for the inventory system resides in `database/schema.sql` and defines tables for `users`, `products`, `locations` and `inventory_transactions`.
 
-Start both services with:
+Start the database with:
 
 ```bash
-docker-compose up -d
+docker-compose up -d db
 ```
-
-
-Hasura exposes a GraphQL API at `http://localhost:8080` and uses the same JWT secret as the NestJS backend (`JWT_SECRET`).
 
 ## Environment Variables
 
@@ -78,16 +75,13 @@ Copy `.env.example` to `.env` and fill in the values for your environment. Impor
 
 - `JWT_SECRET` – secret used to sign JWT tokens
 - `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_NAME` – PostgreSQL connection settings
-- `HASURA_ADMIN_SECRET` and `HASURA_GRAPHQL_JWT_SECRET`
 - OAuth credentials: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
 - `GOOGLE_APPLICATION_CREDENTIALS` pointing to a Firebase service account JSON
-- `VITE_HASURA_URL` and `VITE_HASURA_ADMIN_SECRET`
 - Firebase client keys: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_PUBLIC_VAPID_KEY`
 - `VITE_BACKEND_URL` – base URL for the NestJS backend used by the frontend
 - `VITE_POUCHDB_REMOTE` – remote CouchDB URL for syncing
 - `SERVER_URL` – public URL of the backend used for OAuth callbacks
 
-Hasura exposes a GraphQL API at `http://localhost:8080` and uses the same JWT secret as the NestJS backend (`JWT_SECRET`).
 
 
 ## User Creation
