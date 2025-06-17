@@ -1,0 +1,107 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Product {
+  id: Int!
+  name: String!
+  description: String
+  unit: String
+}
+
+type Location {
+  id: Int!
+  name: String!
+  address: String
+}
+
+type InventoryTransaction {
+  id: Int!
+  productId: Int!
+  locationId: Int!
+  userId: Int!
+  quantity: Int!
+  transactionType: String!
+  occurredAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Query {
+  hello: String!
+  products: [Product!]!
+  product(id: Int!): Product
+  transactions: [InventoryTransaction!]!
+  transaction(id: Int!): InventoryTransaction
+  locations: [Location!]!
+  location(id: Int!): Location
+}
+
+type Mutation {
+  login(data: LoginInput!): String!
+  register(data: RegisterInput!): String!
+  createProduct(data: CreateProductInput!): Product!
+  updateProduct(data: UpdateProductInput!): Product!
+  removeProduct(id: Int!): Boolean!
+  createTransaction(data: CreateInventoryTransactionInput!): InventoryTransaction!
+  updateTransaction(data: UpdateInventoryTransactionInput!): InventoryTransaction!
+  removeTransaction(id: Int!): Boolean!
+  registerDeviceToken(token: String!): Boolean!
+  createLocation(data: CreateLocationInput!): Location!
+  updateLocation(data: UpdateLocationInput!): Location!
+  removeLocation(id: Int!): Boolean!
+}
+
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+input RegisterInput {
+  username: String!
+  password: String!
+}
+
+input CreateProductInput {
+  name: String!
+  description: String
+  unit: String
+}
+
+input UpdateProductInput {
+  name: String
+  description: String
+  unit: String
+  id: Int!
+}
+
+input CreateInventoryTransactionInput {
+  productId: Int!
+  locationId: Int!
+  userId: Int
+  quantity: Int!
+  transactionType: String!
+}
+
+input UpdateInventoryTransactionInput {
+  productId: Int
+  locationId: Int
+  userId: Int
+  quantity: Int
+  transactionType: String
+  id: Int!
+}
+
+input CreateLocationInput {
+  name: String!
+  address: String
+}
+
+input UpdateLocationInput {
+  name: String
+  address: String
+  id: Int!
+}

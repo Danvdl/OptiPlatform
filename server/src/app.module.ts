@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
@@ -17,19 +18,20 @@ import { DeviceToken } from './notifications/entities/device-token.entity';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    GraphQLModule.forRoot({
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'schema.gql'),
     }),
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT ?? '5432', 10),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      entities: [User, Product, InventoryTransaction, Location, DeviceToken],
-      synchronize: true,
-    }),
+  type: 'postgres',
+  url: process.env.DB_URL,   // full connection string with transaction pooler
+  entities: [User, Product, InventoryTransaction, Location, DeviceToken],
+  synchronize: true,
+  ssl: {
+    rejectUnauthorized: false,  // required for Supabase SSL connection
+  },
+}),
+
     AuthModule,
     InventoryModule,
     LocationModule,
