@@ -1,5 +1,9 @@
 import { AuthService } from '../src/auth/auth.service';
 import type { JwtService } from '@nestjs/jwt';
+
+import { Repository } from 'typeorm';
+import { User } from '../src/user/user.entity';
+
 import * as bcrypt from 'bcrypt';
 
 // simple mock JwtService
@@ -21,6 +25,7 @@ jest.spyOn(bcrypt, 'compare').mockImplementation(async (pass: string) => pass ==
 
 describe('AuthService', () => {
   const service = new AuthService(jwtService, usersRepo);
+
 
   it('validates a user with correct credentials', async () => {
     const result = await service.validateUser('test', 'test');

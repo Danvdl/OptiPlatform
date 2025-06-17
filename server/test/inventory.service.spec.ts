@@ -39,12 +39,14 @@ describe('InventoryService', () => {
     jest.spyOn(service as any, 'getCurrentStock').mockResolvedValue(3);
     productRepo.findOneBy.mockResolvedValue({ id: 1, name: 'Widget' });
 
+
     await service.createTransaction({
       productId: 1,
       locationId: 1,
       quantity: -2,
       transactionType: 'remove',
     });
+
 
     expect(notifications.sendLowStockAlert).toHaveBeenCalledWith('Widget', 3);
   });
