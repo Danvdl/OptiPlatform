@@ -2,7 +2,7 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsInt, IsString, IsOptional } from 'class-validator';
 
 @InputType()
-export class CreateInventoryTransactionInput {
+export class CreateProductNoteInput {
   @Field(() => Int)
   @IsInt()
   productId: number;
@@ -12,16 +12,7 @@ export class CreateInventoryTransactionInput {
   @IsOptional()
   userId?: number;
 
-  @Field(() => Int)
-  @IsInt()
-  quantity: number;
-
   @Field()
   @IsString()
-  transactionType: string;
-
-  @Field({ nullable: true })
-  @IsString()
-  @IsOptional()
-  notes?: string;
+  note: string;
 }

@@ -9,9 +9,9 @@ import { AppResolver } from './app.resolver';
 import { User } from './user/user.entity';
 import { InventoryModule } from './inventory/inventory.module';
 import { Product } from './inventory/entities/product.entity';
+import { Category } from './inventory/entities/category.entity';
+import { ProductNote } from './inventory/entities/product-note.entity';
 import { InventoryTransaction } from './inventory/entities/inventory-transaction.entity';
-import { Location } from './location/location.entity';
-import { LocationModule } from './location/location.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { DeviceToken } from './notifications/entities/device-token.entity';
 
@@ -29,7 +29,7 @@ import { DeviceToken } from './notifications/entities/device-token.entity';
         const ormConfig: any = {
           type: 'postgres',
           url: config.get<string>('DB_URL'),
-          entities: [User, Product, InventoryTransaction, Location, DeviceToken],
+          entities: [User, Product, Category, ProductNote, InventoryTransaction, DeviceToken],
           synchronize: config.get<string>('NODE_ENV') === 'development',
         };
 
@@ -46,9 +46,8 @@ import { DeviceToken } from './notifications/entities/device-token.entity';
 
     AuthModule,
     InventoryModule,
-    LocationModule,
     NotificationsModule,
-    TypeOrmModule.forFeature([User, Product, InventoryTransaction, Location, DeviceToken]),
+    TypeOrmModule.forFeature([User, Product, Category, ProductNote, InventoryTransaction, DeviceToken]),
   ],
   providers: [AppResolver],
 })

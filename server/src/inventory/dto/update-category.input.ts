@@ -1,9 +1,9 @@
 import { Field, InputType, Int, PartialType } from '@nestjs/graphql';
-import { CreateLocationInput } from './create-location.input';
+import { CreateCategoryInput } from './create-category.input';
 import { IsInt } from 'class-validator';
 
 @InputType()
-export class UpdateLocationInput extends PartialType(CreateLocationInput) {
+export class UpdateCategoryInput extends PartialType(CreateCategoryInput) {
   @Field(() => Int)
   @IsInt()
   id: number;

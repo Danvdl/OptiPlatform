@@ -20,18 +20,33 @@ describe('InventoryService', () => {
     createQueryBuilder: jest.fn(),
   } as any;
 
+  const categoryRepo = {
+    create: jest.fn((d) => d),
+    save: jest.fn(async (d) => d),
+    delete: jest.fn(),
+    find: jest.fn(),
+    findOne: jest.fn(),
+  } as any;
+
+  const productNoteRepo = {
+    create: jest.fn((d) => d),
+    save: jest.fn(async (d) => d),
+    delete: jest.fn(),
+    find: jest.fn(),
+  } as any;
+
   const notifications = {
     sendLowStockAlert: jest.fn(),
   } as unknown as NotificationsService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new InventoryService(productRepo, txRepo, notifications);
+    service = new InventoryService(productRepo, categoryRepo, productNoteRepo, txRepo, notifications);
   });
 
   it('creates a product', async () => {
     await service.createProduct({ name: 'Widget' });
-    expect(productRepo.create).toHaveBeenCalledWith({ name: 'Widget' });
+    expect(productRepo.create).toHaveBeenCalledWith({ name: 'Widget', restockThreshold: 5 });
     expect(productRepo.save).toHaveBeenCalled();
   });
 
@@ -39,14 +54,11 @@ describe('InventoryService', () => {
     jest.spyOn(service as any, 'getCurrentStock').mockResolvedValue(3);
     productRepo.findOneBy.mockResolvedValue({ id: 1, name: 'Widget' });
 
-
     await service.createTransaction({
       productId: 1,
-      locationId: 1,
       quantity: -2,
       transactionType: 'remove',
     });
-
 
     expect(notifications.sendLowStockAlert).toHaveBeenCalledWith('Widget', 3);
   });

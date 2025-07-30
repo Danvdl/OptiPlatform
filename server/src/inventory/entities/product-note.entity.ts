@@ -4,8 +4,8 @@ import { Product } from './product.entity';
 import { User } from '../../user/user.entity';
 
 @ObjectType()
-@Entity({ name: 'inventory_transactions' })
-export class InventoryTransaction {
+@Entity({ name: 'product_notes' })
+export class ProductNote {
   @Field(() => Int)
   @PrimaryGeneratedColumn()
   id: number;
@@ -14,31 +14,25 @@ export class InventoryTransaction {
   @Column()
   productId: number;
 
-  @Field(() => Int)
-  @Column()
-  userId: number;
-
-  @Field(() => Int)
-  @Column()
-  quantity: number;
+  @Field(() => Int, { nullable: true })
+  @Column({ nullable: true })
+  userId?: number;
 
   @Field()
-  @Column()
-  transactionType: string;
-
-  @Field({ nullable: true })
-  @Column({ type: 'text', nullable: true })
-  notes?: string;
+  @Column('text')
+  note: string;
 
   @Field()
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  occurredAt: Date;
+  createdAt: Date;
 
+  @Field(() => Product)
   @ManyToOne(() => Product)
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @ManyToOne(() => User)
+  @Field(() => User, { nullable: true })
+  @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user?: User;
 }
