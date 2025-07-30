@@ -30,7 +30,7 @@ import { DeviceToken } from './notifications/entities/device-token.entity';
           type: 'postgres',
           url: config.get<string>('DB_URL'),
           entities: [User, Product, Category, ProductNote, InventoryTransaction, DeviceToken],
-          synchronize: config.get<string>('NODE_ENV') === 'development',
+          synchronize: false, // Temporarily disabled to avoid schema conflicts
         };
 
         const rejectUnauthorized = config.get<string>('DB_SSL_REJECT_UNAUTHORIZED');

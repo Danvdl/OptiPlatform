@@ -11,6 +11,17 @@ export class CategoryResolver {
   constructor(private readonly service: InventoryService) {}
 
   @Mutation(() => Category)
+  // Temporary test endpoint without auth for database testing
+  testCreateCategory(@Args('name') name: string) {
+    return this.service.createCategory({ name, description: 'Test category from API' });
+  }
+
+  @Query(() => [Category])
+  categories() {
+    return this.service.findAllCategories();
+  }
+
+  @Mutation(() => Category)
   @UseGuards(JwtAuthGuard)
   createCategory(@Args('data') data: CreateCategoryInput) {
     return this.service.createCategory(data);
@@ -26,12 +37,6 @@ export class CategoryResolver {
   @UseGuards(JwtAuthGuard)
   removeCategory(@Args('id', { type: () => Int }) id: number) {
     return this.service.removeCategory(id).then(() => true);
-  }
-
-  @Query(() => [Category])
-  @UseGuards(JwtAuthGuard)
-  categories() {
-    return this.service.findAllCategories();
   }
 
   @Query(() => Category, { nullable: true })

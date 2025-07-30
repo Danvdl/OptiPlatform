@@ -69,6 +69,7 @@ type Mutation {
   createProduct(data: CreateProductInput!): Product!
   updateProduct(data: UpdateProductInput!): Product!
   removeProduct(id: Int!): Boolean!
+  testCreateCategory(name: String!): Category!
   createCategory(data: CreateCategoryInput!): Category!
   updateCategory(data: UpdateCategoryInput!): Category!
   removeCategory(id: Int!): Boolean!
