@@ -26,15 +26,15 @@ export class Product {
   sku?: string;
 
   @Field(() => Int, { nullable: true })
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'category_id' })
   categoryId?: number;
 
   @Field(() => Int)
-  @Column({ default: 5 })
+  @Column({ default: 5, name: 'restock_threshold' })
   restockThreshold: number;
 
   @Field()
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
   createdAt: Date;
 
   @Field(() => Category, { nullable: true })

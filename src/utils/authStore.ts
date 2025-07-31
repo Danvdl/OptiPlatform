@@ -11,3 +11,8 @@ export async function getToken(): Promise<string | null> {
   const val = await store.get<string>('jwt');
   return val ?? null;
 }
+
+export async function clearToken() {
+  await store.delete('jwt');
+  await store.save();
+}

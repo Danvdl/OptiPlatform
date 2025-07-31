@@ -14,7 +14,7 @@ export class DeviceToken {
   token: string;
 
   @Field(() => Int, { nullable: true })
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'user_id' })
   userId?: number;
 
   @ManyToOne(() => User, { nullable: true })

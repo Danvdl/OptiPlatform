@@ -11,11 +11,11 @@ export class ProductNote {
   id: number;
 
   @Field(() => Int)
-  @Column()
+  @Column({ name: 'product_id' })
   productId: number;
 
   @Field(() => Int, { nullable: true })
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'user_id' })
   userId?: number;
 
   @Field()
@@ -23,7 +23,7 @@ export class ProductNote {
   note: string;
 
   @Field()
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
   createdAt: Date;
 
   @Field(() => Product)

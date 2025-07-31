@@ -11,11 +11,11 @@ export class InventoryTransaction {
   id: number;
 
   @Field(() => Int)
-  @Column()
+  @Column({ name: 'product_id' })
   productId: number;
 
   @Field(() => Int)
-  @Column()
+  @Column({ name: 'user_id' })
   userId: number;
 
   @Field(() => Int)
@@ -23,7 +23,7 @@ export class InventoryTransaction {
   quantity: number;
 
   @Field()
-  @Column()
+  @Column({ name: 'transaction_type' })
   transactionType: string;
 
   @Field({ nullable: true })
@@ -31,7 +31,7 @@ export class InventoryTransaction {
   notes?: string;
 
   @Field()
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'occurred_at' })
   occurredAt: Date;
 
   @ManyToOne(() => Product)

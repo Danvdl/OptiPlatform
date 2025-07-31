@@ -10,6 +10,46 @@ export default function Dashboard() {
     lowStockProducts: []
   });
   const [loading, setLoading] = useState(true);
+  const [animatedValues, setAnimatedValues] = useState({
+    totalProducts: 0,
+    totalCategories: 0,
+    recentTransactions: 0,
+    lowStockCount: 0,
+  });
+
+  // Animate counter values
+  useEffect(() => {
+    if (!loading) {
+      const duration = 1000; // 1 second
+      const steps = 60; // 60fps
+      const interval = duration / steps;
+
+      let step = 0;
+      const timer = setInterval(() => {
+        step++;
+        const progress = step / steps;
+        
+        setAnimatedValues({
+          totalProducts: Math.floor(summary.totalProducts * progress),
+          totalCategories: Math.floor(summary.totalCategories * progress),
+          recentTransactions: Math.floor(summary.recentTransactions * progress),
+          lowStockCount: Math.floor(summary.lowStockCount * progress),
+        });
+
+        if (step >= steps) {
+          clearInterval(timer);
+          setAnimatedValues({
+            totalProducts: summary.totalProducts,
+            totalCategories: summary.totalCategories,
+            recentTransactions: summary.recentTransactions,
+            lowStockCount: summary.lowStockCount,
+          });
+        }
+      }, interval);
+
+      return () => clearInterval(timer);
+    }
+  }, [loading, summary]);
 
   const loadDashboardData = async () => {
     try {
@@ -32,225 +72,523 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div style={{ padding: '2rem' }}>
-        <h1>Dashboard</h1>
-        <p>Loading dashboard data...</p>
+      <div style={styles.container}>
+        <div style={styles.loadingContainer}>
+          <div style={styles.spinner}></div>
+          <h2 style={styles.loadingText}>Loading Dashboard...</h2>
+          <p style={styles.loadingSubtext}>Fetching your inventory data</p>
+        </div>
       </div>
     );
   }
 
+  const stockHealth = summary.totalProducts > 0 
+    ? ((summary.totalProducts - summary.lowStockCount) / summary.totalProducts) * 100 
+    : 100;
+
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>OptiPlatform Dashboard</h1>
-      
+    <div style={styles.container}>
+      {/* Header */}
+      <div style={styles.header}>
+        <div>
+          <h1 style={styles.title}>Dashboard Overview</h1>
+          <p style={styles.subtitle}>Monitor your inventory performance at a glance</p>
+        </div>
+        <button onClick={loadDashboardData} style={styles.refreshButton}>
+          🔄 Refresh
+        </button>
+      </div>
+
       {/* Key Metrics Cards */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-        gap: '1rem', 
-        marginBottom: '2rem' 
-      }}>
-        <div style={cardStyle}>
-          <h3>Total Products</h3>
-          <p style={metricStyle}>{summary.totalProducts}</p>
-        </div>
-        <div style={cardStyle}>
-          <h3>Categories</h3>
-          <p style={metricStyle}>{summary.totalCategories}</p>
-        </div>
-        <div style={cardStyle}>
-          <h3>Low Stock Items</h3>
-          <p style={{ ...metricStyle, color: summary.lowStockCount > 0 ? '#ff6b6b' : '#51cf66' }}>
-            {summary.lowStockCount}
-          </p>
-        </div>
-        <div style={cardStyle}>
-          <h3>Total Transactions</h3>
-          <p style={metricStyle}>{summary.recentTransactions}</p>
+      <div style={styles.metricsGrid}>
+        <MetricCard
+          title="Total Products"
+          value={animatedValues.totalProducts}
+          icon="📦"
+          color="#3b82f6"
+          bgColor="#eff6ff"
+        />
+        <MetricCard
+          title="Categories"
+          value={animatedValues.totalCategories}
+          icon="📂"
+          color="#10b981"
+          bgColor="#ecfdf5"
+        />
+        <MetricCard
+          title="Low Stock Items"
+          value={animatedValues.lowStockCount}
+          icon="⚠️"
+          color={summary.lowStockCount > 0 ? "#ef4444" : "#10b981"}
+          bgColor={summary.lowStockCount > 0 ? "#fef2f2" : "#ecfdf5"}
+          warning={summary.lowStockCount > 0}
+        />
+        <MetricCard
+          title="Total Transactions"
+          value={animatedValues.recentTransactions}
+          icon="📊"
+          color="#8b5cf6"
+          bgColor="#f5f3ff"
+        />
+      </div>
+
+      {/* Stock Health Chart */}
+      <div style={styles.chartContainer}>
+        <h3 style={styles.chartTitle}>
+          <span style={styles.chartIcon}>📈</span>
+          Stock Health Overview
+        </h3>
+        <div style={styles.healthContainer}>
+          <div style={styles.healthBar}>
+            <div 
+              style={{
+                ...styles.healthFill,
+                width: `${stockHealth}%`,
+                backgroundColor: stockHealth >= 80 ? '#10b981' : stockHealth >= 60 ? '#f59e0b' : '#ef4444'
+              }}
+            ></div>
+          </div>
+          <div style={styles.healthStats}>
+            <div style={styles.healthStat}>
+              <span style={styles.healthDot} />
+              <span>In Stock: {summary.totalProducts - summary.lowStockCount} items</span>
+            </div>
+            {summary.lowStockCount > 0 && (
+              <div style={styles.healthStat}>
+                <span style={{...styles.healthDot, backgroundColor: '#ef4444'}} />
+                <span>Low Stock: {summary.lowStockCount} items</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Low Stock Alerts */}
       {summary.lowStockCount > 0 && (
-        <div style={{ ...cardStyle, marginBottom: '2rem', backgroundColor: '#fff5f5', borderLeft: '4px solid #ff6b6b' }}>
-          <h3 style={{ color: '#c92a2a' }}>⚠️ Low Stock Alert</h3>
-          <p>You have {summary.lowStockCount} product(s) running low on stock:</p>
-          <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-            {summary.lowStockProducts.map(product => (
-              <div key={product.id} style={{ 
-                padding: '0.5rem', 
-                margin: '0.5rem 0', 
-                backgroundColor: '#ffebee', 
-                borderRadius: '4px',
-                borderLeft: '3px solid #c62828'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={styles.alertContainer}>
+          <div style={styles.alertHeader}>
+            <h3 style={styles.alertTitle}>
+              <span style={styles.alertIcon}>🚨</span>
+              Low Stock Alert
+            </h3>
+            <span style={styles.alertBadge}>{summary.lowStockCount}</span>
+          </div>
+          <div style={styles.alertList}>
+            {summary.lowStockProducts.slice(0, 3).map(product => (
+              <div key={product.id} style={styles.alertItem}>
+                <div style={styles.alertItemContent}>
                   <div>
-                    <strong style={{ color: '#c92a2a' }}>{product.name}</strong>
-                    {product.sku && <span style={{ color: '#666', fontSize: '0.9rem' }}> (SKU: {product.sku})</span>}
-                    {product.category && (
-                      <span style={{ 
-                        backgroundColor: '#e3f2fd', 
-                        color: '#1976d2', 
-                        padding: '2px 6px', 
-                        borderRadius: '3px', 
-                        fontSize: '0.8rem',
-                        marginLeft: '0.5rem'
-                      }}>
-                        {product.category.name}
-                      </span>
+                    <div style={styles.alertItemName}>{product.name}</div>
+                    {product.sku && (
+                      <div style={styles.alertItemSku}>SKU: {product.sku}</div>
                     )}
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ color: '#c92a2a', fontWeight: 'bold' }}>
+                  <div style={styles.alertItemStock}>
+                    <span style={styles.alertItemValue}>
                       {product.currentStock} {product.unit || 'units'}
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: '#666' }}>
+                    </span>
+                    <span style={styles.alertItemThreshold}>
                       Restock at {product.restockThreshold}
-                    </div>
+                    </span>
                   </div>
                 </div>
               </div>
             ))}
+            {summary.lowStockProducts.length > 3 && (
+              <div style={styles.alertMore}>
+                +{summary.lowStockProducts.length - 3} more items need attention
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Stock Overview */}
-      <div style={cardStyle}>
-        <h3>Current Stock Overview</h3>
-        {summary.totalProducts === 0 ? (
-          <div style={{ textAlign: 'center', padding: '2rem' }}>
-            <p style={{ color: '#666', marginBottom: '1rem' }}>
-              No products in inventory yet.
-            </p>
-            <button 
-              style={buttonStyle}
-              onClick={() => window.location.href = '/inventory'}
-            >
-              Add Your First Product
-            </button>
-          </div>
-        ) : (
+      {/* Success State */}
+      {summary.lowStockCount === 0 && summary.totalProducts > 0 && (
+        <div style={styles.successContainer}>
+          <div style={styles.successIcon}>✅</div>
           <div>
-            <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.9rem', color: '#666' }}>Stock Status</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ width: '12px', height: '12px', backgroundColor: '#51cf66', borderRadius: '50%' }}></div>
-                    <span style={{ fontSize: '0.9rem' }}>In Stock ({summary.totalProducts - summary.lowStockCount})</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ width: '12px', height: '12px', backgroundColor: '#ff6b6b', borderRadius: '50%' }}></div>
-                    <span style={{ fontSize: '0.9rem' }}>Low Stock ({summary.lowStockCount})</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {summary.lowStockCount === 0 && (
-              <div style={{ 
-                textAlign: 'center', 
-                padding: '2rem', 
-                backgroundColor: '#e8f5e8', 
-                borderRadius: '6px',
-                border: '1px solid #c8e6c9'
-              }}>
-                <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>✅</div>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: '#2e7d32' }}>All Stock Levels Good!</h4>
-                <p style={{ margin: 0, color: '#388e3c' }}>
-                  All {summary.totalProducts} products are above their restock thresholds.
-                </p>
-              </div>
-            )}
+            <h3 style={styles.successTitle}>All Stock Levels Good!</h3>
+            <p style={styles.successText}>
+              All {summary.totalProducts} products are above their restock thresholds.
+            </p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Quick Actions */}
-      <div style={{ marginTop: '2rem' }}>
-        <h3>Quick Actions</h3>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <button 
-            style={buttonStyle}
+      <div style={styles.actionsContainer}>
+        <h3 style={styles.actionsTitle}>Quick Actions</h3>
+        <div style={styles.actionsGrid}>
+          <ActionButton
+            icon="📦"
+            title="Manage Inventory"
+            description="View and edit your products"
             onClick={() => window.location.href = '/inventory'}
-          >
-            📦 Manage Inventory
-          </button>
-          <button 
-            style={{ ...buttonStyle, backgroundColor: '#28a745' }}
-            onClick={() => {
-              // TODO: Open add product modal
-              window.location.href = '/inventory';
-            }}
-          >
-            ➕ Add Product
-          </button>
-          <button 
-            style={{ ...buttonStyle, backgroundColor: '#ffc107', color: '#000' }}
-            onClick={() => {
-              // TODO: Open add transaction modal
-              window.location.href = '/inventory';
-            }}
-          >
-            📝 Log Transaction
-          </button>
-          <button 
-            style={{ ...buttonStyle, backgroundColor: '#6c757d' }}
-            onClick={loadDashboardData}
-          >
-            🔄 Refresh Data
-          </button>
+            color="#3b82f6"
+          />
+          <ActionButton
+            icon="➕"
+            title="Add Product"
+            description="Add new items to inventory"
+            onClick={() => window.location.href = '/inventory'}
+            color="#10b981"
+          />
+          <ActionButton
+            icon="📝"
+            title="Log Transaction"
+            description="Record inventory movements"
+            onClick={() => window.location.href = '/inventory'}
+            color="#f59e0b"
+          />
+          <ActionButton
+            icon="📊"
+            title="View Reports"
+            description="Analyze inventory trends"
+            onClick={() => window.location.href = '/inventory'}
+            color="#8b5cf6"
+          />
         </div>
-      </div>
-
-      {/* Recent Activity Preview */}
-      <div style={{ ...cardStyle, marginTop: '2rem' }}>
-        <h3>Recent Activity</h3>
-        <p style={{ color: '#666' }}>
-          {summary.recentTransactions > 0 
-            ? `${summary.recentTransactions} transactions logged across all products.`
-            : 'No transactions recorded yet.'
-          }
-        </p>
-        {summary.recentTransactions > 0 && (
-          <button 
-            style={{ ...buttonStyle, backgroundColor: '#17a2b8' }}
-            onClick={() => window.location.href = '/inventory'}
-          >
-            View All Transactions
-          </button>
-        )}
       </div>
     </div>
   );
 }
 
-// Styles
-const cardStyle: React.CSSProperties = {
-  backgroundColor: 'white',
-  padding: '1.5rem',
-  borderRadius: '8px',
-  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-  border: '1px solid #e9ecef'
-};
+// Metric Card Component
+function MetricCard({ title, value, icon, color, bgColor, warning = false }: {
+  title: string;
+  value: number;
+  icon: string;
+  color: string;
+  bgColor: string;
+  warning?: boolean;
+}) {
+  return (
+    <div style={{...styles.metricCard, backgroundColor: bgColor}}>
+      <div style={styles.metricHeader}>
+        <span style={{...styles.metricIcon, color}}>{icon}</span>
+        <div style={styles.metricTitle}>{title}</div>
+      </div>
+      <div style={{...styles.metricValue, color}}>
+        {value.toLocaleString()}
+      </div>
+      {warning && value > 0 && (
+        <div style={styles.metricWarning}>Requires attention</div>
+      )}
+    </div>
+  );
+}
 
-const metricStyle: React.CSSProperties = {
-  fontSize: '2rem',
-  fontWeight: 'bold',
-  margin: '0.5rem 0 0 0',
-  color: '#495057'
-};
+// Action Button Component
+function ActionButton({ icon, title, description, onClick, color }: {
+  icon: string;
+  title: string;
+  description: string;
+  onClick: () => void;
+  color: string;
+}) {
+  return (
+    <button style={styles.actionButton} onClick={onClick}>
+      <div style={{...styles.actionIcon, color}}>{icon}</div>
+      <div style={styles.actionContent}>
+        <div style={styles.actionTitle}>{title}</div>
+        <div style={styles.actionDescription}>{description}</div>
+      </div>
+    </button>
+  );
+}
 
-const buttonStyle: React.CSSProperties = {
-  backgroundColor: '#007bff',
-  color: 'white',
-  border: 'none',
-  padding: '0.75rem 1.5rem',
-  borderRadius: '6px',
-  cursor: 'pointer',
-  fontSize: '0.9rem',
-  fontWeight: '500',
-  transition: 'background-color 0.2s'
+const styles = {
+  container: {
+    padding: '24px',
+    maxWidth: '1200px',
+    margin: '0 auto',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    backgroundColor: '#f8fafc',
+    minHeight: '100vh',
+  },
+  loadingContainer: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '50vh',
+  },
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: '4px solid #e5e7eb',
+    borderTopColor: '#3b82f6',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
+  loadingText: {
+    color: '#1f2937',
+    margin: '16px 0 8px 0',
+  },
+  loadingSubtext: {
+    color: '#6b7280',
+    margin: 0,
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '32px',
+  },
+  title: {
+    fontSize: '32px',
+    fontWeight: 'bold',
+    color: '#1f2937',
+    margin: '0 0 8px 0',
+  },
+  subtitle: {
+    fontSize: '16px',
+    color: '#6b7280',
+    margin: 0,
+  },
+  refreshButton: {
+    padding: '12px 20px',
+    backgroundColor: '#f3f4f6',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#374151',
+    transition: 'all 0.2s',
+  },
+  metricsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '20px',
+    marginBottom: '32px',
+  },
+  metricCard: {
+    padding: '24px',
+    borderRadius: '12px',
+    border: '1px solid #e5e7eb',
+    transition: 'transform 0.2s, box-shadow 0.2s',
+  },
+  metricHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '16px',
+  },
+  metricIcon: {
+    fontSize: '24px',
+  },
+  metricTitle: {
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#6b7280',
+  },
+  metricValue: {
+    fontSize: '36px',
+    fontWeight: 'bold',
+    marginBottom: '8px',
+  },
+  metricWarning: {
+    fontSize: '12px',
+    color: '#ef4444',
+    fontWeight: '500',
+  },
+  chartContainer: {
+    backgroundColor: 'white',
+    padding: '24px',
+    borderRadius: '12px',
+    border: '1px solid #e5e7eb',
+    marginBottom: '24px',
+  },
+  chartTitle: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    margin: '0 0 20px 0',
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  chartIcon: {
+    fontSize: '20px',
+  },
+  healthContainer: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '16px',
+  },
+  healthBar: {
+    width: '100%',
+    height: '12px',
+    backgroundColor: '#f3f4f6',
+    borderRadius: '6px',
+    overflow: 'hidden',
+  },
+  healthFill: {
+    height: '100%',
+    transition: 'width 1s ease-in-out',
+    borderRadius: '6px',
+  },
+  healthStats: {
+    display: 'flex',
+    gap: '24px',
+  },
+  healthStat: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '14px',
+    color: '#374151',
+  },
+  healthDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    backgroundColor: '#10b981',
+  },
+  alertContainer: {
+    backgroundColor: '#fef2f2',
+    border: '1px solid #fecaca',
+    borderRadius: '12px',
+    padding: '24px',
+    marginBottom: '24px',
+  },
+  alertHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '16px',
+  },
+  alertTitle: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    margin: 0,
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#dc2626',
+  },
+  alertIcon: {
+    fontSize: '20px',
+  },
+  alertBadge: {
+    backgroundColor: '#dc2626',
+    color: 'white',
+    padding: '4px 8px',
+    borderRadius: '6px',
+    fontSize: '12px',
+    fontWeight: '600',
+  },
+  alertList: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '12px',
+  },
+  alertItem: {
+    backgroundColor: 'white',
+    border: '1px solid #fecaca',
+    borderRadius: '8px',
+    padding: '16px',
+  },
+  alertItemContent: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  alertItemName: {
+    fontWeight: '500',
+    color: '#1f2937',
+  },
+  alertItemSku: {
+    fontSize: '12px',
+    color: '#6b7280',
+    marginTop: '2px',
+  },
+  alertItemStock: {
+    textAlign: 'right' as const,
+  },
+  alertItemValue: {
+    fontWeight: '600',
+    color: '#dc2626',
+    display: 'block',
+  },
+  alertItemThreshold: {
+    fontSize: '12px',
+    color: '#6b7280',
+  },
+  alertMore: {
+    textAlign: 'center' as const,
+    padding: '12px',
+    fontSize: '14px',
+    color: '#6b7280',
+    fontStyle: 'italic',
+  },
+  successContainer: {
+    backgroundColor: '#ecfdf5',
+    border: '1px solid #d1fae5',
+    borderRadius: '12px',
+    padding: '24px',
+    marginBottom: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+  },
+  successIcon: {
+    fontSize: '32px',
+  },
+  successTitle: {
+    margin: '0 0 8px 0',
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#065f46',
+  },
+  successText: {
+    margin: 0,
+    color: '#047857',
+  },
+  actionsContainer: {
+    backgroundColor: 'white',
+    padding: '24px',
+    borderRadius: '12px',
+    border: '1px solid #e5e7eb',
+  },
+  actionsTitle: {
+    margin: '0 0 20px 0',
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  actionsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '16px',
+  },
+  actionButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '16px',
+    backgroundColor: '#f9fafb',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    textAlign: 'left' as const,
+  },
+  actionIcon: {
+    fontSize: '24px',
+  },
+  actionContent: {
+    flex: 1,
+  },
+  actionTitle: {
+    fontWeight: '500',
+    color: '#1f2937',
+    marginBottom: '4px',
+  },
+  actionDescription: {
+    fontSize: '12px',
+    color: '#6b7280',
+  },
 };

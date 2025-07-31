@@ -9,10 +9,27 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+// Check if Firebase config is available
+const isFirebaseConfigured = Object.values(firebaseConfig).every(value => value && value !== 'undefined');
+
+let app: any = null;
+let messaging: any = null;
+
+if (isFirebaseConfigured) {
+  try {
+    app = initializeApp(firebaseConfig);
+    messaging = getMessaging(app);
+  } catch (error) {
+    console.warn('Firebase initialization failed:', error);
+  }
+}
 
 export async function registerFCM(register: (token: string) => Promise<void>) {
+  if (!messaging) {
+    console.warn('Firebase messaging not configured - skipping FCM registration');
+    return;
+  }
+  
   try {
     const perm = await Notification.requestPermission();
     if (perm !== 'granted') return;
@@ -26,5 +43,9 @@ export async function registerFCM(register: (token: string) => Promise<void>) {
 }
 
 export function onForegroundMessage(cb: (payload: any) => void) {
+  if (!messaging) {
+    console.warn('Firebase messaging not configured - skipping message listener');
+    return;
+  }
   onMessage(messaging, cb);
 }

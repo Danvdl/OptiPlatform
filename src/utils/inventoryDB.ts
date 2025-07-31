@@ -15,9 +15,9 @@ export async function addRecord(record: Omit<InventoryRecord, '_id'>) {
   await localDB.put(doc);
 }
 
-export async function getAllRecords() {
+export async function getAllRecords(): Promise<InventoryRecord[]> {
   const res = await localDB.allDocs<InventoryRecord>({ include_docs: true });
-  return res.rows.map(r => r.doc!) as InventoryRecord[];
+  return res.rows.map((r: any) => r.doc!) as InventoryRecord[];
 }
 
 export function sync() {
@@ -27,6 +27,6 @@ export function sync() {
   }
   localDB
     .sync(remoteDB, { retry: true })
-    .on('error', (err) => console.error('sync error', err));
+    .on('error', (err: any) => console.error('sync error', err));
 }
 
