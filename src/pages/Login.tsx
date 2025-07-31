@@ -31,16 +31,29 @@ export default function Login() {
 
     try {
       const mutation = isRegister ? 'register' : 'login';
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/graphql`, {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      
+      console.log('Making request to:', `${backendUrl}/graphql`);
+      console.log('Mutation:', mutation);
+      console.log('Data:', { username, password });
+      
+      const res = await fetch(`${backendUrl}/graphql`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
           query: `mutation ${mutation.charAt(0).toUpperCase() + mutation.slice(1)}($data: ${mutation.charAt(0).toUpperCase() + mutation.slice(1)}Input!) { ${mutation}(data: $data) }`,
           variables: { data: { username, password } },
         }),
       });
       
+      console.log('Response status:', res.status);
+      console.log('Response headers:', res.headers);
+      
       const json = await res.json();
+      console.log('Response data:', json);
       
       if (json.errors) {
         setError(json.errors[0].message);
@@ -55,7 +68,8 @@ export default function Login() {
         setError('Authentication failed');
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      console.error('Network error details:', err);
+      setError(`Network error: ${err instanceof Error ? err.message : 'Please try again.'}`);
     } finally {
       setIsLoading(false);
     }

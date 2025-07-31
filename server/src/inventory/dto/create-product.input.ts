@@ -1,5 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsString, IsInt, IsOptional } from 'class-validator';
+import { IsString, IsInt, IsOptional, IsNumber } from 'class-validator';
 
 @InputType()
 export class CreateProductInput {
@@ -31,4 +31,19 @@ export class CreateProductInput {
   @IsInt()
   @IsOptional()
   restockThreshold?: number;
+
+  @Field({ nullable: true })
+  @IsNumber()
+  @IsOptional()
+  purchasePrice?: number;
+
+  @Field({ nullable: true })
+  @IsNumber()
+  @IsOptional()
+  salePrice?: number;
+
+  @Field({ nullable: true, defaultValue: 'USD' })
+  @IsString()
+  @IsOptional()
+  currency?: string;
 }

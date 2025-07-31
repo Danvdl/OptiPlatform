@@ -13,6 +13,7 @@ import { CreateProductNoteInput } from './dto/create-product-note.input';
 import { CreateInventoryTransactionInput } from './dto/create-inventory-transaction.input';
 import { UpdateInventoryTransactionInput } from './dto/update-inventory-transaction.input';
 import { NotificationsService } from '../notifications/notifications.service';
+import { PriceHistoryService } from './price-history.service';
 
 @Injectable()
 export class InventoryService {
@@ -26,18 +27,78 @@ export class InventoryService {
     @InjectRepository(InventoryTransaction)
     private transactions: Repository<InventoryTransaction>,
     private notifications: NotificationsService,
+    private priceHistoryService: PriceHistoryService,
   ) {}
 
   // Product operations
-  createProduct(data: CreateProductInput) {
+  async createProduct(data: CreateProductInput, userId?: number) {
     const product = this.products.create({
       ...data,
       restockThreshold: data.restockThreshold || 5
     });
-    return this.products.save(product);
+    const savedProduct = await this.products.save(product);
+
+    // Track initial pricing if provided
+    if (data.purchasePrice !== undefined && data.purchasePrice > 0) {
+      await this.priceHistoryService.trackPriceChange(
+        savedProduct.id,
+        'purchase',
+        0,
+        data.purchasePrice,
+        userId,
+        'Initial product creation',
+        data.currency || 'USD'
+      );
+    }
+
+    if (data.salePrice !== undefined && data.salePrice > 0) {
+      await this.priceHistoryService.trackPriceChange(
+        savedProduct.id,
+        'sale',
+        0,
+        data.salePrice,
+        userId,
+        'Initial product creation',
+        data.currency || 'USD'
+      );
+    }
+
+    return savedProduct;
   }
 
-  updateProduct(data: UpdateProductInput) {
+  async updateProduct(data: UpdateProductInput, userId?: number) {
+    // Get current product to compare prices
+    const currentProduct = await this.products.findOneBy({ id: data.id });
+    
+    if (!currentProduct) {
+      throw new Error('Product not found');
+    }
+
+    // Track price changes
+    if (data.purchasePrice !== undefined && data.purchasePrice !== currentProduct.purchasePrice) {
+      await this.priceHistoryService.trackPriceChange(
+        data.id,
+        'purchase',
+        currentProduct.purchasePrice || 0,
+        data.purchasePrice,
+        userId,
+        'Product price update',
+        data.currency || currentProduct.currency || 'USD'
+      );
+    }
+
+    if (data.salePrice !== undefined && data.salePrice !== currentProduct.salePrice) {
+      await this.priceHistoryService.trackPriceChange(
+        data.id,
+        'sale',
+        currentProduct.salePrice || 0,
+        data.salePrice,
+        userId,
+        'Product price update',
+        data.currency || currentProduct.currency || 'USD'
+      );
+    }
+
     return this.products.save(data);
   }
 
@@ -102,10 +163,18 @@ export class InventoryService {
 
   // Inventory Transaction operations
   async createTransaction(data: CreateInventoryTransactionInput) {
+    // Calculate total cost if unit cost is provided
+    let totalCost = data.totalCost;
+    if (!totalCost && data.unitCost && data.quantity) {
+      totalCost = data.unitCost * Math.abs(data.quantity);
+    }
+
     const tx = this.transactions.create({
       ...data,
       productId: data.productId,
       userId: data.userId,
+      unitCost: data.unitCost,
+      totalCost: totalCost,
     });
     const saved = await this.transactions.save(tx);
     
@@ -183,13 +252,111 @@ export class InventoryService {
     const totalCategories = await this.categories.count();
     const recentTransactions = await this.transactions.count();
     const lowStockProducts = await this.getLowStockProducts();
+    const inventoryValuation = await this.getInventoryValuation();
     
     return {
       totalProducts,
       totalCategories,
       recentTransactions,
       lowStockCount: lowStockProducts.length,
-      lowStockProducts
+      lowStockProducts,
+      inventoryValuation
     };
+  }
+
+  // Pricing and valuation methods
+  async getInventoryValuation() {
+    const products = await this.products.find();
+    let totalPurchaseValue = 0;
+    let totalSaleValue = 0;
+    let totalCostValue = 0;
+    
+    for (const product of products) {
+      const stock = await this.getCurrentStock(product.id);
+      if (stock > 0) {
+        if (product.purchasePrice) {
+          totalPurchaseValue += product.purchasePrice * stock;
+        }
+        if (product.salePrice) {
+          totalSaleValue += product.salePrice * stock;
+        }
+        
+        // Calculate average cost from transactions
+        const avgCost = await this.getAverageCostPerUnit(product.id);
+        if (avgCost > 0) {
+          totalCostValue += avgCost * stock;
+        }
+      }
+    }
+    
+    return {
+      totalPurchaseValue: Math.round(totalPurchaseValue * 100) / 100,
+      totalSaleValue: Math.round(totalSaleValue * 100) / 100,
+      totalCostValue: Math.round(totalCostValue * 100) / 100,
+      potentialProfit: Math.round((totalSaleValue - totalPurchaseValue) * 100) / 100,
+      realizedProfit: Math.round((totalSaleValue - totalCostValue) * 100) / 100,
+    };
+  }
+
+  async getAverageCostPerUnit(productId: number): Promise<number> {
+    const transactions = await this.transactions.find({
+      where: { productId, unitCost: { $ne: null } as any },
+      select: ['unitCost', 'quantity']
+    });
+    
+    if (transactions.length === 0) return 0;
+    
+    let totalCost = 0;
+    let totalQuantity = 0;
+    
+    transactions.forEach(tx => {
+      if (tx.unitCost && tx.quantity > 0) { // Only consider stock additions
+        totalCost += tx.unitCost * tx.quantity;
+        totalQuantity += tx.quantity;
+      }
+    });
+    
+    return totalQuantity > 0 ? totalCost / totalQuantity : 0;
+  }
+
+  async getProductProfitability(productId: number) {
+    const product = await this.products.findOneBy({ id: productId });
+    if (!product) return null;
+    
+    const stock = await this.getCurrentStock(productId);
+    const avgCost = await this.getAverageCostPerUnit(productId);
+    
+    return {
+      productId,
+      productName: product.name,
+      currentStock: stock,
+      purchasePrice: product.purchasePrice || 0,
+      salePrice: product.salePrice || 0,
+      averageCost: Math.round(avgCost * 100) / 100,
+      profitMargin: product.salePrice && product.purchasePrice 
+        ? Math.round(((product.salePrice - product.purchasePrice) / product.salePrice) * 100)
+        : 0,
+      realizedProfitMargin: product.salePrice && avgCost > 0
+        ? Math.round(((product.salePrice - avgCost) / product.salePrice) * 100)
+        : 0,
+      inventoryValue: stock * (product.purchasePrice || 0),
+      potentialRevenue: stock * (product.salePrice || 0),
+    };
+  }
+
+  async getTopProfitableProducts(limit = 10) {
+    const products = await this.products.find();
+    const profitabilityData = [];
+    
+    for (const product of products) {
+      const profitability = await this.getProductProfitability(product.id);
+      if (profitability && profitability.currentStock > 0) {
+        profitabilityData.push(profitability);
+      }
+    }
+    
+    return profitabilityData
+      .sort((a, b) => b.realizedProfitMargin - a.realizedProfitMargin)
+      .slice(0, limit);
   }
 }

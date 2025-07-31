@@ -2,7 +2,7 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsInt, IsString, IsOptional, IsNumber } from 'class-validator';
 
 @InputType()
-export class CreateInventoryTransactionInput {
+export class CreatePriceHistoryInput {
   @Field(() => Int)
   @IsInt()
   productId: number;
@@ -12,26 +12,25 @@ export class CreateInventoryTransactionInput {
   @IsOptional()
   userId?: number;
 
-  @Field(() => Int)
-  @IsInt()
-  quantity: number;
-
   @Field()
   @IsString()
-  transactionType: string;
+  priceType: string; // 'purchase' or 'sale'
+
+  @Field()
+  @IsNumber()
+  oldPrice: number;
+
+  @Field()
+  @IsNumber()
+  newPrice: number;
+
+  @Field({ nullable: true, defaultValue: 'USD' })
+  @IsString()
+  @IsOptional()
+  currency?: string;
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  notes?: string;
-
-  @Field({ nullable: true })
-  @IsNumber()
-  @IsOptional()
-  unitCost?: number;
-
-  @Field({ nullable: true })
-  @IsNumber()
-  @IsOptional()
-  totalCost?: number;
+  reason?: string;
 }

@@ -33,6 +33,18 @@ export class Product {
   @Column({ default: 5, name: 'restock_threshold' })
   restockThreshold: number;
 
+  @Field({ nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'purchase_price' })
+  purchasePrice?: number;
+
+  @Field({ nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'sale_price' })
+  salePrice?: number;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  currency?: string;
+
   @Field()
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
   createdAt: Date;

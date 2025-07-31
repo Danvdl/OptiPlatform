@@ -39,4 +39,25 @@ export class ProductResolver {
   product(@Args('id', { type: () => Int }) id: number) {
     return this.service.findProduct(id);
   }
+
+  @Query(() => String, { nullable: true })
+  @UseGuards(JwtAuthGuard)
+  async productProfitability(@Args('id', { type: () => Int }) id: number) {
+    const profitability = await this.service.getProductProfitability(id);
+    return JSON.stringify(profitability);
+  }
+
+  @Query(() => String)
+  @UseGuards(JwtAuthGuard)
+  async topProfitableProducts(@Args('limit', { type: () => Int, defaultValue: 10 }) limit: number) {
+    const products = await this.service.getTopProfitableProducts(limit);
+    return JSON.stringify(products);
+  }
+
+  @Query(() => String)
+  @UseGuards(JwtAuthGuard)
+  async inventoryValuation() {
+    const valuation = await this.service.getInventoryValuation();
+    return JSON.stringify(valuation);
+  }
 }

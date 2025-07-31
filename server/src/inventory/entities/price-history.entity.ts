@@ -4,8 +4,8 @@ import { Product } from './product.entity';
 import { User } from '../../user/user.entity';
 
 @ObjectType()
-@Entity({ name: 'inventory_transactions' })
-export class InventoryTransaction {
+@Entity({ name: 'price_history' })
+export class PriceHistory {
   @Field(() => Int)
   @PrimaryGeneratedColumn()
   id: number;
@@ -18,31 +18,30 @@ export class InventoryTransaction {
   @Column({ name: 'user_id' })
   userId: number;
 
-  @Field(() => Int)
-  @Column()
-  quantity: number;
+  @Field()
+  @Column({ name: 'price_type' }) // 'purchase' or 'sale'
+  priceType: string;
 
   @Field()
-  @Column({ name: 'transaction_type' })
-  transactionType: string;
+  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'old_price' })
+  oldPrice: number;
+
+  @Field()
+  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'new_price' })
+  newPrice: number;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  currency?: string;
 
   @Field({ nullable: true })
   @Column({ type: 'text', nullable: true })
-  notes?: string;
-
-  @Field({ nullable: true })
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'unit_cost' })
-  unitCost?: number;
-
-  @Field({ nullable: true })
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'total_cost' })
-  totalCost?: number;
+  reason?: string;
 
   @Field()
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'occurred_at' })
-  occurredAt: Date;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'changed_at' })
+  changedAt: Date;
 
-  // Product relation exposed to GraphQL
   @Field(() => Product)
   @ManyToOne(() => Product)
   @JoinColumn({ name: 'product_id' })
