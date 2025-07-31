@@ -3,6 +3,7 @@ import MainLayout from './layout/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Inventory from './pages/Inventory';
+import Reports from './pages/Reports';
 
 function App() {
   console.log('App component rendering...');
@@ -15,6 +16,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/inventory" element={<Inventory />} />
+          <Route path="/reports" element={<Reports />} />
         </Route>
       </Routes>
     </div>

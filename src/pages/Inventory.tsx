@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import QuickActions from '../components/QuickActions';
 import { 
   fetchItems, 
   fetchProducts,
@@ -15,6 +17,7 @@ import {
 type TabType = 'overview' | 'transactions' | 'products' | 'categories';
 
 export default function Inventory() {
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [transactions, setTransactions] = useState<InventoryItem[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -74,7 +77,25 @@ export default function Inventory() {
 
   useEffect(() => {
     loadData();
-  }, []);
+    
+    // Handle URL parameters for direct actions
+    const tab = searchParams.get('tab') as TabType;
+    const action = searchParams.get('action');
+    
+    if (tab && ['overview', 'transactions', 'products', 'categories'].includes(tab)) {
+      setActiveTab(tab);
+    }
+    
+    if (action === 'add') {
+      if (tab === 'transactions') {
+        setShowAddTransaction(true);
+      } else if (tab === 'products') {
+        setShowAddProduct(true);
+      } else if (tab === 'categories') {
+        setShowAddCategory(true);
+      }
+    }
+  }, [searchParams]);
 
   const handleAddTransaction = async () => {
     if (!transactionForm.productId) return;
@@ -240,9 +261,9 @@ export default function Inventory() {
             />
             <button
               className="btn btn-primary hover-lift"
-              onClick={() => setActiveTab('products')}
+              onClick={() => setShowAddProduct(true)}
             >
-              ➕ Quick Add
+              ➕ Quick Add Product
             </button>
           </div>
         </div>
@@ -365,46 +386,25 @@ export default function Inventory() {
             </div>
 
             {/* Quick Actions */}
-            <div className="card" style={{
-              padding: '1.5rem',
-              marginBottom: '2rem'
-            }}>
-              <h3 style={{ margin: '0 0 1rem', color: '#1e293b' }}>⚡ Quick Actions</h3>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1rem'
-              }}>
-                <button 
-                  className="btn btn-primary hover-lift"
-                  onClick={() => setShowAddTransaction(true)}
-                  style={{ padding: '1rem', justifyContent: 'flex-start' }}
-                >
-                  📝 Log Transaction
-                </button>
-                <button 
-                  className="btn btn-secondary hover-lift"
-                  onClick={() => setShowAddProduct(true)}
-                  style={{ padding: '1rem', justifyContent: 'flex-start' }}
-                >
-                  🛍️ Add Product
-                </button>
-                <button 
-                  className="btn btn-secondary hover-lift"
-                  onClick={() => setShowAddCategory(true)}
-                  style={{ padding: '1rem', justifyContent: 'flex-start' }}
-                >
-                  📁 Add Category
-                </button>
-                <button 
-                  className="btn btn-secondary hover-lift"
-                  onClick={() => setActiveTab('products')}
-                  style={{ padding: '1rem', justifyContent: 'flex-start' }}
-                >
-                  📊 View Reports
-                </button>
-              </div>
-            </div>
+            <QuickActions
+              showAddTransaction={showAddTransaction}
+              showAddProduct={showAddProduct}
+              showAddCategory={showAddCategory}
+              setShowAddTransaction={setShowAddTransaction}
+              setShowAddProduct={setShowAddProduct}
+              setShowAddCategory={setShowAddCategory}
+              onAddTransaction={handleAddTransaction}
+              onAddProduct={handleAddProduct}
+              onAddCategory={handleAddCategory}
+              products={products}
+              categories={categories}
+              transactionForm={transactionForm}
+              setTransactionForm={setTransactionForm}
+              productForm={productForm}
+              setProductForm={setProductForm}
+              categoryForm={categoryForm}
+              setCategoryForm={setCategoryForm}
+            />
 
             {/* Recent Activity & Low Stock Alerts */}
             <div style={{

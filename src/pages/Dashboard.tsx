@@ -231,21 +231,21 @@ export default function Dashboard() {
             icon="➕"
             title="Add Product"
             description="Add new items to inventory"
-            onClick={() => window.location.href = '/inventory'}
+            onClick={() => window.location.href = '/inventory?tab=products&action=add'}
             color="#10b981"
           />
           <ActionButton
             icon="📝"
             title="Log Transaction"
             description="Record inventory movements"
-            onClick={() => window.location.href = '/inventory'}
+            onClick={() => window.location.href = '/inventory?tab=transactions&action=add'}
             color="#f59e0b"
           />
           <ActionButton
             icon="📊"
             title="View Reports"
             description="Analyze inventory trends"
-            onClick={() => window.location.href = '/inventory'}
+            onClick={() => window.location.href = '/reports'}
             color="#8b5cf6"
           />
         </div>

@@ -1,4 +1,4 @@
--- Add pricing columns to products table
+Uncaught SyntaxError: The requested module '/src/pages/Inventory.tsx?t=1753974577238' does not provide an export named 'default' (at App.tsx:5:8)-- Add pricing columns to products table
 ALTER TABLE products 
 ADD COLUMN IF NOT EXISTS purchase_price DECIMAL(10,2),
 ADD COLUMN IF NOT EXISTS sale_price DECIMAL(10,2),
