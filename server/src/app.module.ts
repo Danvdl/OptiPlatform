@@ -12,7 +12,9 @@ import { Product } from './inventory/entities/product.entity';
 import { Category } from './inventory/entities/category.entity';
 import { ProductNote } from './inventory/entities/product-note.entity';
 import { InventoryTransaction } from './inventory/entities/inventory-transaction.entity';
+import { PriceHistory } from './inventory/entities/price-history.entity';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ReportsModule } from './reports/reports.module';
 import { DeviceToken } from './notifications/entities/device-token.entity';
 
 @Module({
@@ -29,7 +31,7 @@ import { DeviceToken } from './notifications/entities/device-token.entity';
         const ormConfig: any = {
           type: 'postgres',
           url: config.get<string>('DB_URL'),
-          entities: [User, Product, Category, ProductNote, InventoryTransaction, DeviceToken],
+          entities: [User, Product, Category, ProductNote, InventoryTransaction, PriceHistory, DeviceToken],
           synchronize: false, // Temporarily disabled to avoid schema conflicts
         };
 
@@ -47,7 +49,8 @@ import { DeviceToken } from './notifications/entities/device-token.entity';
     AuthModule,
     InventoryModule,
     NotificationsModule,
-    TypeOrmModule.forFeature([User, Product, Category, ProductNote, InventoryTransaction, DeviceToken]),
+    ReportsModule,
+    TypeOrmModule.forFeature([User, Product, Category, ProductNote, InventoryTransaction, PriceHistory, DeviceToken]),
   ],
   providers: [AppResolver],
 })
