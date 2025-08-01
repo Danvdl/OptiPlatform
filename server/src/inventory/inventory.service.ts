@@ -15,6 +15,7 @@ import { UpdateInventoryTransactionInput } from './dto/update-inventory-transact
 import { NotificationsService } from '../notifications/notifications.service';
 import { PriceHistoryService } from './price-history.service';
 import { AppError, ErrorCode } from '../errors/error-codes';
+import { DatabaseErrorHandler, HandleDatabaseErrors } from '../errors/database-error-handler';
 
 @Injectable()
 export class InventoryService {
@@ -32,7 +33,11 @@ export class InventoryService {
   ) {}
 
   // Product operations
+  @HandleDatabaseErrors()
   async createProduct(data: CreateProductInput, userId?: number) {
+    // Validate required fields
+    DatabaseErrorHandler.validateEntity(data, ['name', 'sku']);
+    
     const product = this.products.create({
       ...data,
       restockThreshold: data.restockThreshold || 5
@@ -67,6 +72,7 @@ export class InventoryService {
     return savedProduct;
   }
 
+  @HandleDatabaseErrors()
   async updateProduct(data: UpdateProductInput, userId?: number) {
     // Get current product to compare prices
     const currentProduct = await this.products.findOneBy({ id: data.id });

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Response } from 'express';
+import { AppError, ErrorCode } from '../errors/error-codes';
 
 export interface ExportOptions {
   format: 'pdf' | 'csv' | 'excel';
@@ -12,49 +13,72 @@ export interface ExportOptions {
 export class ExportService {
   
   async exportReport(data: any, options: ExportOptions, res: Response): Promise<void> {
-    const filename = options.filename || `report_${new Date().toISOString().split('T')[0]}`;
-    
-    switch (options.format) {
-      case 'csv':
-        await this.exportToCSV(data, filename, res);
-        break;
-      case 'excel':
-        await this.exportToExcel(data, filename, res);
-        break;
-      case 'pdf':
-        await this.exportToPDF(data, filename, options.title || 'Report', res);
-        break;
-      default:
-        throw new Error('Unsupported export format');
+    try {
+      const filename = options.filename || `report_${new Date().toISOString().split('T')[0]}`;
+      
+      switch (options.format) {
+        case 'csv':
+          await this.exportToCSV(data, filename, res);
+          break;
+        case 'excel':
+          await this.exportToExcel(data, filename, res);
+          break;
+        case 'pdf':
+          await this.exportToPDF(data, filename, options.title || 'Report', res);
+          break;
+        default:
+          throw new AppError(
+            ErrorCode.VALIDATION,
+            `Unsupported export format: ${options.format}`
+          );
+      }
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        ErrorCode.UNKNOWN,
+        'Failed to export report'
+      );
     }
   }
 
   private async exportToCSV(data: any[], filename: string, res: Response): Promise<void> {
     if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('No data to export');
+      throw new AppError(
+        ErrorCode.VALIDATION,
+        'No data available to export'
+      );
     }
 
-    // Get headers from the first object
-    const headers = Object.keys(data[0]);
-    
-    // Create CSV content
-    let csvContent = headers.join(',') + '\n';
-    
-    data.forEach(row => {
-      const values = headers.map(header => {
-        const value = row[header];
-        // Handle values that might contain commas or quotes
-        if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
-          return `"${value.replace(/"/g, '""')}"`;
-        }
-        return value !== null && value !== undefined ? value : '';
+    try {
+      // Get headers from the first object
+      const headers = Object.keys(data[0]);
+      
+      // Create CSV content
+      let csvContent = headers.join(',') + '\n';
+      
+      data.forEach(row => {
+        const values = headers.map(header => {
+          const value = row[header];
+          // Handle values that might contain commas or quotes
+          if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+            return `"${value.replace(/"/g, '""')}"`;
+          }
+          return value !== null && value !== undefined ? value : '';
+        });
+        csvContent += values.join(',') + '\n';
       });
-      csvContent += values.join(',') + '\n';
-    });
 
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}.csv"`);
-    res.send(csvContent);
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      throw new AppError(
+        ErrorCode.UNKNOWN,
+        'Failed to generate CSV export'
+      );
+    }
   }
 
   private async exportToExcel(data: any[], filename: string, res: Response): Promise<void> {
@@ -62,37 +86,54 @@ export class ExportService {
     // In a production environment, you'd want to use a library like 'exceljs'
     
     if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('No data to export');
+      throw new AppError(
+        ErrorCode.VALIDATION,
+        'No data available to export'
+      );
     }
 
-    const headers = Object.keys(data[0]);
-    
-    // Create Excel-compatible content (tab-separated)
-    let excelContent = headers.join('\t') + '\n';
-    
-    data.forEach(row => {
-      const values = headers.map(header => {
-        const value = row[header];
-        return value !== null && value !== undefined ? value : '';
+    try {
+      const headers = Object.keys(data[0]);
+      
+      // Create Excel-compatible content (tab-separated)
+      let excelContent = headers.join('\t') + '\n';
+      
+      data.forEach(row => {
+        const values = headers.map(header => {
+          const value = row[header];
+          return value !== null && value !== undefined ? value : '';
+        });
+        excelContent += values.join('\t') + '\n';
       });
-      excelContent += values.join('\t') + '\n';
-    });
 
-    res.setHeader('Content-Type', 'application/vnd.ms-excel');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}.xls"`);
-    res.send(excelContent);
+      res.setHeader('Content-Type', 'application/vnd.ms-excel');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.xls"`);
+      res.send(excelContent);
+    } catch (error) {
+      throw new AppError(
+        ErrorCode.UNKNOWN,
+        'Failed to generate Excel export'
+      );
+    }
   }
 
   private async exportToPDF(data: any, filename: string, title: string, res: Response): Promise<void> {
-    // Create a simple HTML-to-PDF conversion
-    // In production, you'd want to use libraries like 'puppeteer' or 'pdfkit'
-    
-    const htmlContent = this.generateHTMLReport(data, title);
-    
-    // For now, we'll send HTML that can be printed to PDF by the browser
-    res.setHeader('Content-Type', 'text/html');
-    res.setHeader('Content-Disposition', `inline; filename="${filename}.html"`);
-    res.send(htmlContent);
+    try {
+      // Create a simple HTML-to-PDF conversion
+      // In production, you'd want to use libraries like 'puppeteer' or 'pdfkit'
+      
+      const htmlContent = this.generateHTMLReport(data, title);
+      
+      // For now, we'll send HTML that can be printed to PDF by the browser
+      res.setHeader('Content-Type', 'text/html');
+      res.setHeader('Content-Disposition', `inline; filename="${filename}.html"`);
+      res.send(htmlContent);
+    } catch (error) {
+      throw new AppError(
+        ErrorCode.UNKNOWN,
+        'Failed to generate PDF export'
+      );
+    }
   }
 
   private generateHTMLReport(data: any, title: string): string {

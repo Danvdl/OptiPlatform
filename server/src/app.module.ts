@@ -18,10 +18,12 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ReportsModule } from './reports/reports.module';
 import { DeviceToken } from './notifications/entities/device-token.entity';
 import { AppError, ErrorCode } from './errors/error-codes';
+import { ErrorHandlingModule } from './errors/error-handling.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ErrorHandlingModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'schema.gql'),
