@@ -2,19 +2,28 @@
 const isTauri = typeof window !== 'undefined' && (window as any).__TAURI__;
 
 let store: any = null;
+let storePromise: Promise<void> | null = null;
 
 // Initialize Tauri store only if in Tauri environment
-if (isTauri) {
-  try {
-    const { LazyStore } = await import('@tauri-apps/plugin-store');
-    store = new LazyStore('auth.json');
-  } catch (error) {
-    console.warn('Tauri store not available, falling back to localStorage');
+async function initializeStore() {
+  if (isTauri && !store && !storePromise) {
+    storePromise = (async () => {
+      try {
+        const { LazyStore } = await import('@tauri-apps/plugin-store');
+        store = new LazyStore('auth.json');
+      } catch (error) {
+        console.warn('Tauri store not available, falling back to localStorage');
+      }
+    })();
+  }
+  if (storePromise) {
+    await storePromise;
   }
 }
 
 export async function saveToken(token: string) {
   try {
+    await initializeStore();
     if (store) {
       // Use Tauri store
       await store.set('jwt', token);
@@ -32,6 +41,7 @@ export async function saveToken(token: string) {
 
 export async function getToken(): Promise<string | null> {
   try {
+    await initializeStore();
     if (store) {
       // Use Tauri store
       const val = await store.get('jwt');
@@ -49,6 +59,7 @@ export async function getToken(): Promise<string | null> {
 
 export async function clearToken() {
   try {
+    await initializeStore();
     if (store) {
       // Use Tauri store
       await store.delete('jwt');

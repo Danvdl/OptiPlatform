@@ -87,6 +87,12 @@ type Query {
   priceHistoryByType(productId: Int!, priceType: String!): [PriceHistory!]!
   latestPrice(productId: Int!, priceType: String!): PriceHistory
   priceStatistics(productId: Int!, priceType: String!): String
+  inventoryTurnoverReport(startDate: String, endDate: String): String!
+  stockMovementAnalytics(startDate: String, endDate: String): String!
+  lowStockTrendAnalysis: String!
+  categoryPerformanceReport(startDate: String, endDate: String): String!
+  costAnalysisReport(startDate: String, endDate: String): String!
+  dashboardMetrics(period: Float! = 30): String!
 }
 
 type Mutation {
