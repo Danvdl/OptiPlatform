@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import QuickActions from '../components/QuickActions';
+import './Inventory.css';
 import {
   fetchItems,
   fetchProducts,

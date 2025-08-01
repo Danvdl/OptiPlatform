@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { saveToken } from '../utils/authStore';
 import { useError } from '../components/ErrorProvider';
 import { getErrorMessage, ErrorCode } from '../utils/errorCodes';
+import './Login.css';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -96,50 +97,50 @@ export default function Login() {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>OptiPlatform</h1>
-          <p style={styles.subtitle}>Inventory Management System</p>
+    <div className="login-container">
+      <div className="login-card">
+        <div className="login-header">
+          <h1 className="login-title">OptiPlatform</h1>
+          <p className="login-subtitle">Inventory Management System</p>
         </div>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Username</label>
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="login-input-group">
+            <label className="login-label">Username</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              style={styles.input}
+              className="login-input"
               placeholder="Enter your username"
               disabled={isLoading}
             />
           </div>
 
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Password</label>
+          <div className="login-input-group">
+            <label className="login-label">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={styles.input}
+              className="login-input"
               placeholder="Enter your password"
               disabled={isLoading}
             />
           </div>
 
-          {error && <div style={styles.error}>{error}</div>}
+          {error && <div className="login-error">{error}</div>}
 
           <button 
             type="submit" 
-            style={{...styles.button, ...(isLoading ? styles.buttonDisabled : {})}}
+            className={`login-button ${isLoading ? 'disabled' : ''}`}
             disabled={isLoading}
           >
             {isLoading ? 'Please wait...' : (isRegister ? 'Create Account' : 'Sign In')}
           </button>
 
-          <div style={styles.toggleContainer}>
-            <span style={styles.toggleText}>
+          <div className="login-toggle-container">
+            <span className="login-toggle-text">
               {isRegister ? 'Already have an account?' : "Don't have an account?"}
             </span>
             <button
@@ -148,7 +149,7 @@ export default function Login() {
                 setIsRegister(!isRegister);
                 setError('');
               }}
-              style={styles.toggleButton}
+              className="login-toggle-button"
               disabled={isLoading}
             >
               {isRegister ? 'Sign In' : 'Create Account'}
@@ -156,198 +157,35 @@ export default function Login() {
           </div>
         </form>
 
-        <div style={styles.divider}>
-          <span style={styles.dividerText}>Or continue with</span>
+        <div className="login-divider">
+          <span className="login-divider-text">Or continue with</span>
         </div>
 
-        <div style={styles.oauthButtons}>
+        <div className="login-oauth-buttons">
           <button 
             onClick={() => openOAuth('google')} 
-            style={{...styles.oauthButton, ...styles.googleButton}}
+            className="login-oauth-button google"
             disabled={isLoading}
           >
-            <span style={styles.oauthIcon}>🚀</span>
+            <span className="login-oauth-icon">🚀</span>
             Google
           </button>
           <button 
             onClick={() => openOAuth('github')} 
-            style={{...styles.oauthButton, ...styles.githubButton}}
+            className="login-oauth-button github"
             disabled={isLoading}
           >
-            <span style={styles.oauthIcon}>⚡</span>
+            <span className="login-oauth-icon">⚡</span>
             GitHub
           </button>
         </div>
 
-        <div style={styles.demoCredentials}>
-          <p style={styles.demoTitle}>Demo Credentials:</p>
-          <p style={styles.demoText}>Username: <strong>mvpuser2025</strong></p>
-          <p style={styles.demoText}>Password: <strong>mvppass123</strong></p>
+        <div className="login-demo-credentials">
+          <p className="login-demo-title">Demo Credentials:</p>
+          <p className="login-demo-text">Username: <strong>mvpuser2025</strong></p>
+          <p className="login-demo-text">Password: <strong>mvppass123</strong></p>
         </div>
       </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '20px',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: '16px',
-    padding: '40px',
-    width: '100%',
-    maxWidth: '420px',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-  },
-  header: {
-    textAlign: 'center' as const,
-    marginBottom: '32px',
-  },
-  title: {
-    fontSize: '28px',
-    fontWeight: 'bold',
-    color: '#1f2937',
-    margin: '0 0 8px 0',
-  },
-  subtitle: {
-    fontSize: '16px',
-    color: '#6b7280',
-    margin: '0',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '20px',
-  },
-  inputGroup: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '6px',
-  },
-  label: {
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#374151',
-  },
-  input: {
-    padding: '12px 16px',
-    border: '2px solid #e5e7eb',
-    borderRadius: '8px',
-    fontSize: '16px',
-    transition: 'border-color 0.2s',
-    outline: 'none',
-  },
-  button: {
-    backgroundColor: '#4f46e5',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    padding: '12px 24px',
-    fontSize: '16px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-    marginTop: '8px',
-  },
-  buttonDisabled: {
-    backgroundColor: '#9ca3af',
-    cursor: 'not-allowed',
-  },
-  error: {
-    color: '#dc2626',
-    fontSize: '14px',
-    padding: '8px 12px',
-    backgroundColor: '#fef2f2',
-    border: '1px solid #fecaca',
-    borderRadius: '6px',
-  },
-  toggleContainer: {
-    textAlign: 'center' as const,
-    marginTop: '8px',
-  },
-  toggleText: {
-    fontSize: '14px',
-    color: '#6b7280',
-    marginRight: '8px',
-  },
-  toggleButton: {
-    background: 'none',
-    border: 'none',
-    color: '#4f46e5',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    textDecoration: 'underline',
-  },
-  divider: {
-    position: 'relative' as const,
-    margin: '32px 0',
-    textAlign: 'center' as const,
-  },
-  dividerText: {
-    backgroundColor: 'white',
-    color: '#6b7280',
-    fontSize: '14px',
-    padding: '0 16px',
-  },
-  oauthButtons: {
-    display: 'flex',
-    gap: '12px',
-    marginBottom: '24px',
-  },
-  oauthButton: {
-    flex: 1,
-    padding: '12px 16px',
-    border: '2px solid #e5e7eb',
-    borderRadius: '8px',
-    backgroundColor: 'white',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '8px',
-    transition: 'all 0.2s',
-  },
-  googleButton: {
-    ':hover': {
-      borderColor: '#db4437',
-      color: '#db4437',
-    },
-  },
-  githubButton: {
-    ':hover': {
-      borderColor: '#333',
-      color: '#333',
-    },
-  },
-  oauthIcon: {
-    fontSize: '16px',
-  },
-  demoCredentials: {
-    backgroundColor: '#f3f4f6',
-    borderRadius: '8px',
-    padding: '16px',
-    marginTop: '8px',
-  },
-  demoTitle: {
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#374151',
-    margin: '0 0 8px 0',
-  },
-  demoText: {
-    fontSize: '13px',
-    color: '#6b7280',
-    margin: '2px 0',
-  },
-};

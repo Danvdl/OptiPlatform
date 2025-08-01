@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { fetchInventorySummary, InventorySummary, ApiError } from '../utils/inventoryApi';
 import { useError } from '../components/ErrorProvider';
 import { getErrorMessage, ErrorCode } from '../utils/errorCodes';
+import './Dashboard.css';
 
 export default function Dashboard() {
   const [summary, setSummary] = useState<InventorySummary>({
