@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { fetchInventorySummary, InventorySummary } from '../utils/inventoryApi';
+import { fetchInventorySummary, InventorySummary, ApiError } from '../utils/inventoryApi';
+import { useError } from '../components/ErrorProvider';
+import { getErrorMessage, ErrorCode } from '../utils/errorCodes';
 
 export default function Dashboard() {
   const [summary, setSummary] = useState<InventorySummary>({
@@ -16,6 +18,7 @@ export default function Dashboard() {
     recentTransactions: 0,
     lowStockCount: 0,
   });
+  const { showError } = useError();
 
   // Animate counter values
   useEffect(() => {
@@ -56,8 +59,10 @@ export default function Dashboard() {
       setLoading(true);
       const data = await fetchInventorySummary();
       setSummary(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load dashboard data:', error);
+      const code = error instanceof ApiError ? error.code : ErrorCode.UNKNOWN;
+      showError(getErrorMessage(code));
     } finally {
       setLoading(false);
     }

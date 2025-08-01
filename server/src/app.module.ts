@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
+import { GraphQLError } from 'graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
@@ -16,6 +17,7 @@ import { PriceHistory } from './inventory/entities/price-history.entity';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReportsModule } from './reports/reports.module';
 import { DeviceToken } from './notifications/entities/device-token.entity';
+import { AppError, ErrorCode } from './errors/error-codes';
 
 @Module({
   imports: [
@@ -23,6 +25,13 @@ import { DeviceToken } from './notifications/entities/device-token.entity';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'schema.gql'),
+      formatError: (error: GraphQLError) => {
+        const original: any = error.originalError;
+        if (original instanceof AppError) {
+          return { message: original.message, extensions: { code: original.code } };
+        }
+        return { message: error.message, extensions: { code: ErrorCode.UNKNOWN } };
+      },
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

@@ -5,11 +5,14 @@ import App from './App';
 import './index.css';
 import { registerFCM } from './utils/firebaseClient';
 import { getToken } from './utils/authStore';
+import { ErrorProvider } from './components/ErrorProvider';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <ErrorProvider>
+        <App />
+      </ErrorProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

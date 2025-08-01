@@ -14,6 +14,7 @@ import { CreateInventoryTransactionInput } from './dto/create-inventory-transact
 import { UpdateInventoryTransactionInput } from './dto/update-inventory-transaction.input';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PriceHistoryService } from './price-history.service';
+import { AppError, ErrorCode } from '../errors/error-codes';
 
 @Injectable()
 export class InventoryService {
@@ -71,7 +72,7 @@ export class InventoryService {
     const currentProduct = await this.products.findOneBy({ id: data.id });
     
     if (!currentProduct) {
-      throw new Error('Product not found');
+      throw new AppError(ErrorCode.NOT_FOUND, 'Product not found');
     }
 
     // Track price changes

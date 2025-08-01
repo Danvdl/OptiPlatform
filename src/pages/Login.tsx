@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { saveToken } from '../utils/authStore';
+import { useError } from '../components/ErrorProvider';
+import { getErrorMessage, ErrorCode } from '../utils/errorCodes';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -7,6 +9,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isRegister, setIsRegister] = useState(false);
+  const { showError } = useError();
 
   useEffect(() => {
     const handler = async (e: MessageEvent) => {
@@ -56,6 +59,8 @@ export default function Login() {
       console.log('Response data:', json);
       
       if (json.errors) {
+        const code = json.errors[0].extensions?.code || ErrorCode.UNKNOWN;
+        showError(getErrorMessage(code));
         setError(json.errors[0].message);
         return;
       }
@@ -65,10 +70,13 @@ export default function Login() {
         await saveToken(token);
         window.location.assign('/dashboard');
       } else {
+        showError(getErrorMessage(ErrorCode.AUTH_INVALID));
         setError('Authentication failed');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Network error details:', err);
+      const code = err?.code || ErrorCode.NETWORK;
+      showError(getErrorMessage(code));
       setError(`Network error: ${err instanceof Error ? err.message : 'Please try again.'}`);
     } finally {
       setIsLoading(false);
