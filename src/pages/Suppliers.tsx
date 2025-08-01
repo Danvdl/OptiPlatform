@@ -1,19 +1,6 @@
 import { useState, useEffect } from 'react';
 import './Suppliers.css';
-
-interface Supplier {
-  id: number;
-  name: string;
-  supplierCode?: string;
-  supplierType: string;
-  status: string;
-  contactPerson?: string;
-  email?: string;
-  phone?: string;
-  reliabilityScore: number;
-  qualityScore: number;
-  onTimeDeliveryRate: number;
-}
+import { fetchSuppliers, createSupplier, type Supplier, type CreateSupplierInput } from '../utils/advancedApi';
 
 export default function Suppliers() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -30,38 +17,10 @@ export default function Suppliers() {
 
   useEffect(() => {
     // Fetch suppliers from GraphQL backend
-    const fetchSuppliers = async () => {
+    const loadSuppliers = async () => {
       try {
-        // TODO: Implement actual GraphQL query when ready
-        // For now using demo data until GraphQL integration is complete
-        setSuppliers([
-          {
-            id: 1,
-            name: 'Tech Supply Co',
-            supplierCode: 'TSC001',
-            supplierType: 'distributor',
-            status: 'active',
-            contactPerson: 'John Smith',
-            email: 'john@techsupply.com',
-            phone: '+1-555-0101',
-            reliabilityScore: 4.5,
-            qualityScore: 4.2,
-            onTimeDeliveryRate: 95.5
-          },
-          {
-            id: 2,
-            name: 'Global Electronics',
-            supplierCode: 'GE002',
-            supplierType: 'manufacturer',
-            status: 'active',
-            contactPerson: 'Sarah Johnson',
-            email: 'sarah@globalelec.com',
-            phone: '+1-555-0102',
-            reliabilityScore: 4.8,
-            qualityScore: 4.7,
-            onTimeDeliveryRate: 98.2
-          }
-        ]);
+        const data = await fetchSuppliers();
+        setSuppliers(data);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching suppliers:', error);
@@ -69,7 +28,7 @@ export default function Suppliers() {
       }
     };
 
-    fetchSuppliers();
+    loadSuppliers();
   }, []);
 
   const getStatusColor = (status: string) => {
@@ -195,7 +154,7 @@ export default function Suppliers() {
             color: '#10b981',
             marginBottom: '0.5rem'
           }}>
-            {Math.round(suppliers.reduce((acc, s) => acc + s.onTimeDeliveryRate, 0) / suppliers.length)}%
+            {Math.round(suppliers.reduce((acc, s) => acc + (s.onTimeDeliveryRate || 0), 0) / suppliers.length)}%
           </div>
           <div style={{ color: '#6b7280', fontSize: '0.875rem' }}>Avg On-Time Delivery</div>
         </div>
@@ -212,7 +171,7 @@ export default function Suppliers() {
             color: '#f59e0b',
             marginBottom: '0.5rem'
           }}>
-            {(suppliers.reduce((acc, s) => acc + s.qualityScore, 0) / suppliers.length).toFixed(1)}
+            {(suppliers.reduce((acc, s) => acc + (s.qualityScore || 0), 0) / suppliers.length).toFixed(1)}
           </div>
           <div style={{ color: '#6b7280', fontSize: '0.875rem' }}>Avg Quality Score</div>
         </div>
@@ -413,19 +372,23 @@ export default function Suppliers() {
         <div className="suppliers-modal-overlay">
           <div className="suppliers-modal-content">
             <h3 className="suppliers-modal-title">Add New Supplier</h3>
-            <form onSubmit={(e) => {
+            <form onSubmit={async (e) => {
               e.preventDefault();
-              // TODO: Implement GraphQL mutation to create supplier
-              console.log('Creating supplier:', newSupplier);
-              setShowAddForm(false);
-              setNewSupplier({
-                name: '',
-                supplierCode: '',
-                supplierType: 'distributor',
-                contactPerson: '',
-                email: '',
-                phone: ''
-              });
+              try {
+                const newSupplierData = await createSupplier(newSupplier);
+                setSuppliers(prev => [...prev, newSupplierData]);
+                setShowAddForm(false);
+                setNewSupplier({
+                  name: '',
+                  supplierCode: '',
+                  supplierType: 'distributor',
+                  contactPerson: '',
+                  email: '',
+                  phone: ''
+                });
+              } catch (error) {
+                console.error('Error creating supplier:', error);
+              }
             }}>
               <div style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>

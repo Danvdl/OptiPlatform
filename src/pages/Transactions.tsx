@@ -1,24 +1,9 @@
 import { useState, useEffect } from 'react';
 import './Transactions.css';
-
-interface Transaction {
-  id: number;
-  productName: string;
-  type: string;
-  quantity: number;
-  unitCost?: number;
-  totalCost?: number;
-  reason?: string;
-  status: string;
-  occurredAt: string;
-  fromLocation?: string;
-  toLocation?: string;
-  supplierName?: string;
-  reference?: string;
-}
+import { fetchAdvancedTransactions, createAdvancedTransaction, type AdvancedTransaction, type CreateTransactionInput } from '../utils/advancedApi';
 
 export default function Transactions() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<AdvancedTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newTransaction, setNewTransaction] = useState({
@@ -33,65 +18,10 @@ export default function Transactions() {
 
   useEffect(() => {
     // Fetch transactions from GraphQL backend
-    const fetchTransactions = async () => {
+    const loadTransactions = async () => {
       try {
-        // TODO: Implement actual GraphQL query when ready
-        // For now using demo data until GraphQL integration is complete
-        setTransactions([
-      {
-        id: 1,
-        productName: 'Wireless Mouse',
-        type: 'purchase',
-        quantity: 50,
-        unitCost: 15.50,
-        totalCost: 775.00,
-        status: 'completed',
-        occurredAt: '2025-08-01T10:30:00Z',
-        supplierName: 'Tech Supply Co',
-        reference: 'PO250801001'
-      },
-      {
-        id: 2,
-        productName: 'USB Cable Type-C',
-        type: 'sale',
-        quantity: -25,
-        unitCost: 8.99,
-        totalCost: 224.75,
-        status: 'completed',
-        occurredAt: '2025-08-01T14:15:00Z',
-        reference: 'SALE-2025-001'
-      },
-      {
-        id: 3,
-        productName: 'Laptop Stand',
-        type: 'adjustment',
-        quantity: -2,
-        reason: 'Damaged during shipping',
-        status: 'completed',
-        occurredAt: '2025-07-31T09:00:00Z'
-      },
-      {
-        id: 4,
-        productName: 'Wireless Mouse',
-        type: 'transfer_out',
-        quantity: -10,
-        status: 'pending',
-        occurredAt: '2025-08-01T16:45:00Z',
-        fromLocation: 'Warehouse A',
-        toLocation: 'Store Front',
-        reference: 'TXF-001'
-      },
-      {
-        id: 5,
-        productName: 'USB Cable Type-C',
-        type: 'return_to_supplier',
-        quantity: -5,
-        reason: 'Defective units',
-        status: 'completed',
-        occurredAt: '2025-07-30T11:20:00Z',
-        supplierName: 'Global Electronics'
-      }
-    ]);
+        const data = await fetchAdvancedTransactions();
+        setTransactions(data);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching transactions:', error);
@@ -99,7 +29,7 @@ export default function Transactions() {
       }
     };
 
-    fetchTransactions();
+    loadTransactions();
   }, []);
 
   const getTypeColor = (type: string) => {
@@ -542,19 +472,23 @@ export default function Transactions() {
             width: '90%'
           }}>
             <h3 style={{ margin: '0 0 1rem 0' }}>Create New Transaction</h3>
-            <form onSubmit={(e) => {
+            <form onSubmit={async (e) => {
               e.preventDefault();
-              // TODO: Implement GraphQL mutation to create transaction
-              console.log('Creating transaction:', newTransaction);
-              setShowCreateForm(false);
-              setNewTransaction({
-                productName: '',
-                type: 'adjustment',
-                quantity: 0,
-                reason: '',
-                fromLocation: '',
-                toLocation: ''
-              });
+              try {
+                const newTransactionData = await createAdvancedTransaction(newTransaction);
+                setTransactions(prev => [...prev, newTransactionData]);
+                setShowCreateForm(false);
+                setNewTransaction({
+                  productName: '',
+                  type: 'adjustment',
+                  quantity: 0,
+                  reason: '',
+                  fromLocation: '',
+                  toLocation: ''
+                });
+              } catch (error) {
+                console.error('Error creating transaction:', error);
+              }
             }}>
               <div style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>

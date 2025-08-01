@@ -1,18 +1,6 @@
 import { useState, useEffect } from 'react';
 import './PurchaseOrders.css';
-
-interface PurchaseOrder {
-  id: number;
-  poNumber: string;
-  supplierName: string;
-  status: string;
-  priority: string;
-  totalAmount: number;
-  currency: string;
-  orderDate: string;
-  expectedDeliveryDate?: string;
-  itemCount: number;
-}
+import { fetchPurchaseOrders, createPurchaseOrder, type PurchaseOrder, type CreatePurchaseOrderInput } from '../utils/advancedApi';
 
 export default function PurchaseOrders() {
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
@@ -27,48 +15,10 @@ export default function PurchaseOrders() {
 
   useEffect(() => {
     // Fetch purchase orders from GraphQL backend
-    const fetchPurchaseOrders = async () => {
+    const loadPurchaseOrders = async () => {
       try {
-        // TODO: Implement actual GraphQL query when ready
-        // For now using demo data until GraphQL integration is complete
-        setPurchaseOrders([
-      {
-        id: 1,
-        poNumber: 'PO250801001',
-        supplierName: 'Tech Supply Co',
-        status: 'pending_approval',
-        priority: 'normal',
-        totalAmount: 2500.00,
-        currency: 'USD',
-        orderDate: '2025-08-01',
-        expectedDeliveryDate: '2025-08-15',
-        itemCount: 5
-      },
-      {
-        id: 2,
-        poNumber: 'PO250801002',
-        supplierName: 'Global Electronics',
-        status: 'sent',
-        priority: 'high',
-        totalAmount: 5750.50,
-        currency: 'USD',
-        orderDate: '2025-07-30',
-        expectedDeliveryDate: '2025-08-10',
-        itemCount: 12
-      },
-      {
-        id: 3,
-        poNumber: 'PO250731001',
-        supplierName: 'Office Supplies Plus',
-        status: 'received',
-        priority: 'low',
-        totalAmount: 890.25,
-        currency: 'USD',
-        orderDate: '2025-07-25',
-        expectedDeliveryDate: '2025-08-05',
-        itemCount: 8
-      }
-    ]);
+        const data = await fetchPurchaseOrders();
+        setPurchaseOrders(data);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching purchase orders:', error);
@@ -76,7 +26,7 @@ export default function PurchaseOrders() {
       }
     };
 
-    fetchPurchaseOrders();
+    loadPurchaseOrders();
   }, []);
 
   const getStatusColor = (status: string) => {
@@ -491,16 +441,20 @@ export default function PurchaseOrders() {
             width: '90%'
           }}>
             <h3 style={{ margin: '0 0 1rem 0' }}>Create Purchase Order</h3>
-            <form onSubmit={(e) => {
+            <form onSubmit={async (e) => {
               e.preventDefault();
-              // TODO: Implement GraphQL mutation to create purchase order
-              console.log('Creating PO:', newPO);
-              setShowCreateForm(false);
-              setNewPO({
-                supplierName: '',
-                priority: 'normal',
-                expectedDeliveryDate: ''
-              });
+              try {
+                const newPurchaseOrder = await createPurchaseOrder(newPO);
+                setPurchaseOrders(prev => [...prev, newPurchaseOrder]);
+                setShowCreateForm(false);
+                setNewPO({
+                  supplierName: '',
+                  priority: 'normal',
+                  expectedDeliveryDate: ''
+                });
+              } catch (error) {
+                console.error('Error creating purchase order:', error);
+              }
             }}>
               <div style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div>

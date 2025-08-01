@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './Pricing.css';
+import { fetchPricingData, type PricingData } from '../utils/advancedApi';
 
 interface PriceHistory {
   id: number;
@@ -33,71 +34,47 @@ export default function Pricing() {
 
   useEffect(() => {
     // Fetch pricing data from GraphQL backend
-    const fetchPricingData = async () => {
+    const loadPricingData = async () => {
       try {
-        // TODO: Implement actual GraphQL queries when ready
-        // For now using demo data until GraphQL integration is complete
-    setProducts([
-      {
-        id: 1,
-        name: 'Wireless Mouse',
-        sku: 'WM001',
-        purchasePrice: 15.50,
-        salePrice: 29.99,
-        currency: 'USD',
-        currentStock: 45,
-        inventoryValue: 697.50,
-        potentialRevenue: 1349.55,
-        potentialProfit: 652.05
-      },
-      {
-        id: 2,
-        name: 'USB Cable Type-C',
-        sku: 'USB-C-001',
-        purchasePrice: 3.25,
-        salePrice: 8.99,
-        currency: 'USD',
-        currentStock: 120,
-        inventoryValue: 390.00,
-        potentialRevenue: 1078.80,
-        potentialProfit: 688.80
-      },
-      {
-        id: 3,
-        name: 'Laptop Stand',
-        sku: 'LS001',
-        purchasePrice: 25.00,
-        salePrice: 49.99,
-        currency: 'USD',
-        currentStock: 18,
-        inventoryValue: 450.00,
-        potentialRevenue: 899.82,
-        potentialProfit: 449.82
-      }
-    ]);
+        const data = await fetchPricingData();
+        // Map the pricing data to the expected format
+        const mappedProducts = data.map((item) => ({
+          id: item.id,
+          name: item.productName,
+          sku: `SKU${item.id.toString().padStart(3, '0')}`,
+          purchasePrice: item.costPrice,
+          salePrice: item.sellingPrice,
+          currency: 'USD',
+          currentStock: Math.floor(item.inventoryValue / (item.costPrice || 1)),
+          inventoryValue: item.inventoryValue,
+          potentialRevenue: item.potentialRevenue,
+          potentialProfit: item.potentialRevenue - item.inventoryValue
+        }));
+        setProducts(mappedProducts);
 
-    setPriceHistory([
-      {
-        id: 1,
-        productName: 'Wireless Mouse',
-        priceType: 'sale',
-        oldPrice: 24.99,
-        newPrice: 29.99,
-        currency: 'USD',
-        changedAt: '2025-07-15',
-        reason: 'Market price adjustment'
-      },
-      {
-        id: 2,
-        productName: 'USB Cable Type-C',
-        priceType: 'purchase',
-        oldPrice: 3.50,
-        newPrice: 3.25,
-        currency: 'USD',
-        changedAt: '2025-07-10',
-        reason: 'Supplier discount negotiated'
-      }
-    ]);
+        // Sample price history data - in real implementation, this would come from GraphQL too
+        setPriceHistory([
+          {
+            id: 1,
+            productName: 'Wireless Mouse',
+            priceType: 'sale',
+            oldPrice: 24.99,
+            newPrice: 29.99,
+            currency: 'USD',
+            changedAt: '2025-07-15',
+            reason: 'Market price adjustment'
+          },
+          {
+            id: 2,
+            productName: 'USB Cable Type-C',
+            priceType: 'purchase',
+            oldPrice: 3.50,
+            newPrice: 3.25,
+            currency: 'USD',
+            changedAt: '2025-07-10',
+            reason: 'Supplier discount negotiated'
+          }
+        ]);
 
         setLoading(false);
       } catch (error) {
@@ -106,7 +83,7 @@ export default function Pricing() {
       }
     };
 
-    fetchPricingData();
+    loadPricingData();
   }, []);
 
   const totalInventoryValue = products.reduce((acc, p) => acc + p.inventoryValue, 0);

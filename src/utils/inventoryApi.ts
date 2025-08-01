@@ -67,7 +67,7 @@ export interface InventorySummary {
 
 const API_URL = `${import.meta.env.VITE_BACKEND_URL}/graphql`;
 
-async function graphql<T>(query: string, variables?: Record<string, any>): Promise<T> {
+export async function graphql<T>(query: string, variables?: Record<string, any>): Promise<T> {
   const token = await getToken();
   let res: Response;
   try {
