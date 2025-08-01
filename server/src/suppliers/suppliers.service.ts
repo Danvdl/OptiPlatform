@@ -433,8 +433,8 @@ export class SuppliersService {
 
       await manager.save(PurchaseOrder, purchaseOrder);
 
-      // TODO: Create inventory transaction for received items
-      // This would integrate with the inventory system to add stock
+      // Note: Inventory transaction creation is handled in PurchaseOrdersService.receiveItem()
+      // This is here for reference but should use the centralized method
 
       return item;
     });
@@ -544,8 +544,10 @@ export class SuppliersService {
     const totalValue = purchaseOrders.reduce((sum, po) => sum + po.totalAmount, 0);
     
     const onTimeDeliveries = purchaseOrders.filter(po => {
-      return po.expectedDeliveryDate && po.status === PurchaseOrderStatus.RECEIVED;
-      // TODO: Add actual delivery date comparison
+      return po.expectedDeliveryDate && 
+             po.status === PurchaseOrderStatus.RECEIVED &&
+             po.receivedAt &&
+             po.receivedAt <= po.expectedDeliveryDate;
     }).length;
 
     const onTimeDeliveryRate = totalOrders > 0 ? (onTimeDeliveries / totalOrders) * 100 : 0;

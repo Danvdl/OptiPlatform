@@ -6,7 +6,7 @@ import { PurchaseOrderItem, PurchaseOrderItemStatus } from './entities/purchase-
 import { Supplier } from './entities/supplier.entity';
 import { Product } from '../inventory/entities/product.entity';
 import { InventoryTransaction, TransactionType, TransactionStatus } from '../inventory/entities/inventory-transaction.entity';
-import { CreatePurchaseOrderInput, UpdatePurchaseOrderInput, ReceivePurchaseOrderItemInput, CreatePurchaseOrderItemInput } from './dto/purchase-order.input';
+import { CreatePurchaseOrderInput, UpdatePurchaseOrderInput, ReceivePurchaseOrderItemInput, CreatePurchaseOrderItemInput, UpdatePurchaseOrderItemInput } from './dto/purchase-order.input';
 import { AppError, ErrorCode } from '../errors/error-codes';
 import { DatabaseErrorHandler, HandleDatabaseErrors } from '../errors/database-error-handler';
 
@@ -145,7 +145,7 @@ export class PurchaseOrdersService {
   async findOne(id: number): Promise<PurchaseOrder> {
     const purchaseOrder = await this.purchaseOrders.findOne({
       where: { id },
-      relations: ['supplier', 'items', 'items.product', 'createdBy', 'approvedBy']
+      relations: ['supplier', 'items', 'items.product', 'createdBy', 'approvedBy', 'rejectedBy']
     });
 
     if (!purchaseOrder) {
@@ -238,7 +238,7 @@ export class PurchaseOrdersService {
   }
 
   @HandleDatabaseErrors()
-  async updateItem(id: number, data: Partial<CreatePurchaseOrderItemInput>): Promise<PurchaseOrderItem> {
+  async updateItem(id: number, data: UpdatePurchaseOrderItemInput): Promise<PurchaseOrderItem> {
     return await this.purchaseOrderItems.manager.transaction(async (manager: EntityManager) => {
       const item = await manager.findOne(PurchaseOrderItem, {
         where: { id },
@@ -375,6 +375,7 @@ export class PurchaseOrdersService {
       const purchaseOrder = item.purchaseOrder;
       if (allReceived) {
         purchaseOrder.status = PurchaseOrderStatus.RECEIVED;
+        purchaseOrder.receivedAt = new Date();
       } else if (anyReceived) {
         purchaseOrder.status = PurchaseOrderStatus.PARTIALLY_RECEIVED;
       }
@@ -404,7 +405,7 @@ export class PurchaseOrdersService {
     purchaseOrder.status = PurchaseOrderStatus.APPROVED;
     purchaseOrder.approvedAt = new Date();
     purchaseOrder.approvedByUserId = userId;
-    // Note: approvalNotes field doesn't exist in entity, would need to be added or use notes field
+    if (notes) purchaseOrder.approvalNotes = notes;
 
     return await this.purchaseOrders.save(purchaseOrder);
   }
@@ -424,7 +425,9 @@ export class PurchaseOrdersService {
     }
 
     purchaseOrder.status = PurchaseOrderStatus.DRAFT;
-    // Note: rejected/rejection fields don't exist in entity, would need to be added or use notes field
+    purchaseOrder.rejectedAt = new Date();
+    purchaseOrder.rejectedByUserId = userId;
+    purchaseOrder.rejectionReason = reason;
 
     return await this.purchaseOrders.save(purchaseOrder);
   }
@@ -444,7 +447,8 @@ export class PurchaseOrdersService {
     }
 
     purchaseOrder.status = PurchaseOrderStatus.CANCELLED;
-    // Note: cancelled/cancellation fields don't exist in entity, would need to be added or use notes field
+    purchaseOrder.cancelledAt = new Date();
+    purchaseOrder.cancellationReason = reason;
 
     return await this.purchaseOrders.save(purchaseOrder);
   }
@@ -517,8 +521,9 @@ export class PurchaseOrdersService {
 
     const onTimeDeliveries = purchaseOrders.filter(po => 
       po.status === PurchaseOrderStatus.RECEIVED && 
-      po.expectedDeliveryDate
-      // Note: receivedAt field doesn't exist in entity, would need to use items receivedAt or add field
+      po.receivedAt && 
+      po.expectedDeliveryDate && 
+      po.receivedAt <= po.expectedDeliveryDate
     ).length;
 
     const onTimeDeliveryRate = totalOrders > 0 ? (onTimeDeliveries / totalOrders) * 100 : 0;

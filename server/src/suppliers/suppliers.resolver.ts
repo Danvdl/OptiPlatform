@@ -5,6 +5,7 @@ import { Supplier } from './entities/supplier.entity';
 import { SupplierProduct } from './entities/supplier-product.entity';
 import { CreateSupplierInput, UpdateSupplierInput } from './dto/supplier.input';
 import { CreateSupplierProductInput, UpdateSupplierProductInput, SupplierPriceComparisonInput } from './dto/supplier-product.input';
+import { SupplierPriceComparison, LowStockProduct, SupplierPerformanceMetrics } from './dto/supplier-response.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from '../user/user.entity';
 
@@ -34,7 +35,7 @@ export class SuppliersResolver {
 
   @Mutation(() => Supplier)
   async createSupplier(
-    @Args('input') input: CreateSupplierInput,
+    @Args('input', { type: () => CreateSupplierInput }) input: CreateSupplierInput,
     // @CurrentUser() user: User, // Comment out until decorator is available
   ): Promise<Supplier> {
     return this.suppliersService.createSupplier(input);
@@ -42,7 +43,7 @@ export class SuppliersResolver {
 
   @Mutation(() => Supplier)
   async updateSupplier(
-    @Args('input') input: UpdateSupplierInput,
+    @Args('input', { type: () => UpdateSupplierInput }) input: UpdateSupplierInput,
     // @CurrentUser() user: User, // Comment out until decorator is available
   ): Promise<Supplier> {
     return this.suppliersService.updateSupplier(input);
@@ -72,10 +73,10 @@ export class SuppliersResolver {
     return this.suppliersService.getProductSuppliers(productId);
   }
 
-  @Query(() => [Object]) // Define proper GraphQL type for price comparison
+  @Query(() => [SupplierPriceComparison])
   async compareSupplierPrices(
-    @Args('input') input: SupplierPriceComparisonInput,
-  ) {
+    @Args('input', { type: () => SupplierPriceComparisonInput }) input: SupplierPriceComparisonInput,
+  ): Promise<SupplierPriceComparison[]> {
     return this.suppliersService.compareSupplierPrices(input);
   }
 
@@ -83,7 +84,7 @@ export class SuppliersResolver {
 
   @Mutation(() => SupplierProduct)
   async createSupplierProduct(
-    @Args('input') input: CreateSupplierProductInput,
+    @Args('input', { type: () => CreateSupplierProductInput }) input: CreateSupplierProductInput,
     // @CurrentUser() user: User, // Comment out until decorator is available
   ): Promise<SupplierProduct> {
     return this.suppliersService.createSupplierProduct(input);
@@ -91,7 +92,7 @@ export class SuppliersResolver {
 
   @Mutation(() => SupplierProduct)
   async updateSupplierProduct(
-    @Args('input') input: UpdateSupplierProductInput,
+    @Args('input', { type: () => UpdateSupplierProductInput }) input: UpdateSupplierProductInput,
     // @CurrentUser() user: User, // Comment out until decorator is available
   ): Promise<SupplierProduct> {
     return this.suppliersService.updateSupplierProduct(input);
@@ -99,17 +100,17 @@ export class SuppliersResolver {
 
   // Auto-restock Queries
 
-  @Query(() => [Object]) // Define proper GraphQL type for low stock products
-  async lowStockProducts() {
+  @Query(() => [LowStockProduct])
+  async lowStockProducts(): Promise<LowStockProduct[]> {
     return this.suppliersService.checkLowStockProducts();
   }
 
   // Analytics Queries
 
-  @Query(() => Object) // Define proper GraphQL type for supplier performance
+  @Query(() => SupplierPerformanceMetrics)
   async supplierPerformance(
     @Args('supplierId', { type: () => Int }) supplierId: number,
-  ) {
+  ): Promise<SupplierPerformanceMetrics> {
     return this.suppliersService.getSupplierPerformanceMetrics(supplierId);
   }
 }

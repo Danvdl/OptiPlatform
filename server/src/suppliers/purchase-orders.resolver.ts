@@ -3,7 +3,8 @@ import { UseGuards } from '@nestjs/common';
 import { PurchaseOrdersService } from './purchase-orders.service';
 import { PurchaseOrder, PurchaseOrderStatus } from './entities/purchase-order.entity';
 import { PurchaseOrderItem } from './entities/purchase-order-item.entity';
-import { CreatePurchaseOrderInput, UpdatePurchaseOrderInput, ReceivePurchaseOrderItemInput, CreatePurchaseOrderItemInput } from './dto/purchase-order.input';
+import { CreatePurchaseOrderInput, UpdatePurchaseOrderInput, ReceivePurchaseOrderItemInput, CreatePurchaseOrderItemInput, UpdatePurchaseOrderItemInput } from './dto/purchase-order.input';
+import { PurchaseOrderAnalytics } from './dto/supplier-response.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from '../user/user.entity';
 
@@ -26,7 +27,7 @@ export class PurchaseOrdersResolver {
 
   @Query(() => [PurchaseOrder])
   async purchaseOrdersByStatus(
-    @Args('status') status: PurchaseOrderStatus,
+    @Args('status', { type: () => PurchaseOrderStatus }) status: PurchaseOrderStatus,
   ): Promise<PurchaseOrder[]> {
     return this.purchaseOrdersService.findByStatus(status);
   }
@@ -52,7 +53,7 @@ export class PurchaseOrdersResolver {
 
   @Mutation(() => PurchaseOrder)
   async createPurchaseOrder(
-    @Args('input') input: CreatePurchaseOrderInput,
+    @Args('input', { type: () => CreatePurchaseOrderInput }) input: CreatePurchaseOrderInput,
     // @CurrentUser() user: User, // Comment out until decorator is available
   ): Promise<PurchaseOrder> {
     const userId = 1; // Temporary hardcoded user ID
@@ -61,7 +62,7 @@ export class PurchaseOrdersResolver {
 
   @Mutation(() => PurchaseOrder)
   async updatePurchaseOrder(
-    @Args('input') input: UpdatePurchaseOrderInput,
+    @Args('input', { type: () => UpdatePurchaseOrderInput }) input: UpdatePurchaseOrderInput,
   ): Promise<PurchaseOrder> {
     return this.purchaseOrdersService.update(input);
   }
@@ -79,7 +80,7 @@ export class PurchaseOrdersResolver {
   @Mutation(() => PurchaseOrder)
   async rejectPurchaseOrder(
     @Args('id', { type: () => Int }) id: number,
-    @Args('reason') reason: string,
+    @Args('reason', { type: () => String }) reason: string,
     // @CurrentUser() user: User, // Comment out until decorator is available
   ): Promise<PurchaseOrder> {
     const userId = 1; // Temporary hardcoded user ID
@@ -89,7 +90,7 @@ export class PurchaseOrdersResolver {
   @Mutation(() => PurchaseOrder)
   async cancelPurchaseOrder(
     @Args('id', { type: () => Int }) id: number,
-    @Args('reason') reason: string,
+    @Args('reason', { type: () => String }) reason: string,
   ): Promise<PurchaseOrder> {
     return this.purchaseOrdersService.cancel(id, reason);
   }
@@ -99,17 +100,16 @@ export class PurchaseOrdersResolver {
   @Mutation(() => PurchaseOrderItem)
   async addPurchaseOrderItem(
     @Args('purchaseOrderId', { type: () => Int }) purchaseOrderId: number,
-    @Args('input') input: CreatePurchaseOrderItemInput,
+    @Args('input', { type: () => CreatePurchaseOrderItemInput }) input: CreatePurchaseOrderItemInput,
   ): Promise<PurchaseOrderItem> {
     return this.purchaseOrdersService.addItem(purchaseOrderId, input);
   }
 
   @Mutation(() => PurchaseOrderItem)
   async updatePurchaseOrderItem(
-    @Args('id', { type: () => Int }) id: number,
-    @Args('input') input: Partial<CreatePurchaseOrderItemInput>,
+    @Args('input', { type: () => UpdatePurchaseOrderItemInput }) input: UpdatePurchaseOrderItemInput,
   ): Promise<PurchaseOrderItem> {
-    return this.purchaseOrdersService.updateItem(id, input);
+    return this.purchaseOrdersService.updateItem(input.id, input);
   }
 
   @Mutation(() => Boolean)
@@ -121,7 +121,7 @@ export class PurchaseOrdersResolver {
 
   @Mutation(() => PurchaseOrderItem)
   async receivePurchaseOrderItem(
-    @Args('input') input: ReceivePurchaseOrderItemInput,
+    @Args('input', { type: () => ReceivePurchaseOrderItemInput }) input: ReceivePurchaseOrderItemInput,
     // @CurrentUser() user: User, // Comment out until decorator is available
   ): Promise<PurchaseOrderItem> {
     const userId = 1; // Temporary hardcoded user ID
@@ -130,12 +130,12 @@ export class PurchaseOrdersResolver {
 
   // Analytics Queries
 
-  @Query(() => Object) // Define proper GraphQL type for analytics
+  @Query(() => PurchaseOrderAnalytics)
   async purchaseOrderAnalytics(
     @Args('supplierId', { type: () => Int, nullable: true }) supplierId?: number,
     @Args('startDate', { nullable: true }) startDate?: Date,
     @Args('endDate', { nullable: true }) endDate?: Date,
-  ) {
+  ): Promise<PurchaseOrderAnalytics> {
     return this.purchaseOrdersService.getPurchaseOrderAnalytics(supplierId, startDate, endDate);
   }
 }

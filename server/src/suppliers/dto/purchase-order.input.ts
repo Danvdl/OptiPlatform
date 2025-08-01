@@ -281,6 +281,75 @@ export class ReceivePurchaseOrderItemInput {
 }
 
 @InputType()
+export class UpdatePurchaseOrderItemInput {
+  @Field(() => Int)
+  @IsNumber()
+  id: number;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  supplierSku?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  productName?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @Min(1)
+  @IsOptional()
+  quantityOrdered?: number;
+
+  @Field({ nullable: true })
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  unitPrice?: number;
+
+  @Field({ nullable: true })
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  @IsOptional()
+  discountPercentage?: number;
+
+  @Field({ nullable: true })
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  @IsOptional()
+  taxPercentage?: number;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  unitOfMeasure?: string;
+
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  leadTimeDays?: number;
+
+  @Field({ nullable: true })
+  @IsDateString()
+  @IsOptional()
+  expectedDeliveryDate?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  notes?: string;
+}
+
+@InputType()
 export class AutoRestockSettingsInput {
   @Field(() => Int)
   @IsNumber()

@@ -131,6 +131,34 @@ export class PurchaseOrder {
   @Column({ type: 'timestamp', nullable: true, name: 'approved_at' })
   approvedAt?: Date;
 
+  @Field({ nullable: true })
+  @Column({ type: 'timestamp', nullable: true, name: 'received_at' })
+  receivedAt?: Date;
+
+  @Field({ nullable: true })
+  @Column({ type: 'timestamp', nullable: true, name: 'cancelled_at' })
+  cancelledAt?: Date;
+
+  @Field({ nullable: true })
+  @Column({ type: 'timestamp', nullable: true, name: 'rejected_at' })
+  rejectedAt?: Date;
+
+  @Field({ nullable: true })
+  @Column({ type: 'text', nullable: true, name: 'approval_notes' })
+  approvalNotes?: string;
+
+  @Field({ nullable: true })
+  @Column({ type: 'text', nullable: true, name: 'rejection_reason' })
+  rejectionReason?: string;
+
+  @Field({ nullable: true })
+  @Column({ type: 'text', nullable: true, name: 'cancellation_reason' })
+  cancellationReason?: string;
+
+  @Field(() => Int, { nullable: true })
+  @Column({ name: 'rejected_by_user_id', nullable: true })
+  rejectedByUserId?: number;
+
   // Delivery Information
   @Field({ nullable: true })
   @Column({ name: 'delivery_address', type: 'text', nullable: true })
@@ -220,6 +248,11 @@ export class PurchaseOrder {
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'approved_by_user_id' })
   approvedBy?: User;
+
+  @Field(() => User, { nullable: true })
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'rejected_by_user_id' })
+  rejectedBy?: User;
 
   @Field(() => [PurchaseOrderItem])
   @OneToMany(() => PurchaseOrderItem, item => item.purchaseOrder, { cascade: true })

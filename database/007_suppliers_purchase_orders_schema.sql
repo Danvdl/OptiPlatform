@@ -127,6 +127,15 @@ CREATE TABLE purchase_orders (
     sent_at TIMESTAMP,
     acknowledged_at TIMESTAMP,
     approved_at TIMESTAMP,
+    received_at TIMESTAMP,
+    cancelled_at TIMESTAMP,
+    rejected_at TIMESTAMP,
+    
+    -- Approval and rejection information
+    approval_notes TEXT,
+    rejection_reason TEXT,
+    cancellation_reason TEXT,
+    rejected_by_user_id INTEGER REFERENCES users(id),
     
     -- Delivery Information
     delivery_address TEXT,
