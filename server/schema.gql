@@ -50,12 +50,49 @@ type InventoryTransaction {
   productId: Int!
   userId: Int!
   quantity: Int!
-  transactionType: String!
+  transactionType: TransactionType!
+  status: TransactionStatus!
   notes: String
   unitCost: Float
   totalCost: Float
+  fromLocationId: Int
+  toLocationId: Int
+  referenceTransactionId: Int
+  supplierName: String
+  supplierReference: String
+  reasonCode: String
+  expiryDate: DateTime
+  reservationReference: String
+  reservationExpiresAt: DateTime
   occurredAt: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime
   product: Product!
+}
+
+"""The type of inventory transaction"""
+enum TransactionType {
+  ADD
+  REMOVE
+  ADJUSTMENT
+  TRANSFER_OUT
+  TRANSFER_IN
+  RETURN_TO_SUPPLIER
+  RETURN_FROM_CUSTOMER
+  WASTE
+  DAMAGED
+  RESERVE
+  UNRESERVE
+  SALE
+  PURCHASE
+}
+
+"""The status of the transaction"""
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  REVERSED
 }
 
 type PriceHistory {
@@ -83,6 +120,11 @@ type Query {
   productNotes(productId: Int!): [ProductNote!]!
   transactions: [InventoryTransaction!]!
   transaction(id: Int!): InventoryTransaction
+  transactionsByType(type: TransactionType!, limit: Int): [InventoryTransaction!]!
+  activeReservations(productId: Int): [InventoryTransaction!]!
+  expiredReservations: [InventoryTransaction!]!
+  reservedStock(productId: Int!): Int!
+  locationStock(productId: Int!, locationId: Int!): Int!
   priceHistoryByProduct(productId: Int!): [PriceHistory!]!
   priceHistoryByType(productId: Int!, priceType: String!): [PriceHistory!]!
   latestPrice(productId: Int!, priceType: String!): PriceHistory
@@ -110,6 +152,12 @@ type Mutation {
   createTransaction(data: CreateInventoryTransactionInput!): InventoryTransaction!
   updateTransaction(data: UpdateInventoryTransactionInput!): InventoryTransaction!
   removeTransaction(id: Int!): Boolean!
+  createAdjustment(data: CreateAdjustmentInput!): InventoryTransaction!
+  createTransfer(data: CreateTransferInput!): InventoryTransaction!
+  createReturn(data: CreateReturnInput!): InventoryTransaction!
+  createWaste(data: CreateWasteInput!): InventoryTransaction!
+  createReservation(data: CreateReservationInput!): InventoryTransaction!
+  releaseReservation(data: ReleaseReservationInput!): InventoryTransaction!
   createPriceHistory(input: CreatePriceHistoryInput!): PriceHistory!
   registerDeviceToken(token: String!): Boolean!
 }
@@ -170,21 +218,103 @@ input CreateInventoryTransactionInput {
   productId: Int!
   userId: Int
   quantity: Int!
-  transactionType: String!
+  transactionType: TransactionType!
+  status: TransactionStatus
   notes: String
   unitCost: Float
   totalCost: Float
+  fromLocationId: Int
+  toLocationId: Int
+  referenceTransactionId: Int
+  supplierName: String
+  supplierReference: String
+  reasonCode: String
+  expiryDate: String
+  reservationReference: String
+  reservationExpiresAt: String
 }
 
 input UpdateInventoryTransactionInput {
   productId: Int
   userId: Int
   quantity: Int
-  transactionType: String
+  transactionType: TransactionType
+  status: TransactionStatus
   notes: String
   unitCost: Float
   totalCost: Float
+  fromLocationId: Int
+  toLocationId: Int
+  referenceTransactionId: Int
+  supplierName: String
+  supplierReference: String
+  reasonCode: String
+  expiryDate: String
+  reservationReference: String
+  reservationExpiresAt: String
   id: Int!
+}
+
+input CreateAdjustmentInput {
+  productId: Int!
+  userId: Int!
+  adjustmentQuantity: Int!
+  reason: String!
+  notes: String
+  unitCost: Float
+}
+
+input CreateTransferInput {
+  productId: Int!
+  userId: Int!
+  quantity: Int!
+  fromLocationId: Int!
+  toLocationId: Int!
+  notes: String
+  transferReference: String
+  unitCost: Float
+}
+
+input CreateReturnInput {
+  productId: Int!
+  userId: Int!
+  quantity: Int!
+  returnType: String!
+  supplierName: String
+  supplierReference: String
+  reason: String!
+  notes: String
+  refundAmount: Float
+  unitCost: Float
+}
+
+input CreateWasteInput {
+  productId: Int!
+  userId: Int!
+  quantity: Int!
+  wasteType: String!
+  reasonCode: String!
+  expiryDate: String
+  notes: String
+  lossValue: Float
+  unitCost: Float
+}
+
+input CreateReservationInput {
+  productId: Int!
+  userId: Int!
+  quantity: Int!
+  reservationReference: String!
+  expiresAt: String
+  customerInfo: String
+  notes: String
+}
+
+input ReleaseReservationInput {
+  reservationTransactionId: Int!
+  userId: Int!
+  reason: String!
+  notes: String
 }
 
 input CreatePriceHistoryInput {

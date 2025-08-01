@@ -16,6 +16,7 @@ import { InventoryTransaction } from './inventory/entities/inventory-transaction
 import { PriceHistory } from './inventory/entities/price-history.entity';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReportsModule } from './reports/reports.module';
+import { SuppliersModule } from './suppliers/suppliers.module';
 import { DeviceToken } from './notifications/entities/device-token.entity';
 import { AppError, ErrorCode } from './errors/error-codes';
 import { ErrorHandlingModule } from './errors/error-handling.module';
@@ -61,6 +62,7 @@ import { ErrorHandlingModule } from './errors/error-handling.module';
     InventoryModule,
     NotificationsModule,
     ReportsModule,
+    SuppliersModule,
     TypeOrmModule.forFeature([User, Product, Category, ProductNote, InventoryTransaction, PriceHistory, DeviceToken]),
   ],
   providers: [AppResolver],

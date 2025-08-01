@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { Category } from './entities/category.entity';
 import { ProductNote } from './entities/product-note.entity';
-import { InventoryTransaction } from './entities/inventory-transaction.entity';
+import { InventoryTransaction, TransactionType, TransactionStatus } from './entities/inventory-transaction.entity';
 import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
 import { CreateCategoryInput } from './dto/create-category.input';
@@ -12,6 +12,14 @@ import { UpdateCategoryInput } from './dto/update-category.input';
 import { CreateProductNoteInput } from './dto/create-product-note.input';
 import { CreateInventoryTransactionInput } from './dto/create-inventory-transaction.input';
 import { UpdateInventoryTransactionInput } from './dto/update-inventory-transaction.input';
+import { 
+  CreateAdjustmentInput, 
+  CreateTransferInput, 
+  CreateReturnInput, 
+  CreateWasteInput, 
+  CreateReservationInput,
+  ReleaseReservationInput 
+} from './dto/advanced-transaction.input';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PriceHistoryService } from './price-history.service';
 import { AppError, ErrorCode } from '../errors/error-codes';
@@ -365,5 +373,361 @@ export class InventoryService {
     return profitabilityData
       .sort((a, b) => b.realizedProfitMargin - a.realizedProfitMargin)
       .slice(0, limit);
+  }
+
+  // Advanced Transaction Methods
+
+  @HandleDatabaseErrors()
+  async createAdjustment(data: CreateAdjustmentInput): Promise<InventoryTransaction> {
+    // Validate the product exists
+    const product = await this.products.findOneBy({ id: data.productId });
+    if (!product) {
+      throw new AppError(ErrorCode.NOT_FOUND, 'Product not found');
+    }
+
+    const currentStock = await this.getCurrentStock(data.productId);
+    const newStock = currentStock + data.adjustmentQuantity;
+
+    if (newStock < 0) {
+      throw new AppError(
+        ErrorCode.VALIDATION, 
+        `Adjustment would result in negative stock. Current: ${currentStock}, Adjustment: ${data.adjustmentQuantity}`
+      );
+    }
+
+    const transaction = this.transactions.create({
+      productId: data.productId,
+      userId: data.userId,
+      quantity: Math.abs(data.adjustmentQuantity),
+      transactionType: data.adjustmentQuantity > 0 ? TransactionType.ADD : TransactionType.REMOVE,
+      status: TransactionStatus.COMPLETED,
+      notes: `${data.reason}: ${data.notes || ''}`,
+      unitCost: data.unitCost,
+      reasonCode: data.reason,
+    });
+
+    const savedTransaction = await this.transactions.save(transaction);
+
+    // Check for low stock after adjustment
+    if (newStock <= (product.restockThreshold || 5)) {
+      await this.notifications.sendLowStockAlert(product.name, newStock);
+    }
+
+    return savedTransaction;
+  }
+
+  @HandleDatabaseErrors()
+  async createTransfer(data: CreateTransferInput): Promise<{ outTransaction: InventoryTransaction; inTransaction: InventoryTransaction }> {
+    // Validate the product exists
+    const product = await this.products.findOneBy({ id: data.productId });
+    if (!product) {
+      throw new AppError(ErrorCode.NOT_FOUND, 'Product not found');
+    }
+
+    // Check if source location has enough stock
+    const sourceStock = await this.getLocationStock(data.productId, data.fromLocationId);
+    if (sourceStock < data.quantity) {
+      throw new AppError(
+        ErrorCode.VALIDATION, 
+        `Insufficient stock at source location. Available: ${sourceStock}, Requested: ${data.quantity}`
+      );
+    }
+
+    // Create transfer out transaction
+    const outTransaction = this.transactions.create({
+      productId: data.productId,
+      userId: data.userId,
+      quantity: data.quantity,
+      transactionType: TransactionType.TRANSFER_OUT,
+      status: TransactionStatus.COMPLETED,
+      fromLocationId: data.fromLocationId,
+      toLocationId: data.toLocationId,
+      notes: data.notes,
+      unitCost: data.unitCost,
+    });
+
+    const savedOutTransaction = await this.transactions.save(outTransaction);
+
+    // Create transfer in transaction
+    const inTransaction = this.transactions.create({
+      productId: data.productId,
+      userId: data.userId,
+      quantity: data.quantity,
+      transactionType: TransactionType.TRANSFER_IN,
+      status: TransactionStatus.COMPLETED,
+      fromLocationId: data.fromLocationId,
+      toLocationId: data.toLocationId,
+      referenceTransactionId: savedOutTransaction.id,
+      notes: data.notes,
+      unitCost: data.unitCost,
+    });
+
+    const savedInTransaction = await this.transactions.save(inTransaction);
+
+    // Update the out transaction to reference the in transaction
+    await this.transactions.update(savedOutTransaction.id, {
+      referenceTransactionId: savedInTransaction.id
+    });
+
+    return {
+      outTransaction: savedOutTransaction,
+      inTransaction: savedInTransaction,
+    };
+  }
+
+  @HandleDatabaseErrors()
+  async createReturn(data: CreateReturnInput): Promise<InventoryTransaction> {
+    // Validate the product exists
+    const product = await this.products.findOneBy({ id: data.productId });
+    if (!product) {
+      throw new AppError(ErrorCode.NOT_FOUND, 'Product not found');
+    }
+
+    const transactionType = data.returnType === 'to_supplier' 
+      ? TransactionType.RETURN_TO_SUPPLIER 
+      : TransactionType.RETURN_FROM_CUSTOMER;
+
+    // For returns to supplier, check if we have enough stock
+    if (data.returnType === 'to_supplier') {
+      const currentStock = await this.getCurrentStock(data.productId);
+      if (currentStock < data.quantity) {
+        throw new AppError(
+          ErrorCode.VALIDATION, 
+          `Insufficient stock for return. Available: ${currentStock}, Return quantity: ${data.quantity}`
+        );
+      }
+    }
+
+    const transaction = this.transactions.create({
+      productId: data.productId,
+      userId: data.userId,
+      quantity: data.quantity,
+      transactionType,
+      status: TransactionStatus.COMPLETED,
+      supplierName: data.supplierName,
+      supplierReference: data.supplierReference,
+      reasonCode: data.reason,
+      notes: data.notes,
+      unitCost: data.unitCost,
+      totalCost: data.refundAmount,
+    });
+
+    return await this.transactions.save(transaction);
+  }
+
+  @HandleDatabaseErrors()
+  async createWaste(data: CreateWasteInput): Promise<InventoryTransaction> {
+    // Validate the product exists
+    const product = await this.products.findOneBy({ id: data.productId });
+    if (!product) {
+      throw new AppError(ErrorCode.NOT_FOUND, 'Product not found');
+    }
+
+    // Check if we have enough stock
+    const currentStock = await this.getCurrentStock(data.productId);
+    if (currentStock < data.quantity) {
+      throw new AppError(
+        ErrorCode.VALIDATION, 
+        `Insufficient stock for waste/damage. Available: ${currentStock}, Waste quantity: ${data.quantity}`
+      );
+    }
+
+    const transactionType = data.wasteType === 'waste' ? TransactionType.WASTE : TransactionType.DAMAGED;
+
+    const transaction = this.transactions.create({
+      productId: data.productId,
+      userId: data.userId,
+      quantity: data.quantity,
+      transactionType,
+      status: TransactionStatus.COMPLETED,
+      reasonCode: data.reasonCode,
+      expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
+      notes: data.notes,
+      unitCost: data.unitCost,
+      totalCost: data.lossValue,
+    });
+
+    const savedTransaction = await this.transactions.save(transaction);
+
+    // Create notification for significant waste
+    const wasteValue = (data.unitCost || product.purchasePrice || 0) * data.quantity;
+    if (wasteValue > 100) { // Threshold for significant waste
+      // TODO: Implement waste notification
+      console.log(`Waste Alert: ${product.name} - ${data.quantity} units wasted/damaged. Value: $${wasteValue.toFixed(2)}. Reason: ${data.reasonCode}`);
+    }
+
+    return savedTransaction;
+  }
+
+  @HandleDatabaseErrors()
+  async createReservation(data: CreateReservationInput): Promise<InventoryTransaction> {
+    // Validate the product exists
+    const product = await this.products.findOneBy({ id: data.productId });
+    if (!product) {
+      throw new AppError(ErrorCode.NOT_FOUND, 'Product not found');
+    }
+
+    // Check available stock (current stock minus existing reservations)
+    const currentStock = await this.getCurrentStock(data.productId);
+    const reservedStock = await this.getReservedStock(data.productId);
+    const availableStock = currentStock - reservedStock;
+
+    if (availableStock < data.quantity) {
+      throw new AppError(
+        ErrorCode.VALIDATION, 
+        `Insufficient available stock. Available: ${availableStock}, Requested: ${data.quantity}`
+      );
+    }
+
+    const expiresAt = data.expiresAt ? new Date(data.expiresAt) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Default 7 days
+
+    const transaction = this.transactions.create({
+      productId: data.productId,
+      userId: data.userId,
+      quantity: data.quantity,
+      transactionType: TransactionType.RESERVE,
+      status: TransactionStatus.COMPLETED,
+      reservationReference: data.reservationReference,
+      reservationExpiresAt: expiresAt,
+      notes: `Customer: ${data.customerInfo || 'N/A'}. ${data.notes || ''}`,
+    });
+
+    return await this.transactions.save(transaction);
+  }
+
+  @HandleDatabaseErrors()
+  async releaseReservation(data: ReleaseReservationInput): Promise<InventoryTransaction> {
+    // Find the original reservation
+    const reservation = await this.transactions.findOneBy({ 
+      id: data.reservationTransactionId,
+      transactionType: TransactionType.RESERVE 
+    });
+
+    if (!reservation) {
+      throw new AppError(ErrorCode.NOT_FOUND, 'Reservation not found');
+    }
+
+    // Check if already released
+    const existingRelease = await this.transactions.findOneBy({
+      referenceTransactionId: data.reservationTransactionId,
+      transactionType: TransactionType.UNRESERVE
+    });
+
+    if (existingRelease) {
+      throw new AppError(ErrorCode.VALIDATION, 'Reservation already released');
+    }
+
+    // Create unreserve transaction
+    const unreserveTransaction = this.transactions.create({
+      productId: reservation.productId,
+      userId: data.userId,
+      quantity: reservation.quantity,
+      transactionType: TransactionType.UNRESERVE,
+      status: TransactionStatus.COMPLETED,
+      referenceTransactionId: data.reservationTransactionId,
+      reasonCode: data.reason,
+      notes: data.notes,
+    });
+
+    return await this.transactions.save(unreserveTransaction);
+  }
+
+  // Helper methods for advanced transactions
+
+  async getLocationStock(productId: number, locationId: number): Promise<number> {
+    const transactions = await this.transactions.find({
+      where: [
+        { productId, fromLocationId: locationId },
+        { productId, toLocationId: locationId }
+      ]
+    });
+
+    let stock = 0;
+    transactions.forEach(tx => {
+      if (tx.toLocationId === locationId) {
+        stock += tx.quantity; // Stock coming in
+      }
+      if (tx.fromLocationId === locationId) {
+        stock -= tx.quantity; // Stock going out
+      }
+    });
+
+    return stock;
+  }
+
+  async getReservedStock(productId: number): Promise<number> {
+    const reservations = await this.transactions.find({
+      where: { 
+        productId, 
+        transactionType: TransactionType.RESERVE,
+        status: TransactionStatus.COMPLETED 
+      }
+    });
+
+    const releases = await this.transactions.find({
+      where: { 
+        productId, 
+        transactionType: TransactionType.UNRESERVE,
+        status: TransactionStatus.COMPLETED 
+      }
+    });
+
+    let reservedStock = 0;
+    reservations.forEach(tx => reservedStock += tx.quantity);
+    releases.forEach(tx => reservedStock -= tx.quantity);
+
+    return Math.max(0, reservedStock);
+  }
+
+  async getTransactionsByType(transactionType: TransactionType, limit = 50): Promise<InventoryTransaction[]> {
+    return await this.transactions.find({
+      where: { transactionType },
+      relations: ['product'],
+      order: { occurredAt: 'DESC' },
+      take: limit
+    });
+  }
+
+  async getActiveReservations(productId?: number): Promise<InventoryTransaction[]> {
+    const whereCondition: any = {
+      transactionType: TransactionType.RESERVE,
+      status: TransactionStatus.COMPLETED
+    };
+
+    if (productId) {
+      whereCondition.productId = productId;
+    }
+
+    const reservations = await this.transactions.find({
+      where: whereCondition,
+      relations: ['product'],
+      order: { reservationExpiresAt: 'ASC' }
+    });
+
+    // Filter out released reservations
+    const activeReservations = [];
+    for (const reservation of reservations) {
+      const release = await this.transactions.findOneBy({
+        referenceTransactionId: reservation.id,
+        transactionType: TransactionType.UNRESERVE
+      });
+      
+      if (!release) {
+        activeReservations.push(reservation);
+      }
+    }
+
+    return activeReservations;
+  }
+
+  async getExpiredReservations(): Promise<InventoryTransaction[]> {
+    const now = new Date();
+    return await this.transactions
+      .createQueryBuilder('transaction')
+      .where('transaction.transactionType = :type', { type: TransactionType.RESERVE })
+      .andWhere('transaction.status = :status', { status: TransactionStatus.COMPLETED })
+      .andWhere('transaction.reservationExpiresAt < :now', { now })
+      .leftJoinAndSelect('transaction.product', 'product')
+      .getMany();
   }
 }
