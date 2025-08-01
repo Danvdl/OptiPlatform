@@ -39,9 +39,13 @@ describe('InventoryService', () => {
     sendLowStockAlert: jest.fn(),
   } as unknown as NotificationsService;
 
+  const priceHistoryService = {
+    trackPriceChange: jest.fn(),
+  } as any;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new InventoryService(productRepo, categoryRepo, productNoteRepo, txRepo, notifications);
+    service = new InventoryService(productRepo, categoryRepo, productNoteRepo, txRepo, notifications, priceHistoryService);
   });
 
   it('creates a product', async () => {

@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import QuickActions from '../components/QuickActions';
-import { 
-  fetchItems, 
+import {
+  fetchItems,
   fetchProducts,
   fetchCategories,
-  addItem, 
-  updateItem, 
+  addItem,
+  updateItem,
   createProduct,
   createCategory,
   InventoryItem,
   Product,
-  Category
+  Category,
+  ApiError
 } from '../utils/inventoryApi';
+import { useError } from '../components/ErrorProvider';
+import { getErrorMessage, ErrorCode } from '../utils/errorCodes';
 
 type TabType = 'overview' | 'transactions' | 'products' | 'categories';
 
@@ -55,6 +58,7 @@ export default function Inventory() {
   });
 
   const [editing, setEditing] = useState<{ [id: number]: { quantity: number; notes: string } }>({});
+  const { showError } = useError();
 
   const loadData = async () => {
     try {
@@ -68,8 +72,10 @@ export default function Inventory() {
       setTransactions(txData);
       setProducts(productData);
       setCategories(categoryData);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load inventory data:', error);
+      const code = error instanceof ApiError ? error.code : ErrorCode.UNKNOWN;
+      showError(getErrorMessage(code));
     } finally {
       setLoading(false);
     }
@@ -109,8 +115,10 @@ export default function Inventory() {
       setTransactionForm({ productId: 0, quantity: 0, transactionType: 'add', notes: '' });
       setShowAddTransaction(false);
       await loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to add transaction:', error);
+      const code = error instanceof ApiError ? error.code : ErrorCode.UNKNOWN;
+      showError(getErrorMessage(code));
     }
   };
 
@@ -124,8 +132,10 @@ export default function Inventory() {
       setProductForm({ name: '', description: '', sku: '', unit: '', categoryId: 0, restockThreshold: 5 });
       setShowAddProduct(false);
       await loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to add product:', error);
+      const code = error instanceof ApiError ? error.code : ErrorCode.UNKNOWN;
+      showError(getErrorMessage(code));
     }
   };
 
@@ -136,8 +146,10 @@ export default function Inventory() {
       setCategoryForm({ name: '', description: '' });
       setShowAddCategory(false);
       await loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to add category:', error);
+      const code = error instanceof ApiError ? error.code : ErrorCode.UNKNOWN;
+      showError(getErrorMessage(code));
     }
   };
 
@@ -152,8 +164,10 @@ export default function Inventory() {
         return newEditing;
       });
       await loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update transaction:', error);
+      const code = error instanceof ApiError ? error.code : ErrorCode.UNKNOWN;
+      showError(getErrorMessage(code));
     }
   };
 

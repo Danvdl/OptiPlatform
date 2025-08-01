@@ -2,6 +2,7 @@ import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
 import { LoginInput } from './dto/login.input';
 import { RegisterInput } from './dto/register.input';
+import { AppError, ErrorCode } from '../errors/error-codes';
 
 @Resolver()
 export class AuthResolver {
@@ -14,7 +15,7 @@ export class AuthResolver {
       loginInput.password,
     );
     if (!user) {
-      throw new Error('Invalid credentials');
+      throw new AppError(ErrorCode.AUTH_INVALID, 'Invalid credentials');
     }
     return this.authService.login(user);
   }

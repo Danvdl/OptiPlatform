@@ -1,4 +1,11 @@
 import { getToken } from './authStore';
+import { ErrorCode } from './errorCodes';
+
+export class ApiError extends Error {
+  constructor(public code: string, message: string) {
+    super(message);
+  }
+}
 
 export interface InventoryItem {
   id: number;
@@ -62,17 +69,24 @@ const API_URL = `${import.meta.env.VITE_BACKEND_URL}/graphql`;
 
 async function graphql<T>(query: string, variables?: Record<string, any>): Promise<T> {
   const token = await getToken();
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ query, variables }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+  } catch (_) {
+    throw new ApiError(ErrorCode.NETWORK, 'Network error');
+  }
   const json = await res.json();
-  if (json.errors) {
-    throw new Error(json.errors.map((e: any) => e.message).join(', '));
+  if (json.errors && json.errors.length > 0) {
+    const first = json.errors[0];
+    const code = first.extensions?.code || ErrorCode.UNKNOWN;
+    throw new ApiError(code, first.message);
   }
   return json.data;
 }
