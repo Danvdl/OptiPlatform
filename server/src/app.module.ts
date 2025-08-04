@@ -8,6 +8,10 @@ import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { AppResolver } from './app.resolver';
 import { User } from './user/user.entity';
+import { UserPermission } from './user/user-permission.entity';
+import { ActivityLog } from './user/activity-log.entity';
+import { UserPreferences } from './user/user-preferences.entity';
+import { UserModule } from './user/user.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { Product } from './inventory/entities/product.entity';
 import { Category } from './inventory/entities/category.entity';
@@ -28,6 +32,15 @@ import { ErrorHandlingModule } from './errors/error-handling.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'schema.gql'),
+      context: ({ req }) => {
+        console.log('🔍 GraphQL Context - Request headers:', {
+          authorization: req.headers?.authorization,
+          'content-type': req.headers?.['content-type'],
+          'user-agent': req.headers?.['user-agent'],
+          allHeaderKeys: Object.keys(req.headers || {})
+        });
+        return { req };
+      },
       formatError: (error: GraphQLError) => {
         const original: any = error.originalError;
         if (original instanceof AppError) {
@@ -43,8 +56,9 @@ import { ErrorHandlingModule } from './errors/error-handling.module';
         const ormConfig: any = {
           type: 'postgres',
           url: config.get<string>('DB_URL'),
-          entities: [User, Product, Category, ProductNote, InventoryTransaction, PriceHistory, DeviceToken],
+          entities: [User, UserPermission, ActivityLog, UserPreferences, Product, Category, ProductNote, InventoryTransaction, PriceHistory, DeviceToken],
           synchronize: false, // Temporarily disabled to avoid schema conflicts
+          schema: 'public', // Explicitly use public schema to avoid auth.users conflict
         };
 
         const rejectUnauthorized = config.get<string>('DB_SSL_REJECT_UNAUTHORIZED');
@@ -59,11 +73,12 @@ import { ErrorHandlingModule } from './errors/error-handling.module';
     }),
 
     AuthModule,
+    UserModule,
     InventoryModule,
     NotificationsModule,
     ReportsModule,
     SuppliersModule,
-    TypeOrmModule.forFeature([User, Product, Category, ProductNote, InventoryTransaction, PriceHistory, DeviceToken]),
+    TypeOrmModule.forFeature([User, UserPermission, ActivityLog, UserPreferences, Product, Category, ProductNote, InventoryTransaction, PriceHistory, DeviceToken]),
   ],
   providers: [AppResolver],
 })

@@ -1,301 +1,28 @@
-import { NavLink } from 'react-router-dom';
-import { clearToken } from '../utils/authStore';
-
-export default function Sidebar() {
-  const handleLogout = async () => {
-    await clearToken();
-    window.location.href = '/login';
-  };
-
-  return (
-    <nav style={{
-      width: '280px',
-      background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-      color: 'white',
-      padding: '1.5rem',
-      boxShadow: '4px 0 10px rgba(0, 0, 0, 0.1)',
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh'
-    }}>
-      {/* Logo */}
-      <div style={{
-        marginBottom: '2rem',
-        textAlign: 'center',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        paddingBottom: '1.5rem'
-      }}>
-        <h2 style={{
-          margin: 0,
-          fontSize: '1.75rem',
-          fontWeight: '700',
-          background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem'
-        }}>
-          📦 OptiPlatform
-        </h2>
-        <p style={{
-          margin: '0.5rem 0 0',
-          fontSize: '0.875rem',
-          opacity: 0.7
-        }}>
-          Inventory Management
-        </p>
-      </div>
-
-      {/* Navigation */}
-      <ul style={{
-        listStyle: 'none',
-        padding: 0,
-        margin: 0,
-        flex: 1
-      }}>
-        <li style={{ marginBottom: '0.5rem' }}>
-          <NavLink
-            to="/dashboard"
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.875rem 1rem',
-              borderRadius: '0.75rem',
-              textDecoration: 'none',
-              color: 'white',
-              fontWeight: '500',
-              transition: 'all 0.2s ease',
-              background: isActive 
-                ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' 
-                : 'transparent',
-              transform: isActive ? 'translateX(4px)' : 'none',
-              boxShadow: isActive 
-                ? '0 4px 12px rgba(59, 130, 246, 0.4)' 
-                : 'none'
-            })}
-            className="sidebar-link"
-          >
-            <span style={{ fontSize: '1.25rem' }}>📊</span>
-            Dashboard
-          </NavLink>
-        </li>
-        <li style={{ marginBottom: '0.5rem' }}>
-          <NavLink
-            to="/inventory"
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.875rem 1rem',
-              borderRadius: '0.75rem',
-              textDecoration: 'none',
-              color: 'white',
-              fontWeight: '500',
-              transition: 'all 0.2s ease',
-              background: isActive 
-                ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' 
-                : 'transparent',
-              transform: isActive ? 'translateX(4px)' : 'none',
-              boxShadow: isActive 
-                ? '0 4px 12px rgba(59, 130, 246, 0.4)' 
-                : 'none'
-            })}
-            className="sidebar-link"
-          >
-            <span style={{ fontSize: '1.25rem' }}>📦</span>
-            Inventory
-          </NavLink>
-        </li>
-        <li style={{ marginBottom: '0.5rem' }}>
-          <NavLink
-            to="/suppliers"
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.875rem 1rem',
-              borderRadius: '0.75rem',
-              textDecoration: 'none',
-              color: 'white',
-              fontWeight: '500',
-              transition: 'all 0.2s ease',
-              background: isActive 
-                ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' 
-                : 'transparent',
-              transform: isActive ? 'translateX(4px)' : 'none',
-              boxShadow: isActive 
-                ? '0 4px 12px rgba(59, 130, 246, 0.4)' 
-                : 'none'
-            })}
-            className="sidebar-link"
-          >
-            <span style={{ fontSize: '1.25rem' }}>🏢</span>
-            Suppliers
-          </NavLink>
-        </li>
-        <li style={{ marginBottom: '0.5rem' }}>
-          <NavLink
-            to="/purchase-orders"
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.875rem 1rem',
-              borderRadius: '0.75rem',
-              textDecoration: 'none',
-              color: 'white',
-              fontWeight: '500',
-              transition: 'all 0.2s ease',
-              background: isActive 
-                ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' 
-                : 'transparent',
-              transform: isActive ? 'translateX(4px)' : 'none',
-              boxShadow: isActive 
-                ? '0 4px 12px rgba(59, 130, 246, 0.4)' 
-                : 'none'
-            })}
-            className="sidebar-link"
-          >
-            <span style={{ fontSize: '1.25rem' }}>🛒</span>
-            Purchase Orders
-          </NavLink>
-        </li>
-        <li style={{ marginBottom: '0.5rem' }}>
-          <NavLink
-            to="/pricing"
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.875rem 1rem',
-              borderRadius: '0.75rem',
-              textDecoration: 'none',
-              color: 'white',
-              fontWeight: '500',
-              transition: 'all 0.2s ease',
-              background: isActive 
-                ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' 
-                : 'transparent',
-              transform: isActive ? 'translateX(4px)' : 'none',
-              boxShadow: isActive 
-                ? '0 4px 12px rgba(59, 130, 246, 0.4)' 
-                : 'none'
-            })}
-            className="sidebar-link"
-          >
-            <span style={{ fontSize: '1.25rem' }}>💰</span>
-            Pricing & Costs
-          </NavLink>
-        </li>
-        <li style={{ marginBottom: '0.5rem' }}>
-          <NavLink
-            to="/transactions"
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.875rem 1rem',
-              borderRadius: '0.75rem',
-              textDecoration: 'none',
-              color: 'white',
-              fontWeight: '500',
-              transition: 'all 0.2s ease',
-              background: isActive 
-                ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' 
-                : 'transparent',
-              transform: isActive ? 'translateX(4px)' : 'none',
-              boxShadow: isActive 
-                ? '0 4px 12px rgba(59, 130, 246, 0.4)' 
-                : 'none'
-            })}
-            className="sidebar-link"
-          >
-            <span style={{ fontSize: '1.25rem' }}>�</span>
-            Transactions
-          </NavLink>
-        </li>
-        <li style={{ marginBottom: '0.5rem' }}>
-          <NavLink
-            to="/reports"
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.875rem 1rem',
-              borderRadius: '0.75rem',
-              textDecoration: 'none',
-              color: 'white',
-              fontWeight: '500',
-              transition: 'all 0.2s ease',
-              background: isActive 
-                ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' 
-                : 'transparent',
-              transform: isActive ? 'translateX(4px)' : 'none',
-              boxShadow: isActive 
-                ? '0 4px 12px rgba(59, 130, 246, 0.4)' 
-                : 'none'
-            })}
-            className="sidebar-link"
-          >
-            <span style={{ fontSize: '1.25rem' }}>�📈</span>
-            Reports & Analytics
-          </NavLink>
-        </li>
-      </ul>
-
-      {/* User section */}
-      <div style={{
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-        paddingTop: '1.5rem',
-        marginTop: 'auto'
-      }}>
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.05)',
-          borderRadius: '0.75rem',
-          padding: '1rem',
-          marginBottom: '1rem'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            marginBottom: '0.5rem'
-          }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.25rem'
-            }}>
-              👤
-            </div>
-            <div>
-              <div style={{ fontWeight: '500', fontSize: '0.875rem' }}>
-                MVP User
-              </div>
-              <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>
-                Administrator
-              </div>
+import { NavLink } from 'react-router-dom';import { clearToken } from '../utils/authStore';import { useAuth } from '../contexts/AuthContext';import { RoleGuard, PermissionGuard } from './PermissionGuards';export default function Sidebar() {  const { user, hasPermission } = useAuth();    const handleLogout = async () => {    await clearToken();    window.location.href = '/login';  };  return (    <nav style={{      width: '280px',      background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',      color: 'white',      padding: '1.5rem',      boxShadow: '4px 0 10px rgba(0, 0, 0, 0.1)',      display: 'flex',      flexDirection: 'column',      minHeight: '100vh'    }}>      {/* Logo */}      <div style={{        marginBottom: '2rem',        textAlign: 'center',        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',        paddingBottom: '1.5rem'      }}>        <h2 style={{          margin: 0,          fontSize: '1.75rem',          fontWeight: '700',          background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',          WebkitBackgroundClip: 'text',          WebkitTextFillColor: 'transparent',          display: 'flex',          alignItems: 'center',          justifyContent: 'center',          gap: '0.5rem'        }}>          📦 OptiPlatform        </h2>        <p style={{          margin: '0.5rem 0 0',          fontSize: '0.875rem',          opacity: 0.7        }}>          Inventory Management        </p>      </div>      {/* Navigation */}      <ul style={{        listStyle: 'none',        padding: 0,        margin: 0,        flex: 1      }}>        <li style={{ marginBottom: '0.5rem' }}>          <NavLink            to="/dashboard"            style={({ isActive }) => ({              display: 'flex',              alignItems: 'center',              gap: '0.75rem',              padding: '0.875rem 1rem',              borderRadius: '0.75rem',              textDecoration: 'none',              color: 'white',              fontWeight: '500',              transition: 'all 0.2s ease',              background: isActive                 ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)'                 : 'transparent',              transform: isActive ? 'translateX(4px)' : 'none',              boxShadow: isActive                 ? '0 4px 12px rgba(59, 130, 246, 0.4)'                 : 'none'            })}            className="sidebar-link"          >            <span style={{ fontSize: '1.25rem' }}>📊</span>            Dashboard          </NavLink>        </li>                <li style={{ marginBottom: '0.5rem' }}>          <NavLink            to="/inventory"            style={({ isActive }) => ({              display: 'flex',              alignItems: 'center',              gap: '0.75rem',              padding: '0.875rem 1rem',              borderRadius: '0.75rem',              textDecoration: 'none',              color: 'white',              fontWeight: '500',              transition: 'all 0.2s ease',              background: isActive                 ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)'                 : 'transparent',              transform: isActive ? 'translateX(4px)' : 'none',              boxShadow: isActive                 ? '0 4px 12px rgba(59, 130, 246, 0.4)'                 : 'none'            })}            className="sidebar-link"          >            <span style={{ fontSize: '1.25rem' }}>📦</span>            Inventory          </NavLink>        </li>                <PermissionGuard permission="supplier:read">          <li style={{ marginBottom: '0.5rem' }}>            <NavLink              to="/suppliers"              style={({ isActive }) => ({                display: 'flex',                alignItems: 'center',                gap: '0.75rem',                padding: '0.875rem 1rem',                borderRadius: '0.75rem',                textDecoration: 'none',                color: 'white',                fontWeight: '500',                transition: 'all 0.2s ease',                background: isActive                   ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)'                   : 'transparent',                transform: isActive ? 'translateX(4px)' : 'none',                boxShadow: isActive                   ? '0 4px 12px rgba(59, 130, 246, 0.4)'                   : 'none'              })}              className="sidebar-link"            >              <span style={{ fontSize: '1.25rem' }}>🏢</span>              Suppliers            </NavLink>          </li>        </PermissionGuard>                <PermissionGuard permission="purchase_order:read">          <li style={{ marginBottom: '0.5rem' }}>            <NavLink              to="/purchase-orders"              style={({ isActive }) => ({                display: 'flex',                alignItems: 'center',                gap: '0.75rem',                padding: '0.875rem 1rem',                borderRadius: '0.75rem',                textDecoration: 'none',                color: 'white',                fontWeight: '500',                transition: 'all 0.2s ease',                background: isActive                   ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)'                   : 'transparent',                transform: isActive ? 'translateX(4px)' : 'none',                boxShadow: isActive                   ? '0 4px 12px rgba(59, 130, 246, 0.4)'                   : 'none'              })}              className="sidebar-link"            >              <span style={{ fontSize: '1.25rem' }}>🛒</span>              Purchase Orders            </NavLink>          </li>        </PermissionGuard>                <li style={{ marginBottom: '0.5rem' }}>          <NavLink            to="/pricing"            style={({ isActive }) => ({              display: 'flex',              alignItems: 'center',              gap: '0.75rem',              padding: '0.875rem 1rem',              borderRadius: '0.75rem',              textDecoration: 'none',              color: 'white',              fontWeight: '500',              transition: 'all 0.2s ease',              background: isActive                 ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)'                 : 'transparent',              transform: isActive ? 'translateX(4px)' : 'none',              boxShadow: isActive                 ? '0 4px 12px rgba(59, 130, 246, 0.4)'                 : 'none'            })}            className="sidebar-link"          >            <span style={{ fontSize: '1.25rem' }}>💰</span>            Pricing & Costs          </NavLink>        </li>                <PermissionGuard permission="transaction:read">          <li style={{ marginBottom: '0.5rem' }}>            <NavLink              to="/transactions"              style={({ isActive }) => ({                display: 'flex',                alignItems: 'center',                gap: '0.75rem',                padding: '0.875rem 1rem',                borderRadius: '0.75rem',                textDecoration: 'none',                color: 'white',                fontWeight: '500',                transition: 'all 0.2s ease',                background: isActive                   ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)'                   : 'transparent',                transform: isActive ? 'translateX(4px)' : 'none',                boxShadow: isActive                   ? '0 4px 12px rgba(59, 130, 246, 0.4)'                   : 'none'              })}              className="sidebar-link"            >              <span style={{ fontSize: '1.25rem' }}>💳</span>              Transactions            </NavLink>          </li>        </PermissionGuard>                <PermissionGuard permission="reports:read">          <li style={{ marginBottom: '0.5rem' }}>            <NavLink              to="/reports"              style={({ isActive }) => ({                display: 'flex',                alignItems: 'center',                gap: '0.75rem',                padding: '0.875rem 1rem',                borderRadius: '0.75rem',                textDecoration: 'none',                color: 'white',                fontWeight: '500',                transition: 'all 0.2s ease',                background: isActive                   ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)'                   : 'transparent',                transform: isActive ? 'translateX(4px)' : 'none',                boxShadow: isActive                   ? '0 4px 12px rgba(59, 130, 246, 0.4)'                   : 'none'              })}              className="sidebar-link"            >              <span style={{ fontSize: '1.25rem' }}>📈</span>              Reports & Analytics            </NavLink>          </li>        </PermissionGuard>                {/* Admin Section */}        <PermissionGuard permission="user:read">          <li style={{             marginBottom: '0.5rem',            borderTop: '1px solid rgba(255, 255, 255, 0.1)',            paddingTop: '1rem',            marginTop: '1rem'          }}>            <NavLink              to="/users"              style={({ isActive }) => ({                display: 'flex',                alignItems: 'center',                gap: '0.75rem',                padding: '0.875rem 1rem',                borderRadius: '0.75rem',                textDecoration: 'none',                color: 'white',                fontWeight: '500',                transition: 'all 0.2s ease',                background: isActive                   ? 'linear-gradient(135deg, #dc2626, #b91c1c)'                   : 'transparent',                transform: isActive ? 'translateX(4px)' : 'none',                boxShadow: isActive                   ? '0 4px 12px rgba(220, 38, 38, 0.4)'                   : 'none'              })}              className="sidebar-link"            >              <span style={{ fontSize: '1.25rem' }}>👥</span>              User Management            </NavLink>          </li>        </PermissionGuard>      </ul>      {/* User section */}      <div style={{        borderTop: '1px solid rgba(255, 255, 255, 0.1)',        paddingTop: '1.5rem',        marginTop: 'auto'      }}>        <div style={{          background: 'rgba(255, 255, 255, 0.05)',          borderRadius: '0.75rem',          padding: '1rem',          marginBottom: '1rem'        }}>          <div style={{            display: 'flex',            alignItems: 'center',            gap: '0.75rem',            marginBottom: '0.5rem'          }}>            <div style={{              width: '40px',              height: '40px',              borderRadius: '50%',              background: user?.avatar ? `url(${user.avatar})` : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',              backgroundSize: 'cover',              backgroundPosition: 'center',              display: 'flex',              alignItems: 'center',              justifyContent: 'center',              color: 'white',              fontSize: '1.25rem',              fontWeight: '600'            }}>              {!user?.avatar && (user?.firstName?.[0] || user?.username?.[0] || '?')}            </div>            <div style={{ flex: 1 }}>              <p style={{                margin: 0,                fontWeight: '600',                fontSize: '0.875rem',                color: 'white'              }}>                {user?.fullName || user?.username || 'User'}              </p>              <p style={{                margin: 0,                fontSize: '0.75rem',                opacity: 0.7,                display: 'flex',                alignItems: 'center',                gap: '0.25rem'              }}>                <span style={{                  background: user?.role === 'ADMIN' ? '#dc2626' :                              user?.role === 'MANAGER' ? '#d97706' : '#059669',                  color: 'white',                  padding: '0.125rem 0.5rem',                  borderRadius: '0.5rem',                  fontSize: '0.625rem',                  fontWeight: '600',                  textTransform: 'uppercase'
+                }}>
+                  {user?.role || 'Staff'}
+                </span>
+              </p>
             </div>
           </div>
+          <div style={{
+            fontSize: '0.75rem',
+            opacity: 0.6,
+            marginBottom: '0.75rem'
+          }}>
+            {user?.email}
+          </div>
         </div>
-
+        
         <button
           onClick={handleLogout}
           style={{
             width: '100%',
-            padding: '0.875rem 1rem',
-            background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-            color: 'white',
-            border: 'none',
+            padding: '0.75rem',
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
             borderRadius: '0.75rem',
+            color: '#fca5a5',
             fontWeight: '500',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
@@ -304,19 +31,21 @@ export default function Sidebar() {
             justifyContent: 'center',
             gap: '0.5rem'
           }}
-          className="hover-lift"
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(239, 68, 68, 0.2)';
+            e.target.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+            e.target.style.color = '#ef4444';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(239, 68, 68, 0.1)';
+            e.target.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+            e.target.style.color = '#fca5a5';
+          }}
         >
           <span>🚪</span>
-          Logout
+          Sign Out
         </button>
       </div>
-
-      <style>{`
-        .sidebar-link:hover {
-          background: rgba(255, 255, 255, 0.1) !important;
-          transform: translateX(4px) !important;
-        }
-      `}</style>
     </nav>
   );
 }

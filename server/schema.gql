@@ -2,9 +2,96 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type ActivityLog {
+  id: Int!
+  userId: Int!
+  activityType: ActivityType!
+  description: String!
+  entityType: String
+  entityId: Int
+  details: String
+  ipAddress: String
+  userAgent: String
+  createdAt: DateTime!
+}
+
+"""Types of activities that can be logged"""
+enum ActivityType {
+  LOGIN
+  LOGOUT
+  CREATE
+  UPDATE
+  DELETE
+  VIEW
+  EXPORT
+  IMPORT
+  APPROVE
+  REJECT
+  TRANSFER
+  ADJUSTMENT
+  PURCHASE
+  SALE
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type UserPreferences {
+  id: Int!
+  userId: Int!
+  preferenceType: PreferenceType!
+  value: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Types of user preferences"""
+enum PreferenceType {
+  DASHBOARD_LAYOUT
+  THEME
+  LANGUAGE
+  TIMEZONE
+  NOTIFICATION_SETTINGS
+  DEFAULT_VIEW
+  TABLE_SETTINGS
+  CHART_PREFERENCES
+  EXPORT_FORMAT
+  PAGE_SIZE
+}
+
 type User {
   id: Int!
   username: String!
+  email: String
+  firstName: String
+  lastName: String
+  role: UserRole!
+  status: UserStatus!
+  phoneNumber: String
+  department: String
+  position: String
+  avatar: String
+  lastLoginAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  preferences: UserPreferences
+  fullName: String!
+}
+
+"""The role of the user in the system"""
+enum UserRole {
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+"""The status of the user account"""
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
 }
 
 type Category {
@@ -14,11 +101,6 @@ type Category {
   createdAt: DateTime!
   products: [Product!]
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type Product {
   id: Int!
@@ -358,6 +440,14 @@ type PurchaseOrderAnalytics {
 
 type Query {
   hello: String!
+  users: [User!]!
+  user(id: Int!): User!
+  currentUser: User!
+  userPermissions(userId: Int): [Permission!]!
+  activityLogs(filter: ActivityLogFilterInput!): [ActivityLog!]!
+  userPreferences(userId: Int): [UserPreferences!]!
+  hasPermission(permission: Permission!): Boolean!
+  availablePermissions: [Permission!]!
   products: [Product!]!
   product(id: Int!): Product
   productProfitability(id: Int!): String
@@ -400,6 +490,56 @@ type Query {
   purchaseOrderAnalytics(supplierId: Int, startDate: DateTime, endDate: DateTime): PurchaseOrderAnalytics!
 }
 
+"""Available permissions in the system"""
+enum Permission {
+  INVENTORY_READ
+  INVENTORY_WRITE
+  INVENTORY_DELETE
+  PRODUCT_CREATE
+  PRODUCT_UPDATE
+  PRODUCT_DELETE
+  TRANSACTION_READ
+  TRANSACTION_CREATE
+  TRANSACTION_UPDATE
+  TRANSACTION_DELETE
+  SUPPLIER_READ
+  SUPPLIER_CREATE
+  SUPPLIER_UPDATE
+  SUPPLIER_DELETE
+  PURCHASE_ORDER_READ
+  PURCHASE_ORDER_CREATE
+  PURCHASE_ORDER_UPDATE
+  PURCHASE_ORDER_DELETE
+  PURCHASE_ORDER_APPROVE
+  REPORTS_READ
+  REPORTS_EXPORT
+  REPORTS_ADVANCED
+  USER_READ
+  USER_CREATE
+  USER_UPDATE
+  USER_DELETE
+  USER_PERMISSIONS
+  SYSTEM_SETTINGS
+  SYSTEM_BACKUP
+  SYSTEM_LOGS
+  NOTIFICATION_SEND
+  NOTIFICATION_MANAGE
+  LOCATION_READ
+  LOCATION_CREATE
+  LOCATION_UPDATE
+  LOCATION_DELETE
+}
+
+input ActivityLogFilterInput {
+  userId: Int
+  entityType: String
+  entityId: Int
+  dateFrom: DateTime
+  dateTo: DateTime
+  limit: Int! = 50
+  offset: Int! = 0
+}
+
 input SupplierPriceComparisonInput {
   productId: Int!
   quantity: Int
@@ -409,6 +549,16 @@ input SupplierPriceComparisonInput {
 type Mutation {
   login(data: LoginInput!): String!
   register(data: RegisterInput!): String!
+  createUser(input: CreateUserInput!): User!
+  updateUser(input: UpdateUserInput!): User!
+  updateProfile(input: UpdateUserProfileInput!): User!
+  changePassword(input: ChangePasswordInput!): Boolean!
+  deleteUser(id: Int!): Boolean!
+  grantPermission(input: GrantPermissionInput!): Boolean!
+  revokePermission(input: RevokePermissionInput!): Boolean!
+  grantMultiplePermissions(input: GrantMultiplePermissionsInput!): Boolean!
+  setUserPermissions(input: SetUserPermissionsInput!): Boolean!
+  setUserPreference(input: SetUserPreferenceInput!): UserPreferences!
   createProduct(data: CreateProductInput!): Product!
   updateProduct(data: UpdateProductInput!): Product!
   removeProduct(id: Int!): Boolean!
@@ -453,6 +603,71 @@ input LoginInput {
 input RegisterInput {
   username: String!
   password: String!
+}
+
+input CreateUserInput {
+  username: String!
+  email: String!
+  password: String!
+  firstName: String
+  lastName: String
+  role: UserRole!
+  phoneNumber: String
+  department: String
+  position: String
+}
+
+input UpdateUserInput {
+  id: Int!
+  username: String
+  email: String
+  firstName: String
+  lastName: String
+  role: UserRole
+  status: UserStatus
+  phoneNumber: String
+  department: String
+  position: String
+  avatar: String
+}
+
+input UpdateUserProfileInput {
+  firstName: String
+  lastName: String
+  phoneNumber: String
+  department: String
+  position: String
+  avatar: String
+}
+
+input ChangePasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+
+input GrantPermissionInput {
+  userId: Int!
+  permission: Permission!
+}
+
+input RevokePermissionInput {
+  userId: Int!
+  permission: Permission!
+}
+
+input GrantMultiplePermissionsInput {
+  userId: Int!
+  permissions: [Permission!]!
+}
+
+input SetUserPermissionsInput {
+  userId: Int!
+  permissions: [Permission!]!
+}
+
+input SetUserPreferenceInput {
+  preferenceType: PreferenceType!
+  value: String!
 }
 
 input CreateProductInput {

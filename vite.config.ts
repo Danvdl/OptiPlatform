@@ -10,7 +10,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'firebase-vendor': ['firebase'],
+          'firebase-vendor': ['firebase/app', 'firebase/messaging'],
           'tauri-vendor': ['@tauri-apps/plugin-store'],
         },
       },
@@ -19,4 +19,7 @@ export default defineConfig({
   esbuild: {
     target: 'es2022',
   },
+  optimizeDeps: {
+    include: ['firebase/app', 'firebase/messaging']
+  }
 });

@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { fetchInventorySummary, InventorySummary, ApiError } from '../utils/inventoryApi';
 import { useError } from '../components/ErrorProvider';
 import { getErrorMessage, ErrorCode } from '../utils/errorCodes';
+import { useAuth } from '../contexts/AuthContext';
+import { PermissionGuard, RoleGuard } from '../components/PermissionGuards';
+import { UserRole } from '../types/user-management';
 import './Dashboard.css';
 
 export default function Dashboard() {
+  const { user, hasPermission } = useAuth();
   const [summary, setSummary] = useState<InventorySummary>({
     totalProducts: 0,
     totalCategories: 0,
@@ -94,15 +98,54 @@ export default function Dashboard() {
 
   return (
     <div style={styles.container}>
-      {/* Header */}
+      {/* Header with role-based welcome */}
       <div style={styles.header}>
         <div>
-          <h1 style={styles.title}>Dashboard Overview</h1>
-          <p style={styles.subtitle}>Monitor your inventory performance at a glance</p>
+          <h1 style={styles.title}>
+            Welcome back, {user?.firstName || user?.username || 'User'}!
+          </h1>
+          <p style={styles.subtitle}>
+            {user?.role === UserRole.ADMIN && 'System Administrator - Full access to all features'}
+            {user?.role === UserRole.MANAGER && 'Manager Dashboard - Monitor operations and manage team'}
+            {user?.role === UserRole.STAFF && 'Staff Dashboard - Track your daily inventory tasks'}
+            {!user?.role && 'Monitor your inventory performance at a glance'}
+          </p>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem', 
+            marginTop: '0.5rem' 
+          }}>
+            <span style={{
+              background: user?.role === UserRole.ADMIN ? '#dc2626' : 
+                         user?.role === UserRole.MANAGER ? '#d97706' : '#059669',
+              color: 'white',
+              padding: '0.25rem 0.75rem',
+              borderRadius: '1rem',
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              textTransform: 'uppercase'
+            }}>
+              {user?.role || 'Staff'}
+            </span>
+            <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+              Last login: {user?.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Today'}
+            </span>
+          </div>
         </div>
-        <button onClick={loadDashboardData} style={styles.refreshButton}>
-          🔄 Refresh
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <RoleGuard roles={[UserRole.ADMIN]}>
+            <button 
+              onClick={() => window.location.href = '/users'} 
+              style={styles.adminButton}
+            >
+              👥 Manage Users
+            </button>
+          </RoleGuard>
+          <button onClick={loadDashboardData} style={styles.refreshButton}>
+            🔄 Refresh
+          </button>
+        </div>
       </div>
 
       {/* Key Metrics Cards */}
@@ -596,5 +639,19 @@ const styles = {
   actionDescription: {
     fontSize: '12px',
     color: '#6b7280',
+  },
+  adminButton: {
+    padding: '0.75rem 1.5rem',
+    background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '0.75rem',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.875rem',
   },
 };
