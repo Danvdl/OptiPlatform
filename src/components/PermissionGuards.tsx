@@ -22,7 +22,7 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
 };
 
 interface RoleGuardProps {
-  roles: string[];
+  roles: (string | import('../types/user-management').UserRole)[];
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }
@@ -33,8 +33,19 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   fallback = null 
 }) => {
   const { user } = useAuth();
+  const userRole = user?.role?.toLowerCase();
 
-  if (!user || !roles.includes(user.role)) {
+  // Debug logging with case-insensitive comparison
+  console.log('🛡️ RoleGuard Debug:', {
+    userRole: user?.role,
+    userRoleLower: userRole,
+    requiredRoles: roles,
+    requiredRolesLower: roles.map(r => r.toLowerCase()),
+    userExists: !!user,
+    includes: userRole ? roles.map(r => r.toLowerCase()).includes(userRole) : false
+  });
+
+  if (!user || !userRole || !roles.map(r => r.toLowerCase()).includes(userRole)) {
     return <>{fallback}</>;
   }
 
@@ -43,7 +54,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
 
 // Combined guard for both role and permission checks
 interface AccessGuardProps {
-  roles?: string[];
+  roles?: (string | import('../types/user-management').UserRole)[];
   permissions?: string[];
   requireAll?: boolean; // If true, user must have ALL permissions, if false, just one
   children: React.ReactNode;
@@ -60,7 +71,7 @@ export const AccessGuard: React.FC<AccessGuardProps> = ({
   const { user, hasPermission } = useAuth();
 
   // Check role access
-  const hasRoleAccess = roles.length === 0 || (user && roles.includes(user.role));
+  const hasRoleAccess = roles.length === 0 || (user && roles.includes(user.role as any));
 
   // Check permission access
   let hasPermissionAccess = true;

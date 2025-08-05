@@ -34,7 +34,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // Check if there's a token before making API calls
       const token = await getToken();
+      console.log('🔑 Auth Debug - Token found:', !!token);
+      
       if (!token) {
+        console.log('❌ Auth Debug - No token found, setting user to null');
         setUser(null);
         setPermissions([]);
         setLoading(false);
@@ -42,11 +45,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       setLoading(true);
+      console.log('📡 Auth Debug - Fetching current user...');
+      
       const currentUser = await fetchCurrentUser();
+      console.log('👤 Auth Debug - Current user:', currentUser);
+      console.log('🎭 Auth Debug - User role:', currentUser?.role, typeof currentUser?.role);
+      
       setUser(currentUser);
       
       // Load user permissions
+      console.log('🔐 Auth Debug - Fetching user permissions...');
+      
       const userPermissions = await fetchUserPermissions();
+      console.log('🔐 Auth Debug - User permissions:', userPermissions);
+      
       setPermissions(userPermissions);
     } catch (error) {
       console.error('Error loading user:', error);
@@ -70,11 +82,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading,
     permissions,
     hasPermission: checkPermission,
-    isAdmin: user?.role === UserRole.ADMIN,
-    isManager: user?.role === UserRole.MANAGER,
-    isStaff: user?.role === UserRole.STAFF,
+    isAdmin: user?.role?.toLowerCase() === UserRole.ADMIN.toLowerCase(),
+    isManager: user?.role?.toLowerCase() === UserRole.MANAGER.toLowerCase(),
+    isStaff: user?.role?.toLowerCase() === UserRole.STAFF.toLowerCase(),
     refreshUser: loadUser
   };
+
+  // Debug logging
+  console.log('🎭 Auth Context Values:', {
+    user: user ? { id: user.id, username: user.username, role: user.role } : null,
+    loading,
+    isAdmin: user?.role === UserRole.ADMIN,
+    userRole: user?.role,
+    UserRoleADMIN: UserRole.ADMIN,
+    roleComparison: user?.role === UserRole.ADMIN
+  });
 
   return (
     <AuthContext.Provider value={value}>
