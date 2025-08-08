@@ -55,8 +55,25 @@ export class SuppliersService {
 
   async findAllSuppliers(): Promise<Supplier[]> {
     return await this.suppliers.find({
-      relations: ['supplierProducts', 'purchaseOrders'],
-      order: { name: 'ASC' }
+      select: [
+        'id',
+        'name',
+  'supplierCode',
+        'type',
+        'status',
+        'contactPerson',
+        'email',
+        'phone',
+        'preferredCurrency',
+        'paymentTermsDays',
+        'reliabilityScore',
+        'qualityScore',
+        'onTimeDeliveryRate',
+        'notes',
+        'createdAt',
+        'updatedAt',
+      ],
+      order: { name: 'ASC' },
     });
   }
 
@@ -76,8 +93,25 @@ export class SuppliersService {
   async findActiveSuppliers(): Promise<Supplier[]> {
     return await this.suppliers.find({
       where: { status: SupplierStatus.ACTIVE },
-      relations: ['supplierProducts'],
-      order: { name: 'ASC' }
+      select: [
+        'id',
+        'name',
+  'supplierCode',
+        'type',
+        'status',
+        'contactPerson',
+        'email',
+        'phone',
+        'preferredCurrency',
+        'paymentTermsDays',
+        'reliabilityScore',
+        'qualityScore',
+        'onTimeDeliveryRate',
+        'notes',
+        'createdAt',
+        'updatedAt',
+      ],
+      order: { name: 'ASC' },
     });
   }
 

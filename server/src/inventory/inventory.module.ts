@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { InventoryService } from './inventory.service';
 import { Product } from './entities/product.entity';
@@ -16,6 +17,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
+  ConfigModule,
     TypeOrmModule.forFeature([Product, Category, ProductNote, InventoryTransaction, PriceHistory]),
     NotificationsModule,
   ],

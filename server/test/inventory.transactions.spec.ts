@@ -21,7 +21,8 @@ describe('InventoryService - transactions', () => {
   const notifications = { sendLowStockAlert: jest.fn(), sendWasteAlert: jest.fn() } as any;
   const priceHistoryService = { trackPriceChange: jest.fn() } as any;
 
-  const service = new InventoryService(productRepo, categoryRepo, productNoteRepo, txRepo, notifications, priceHistoryService);
+  const config = { get: jest.fn(() => undefined) } as any;
+  const service = new InventoryService(productRepo, categoryRepo, productNoteRepo, txRepo, notifications, priceHistoryService, config);
 
   beforeEach(() => {
     jest.clearAllMocks();

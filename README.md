@@ -144,6 +144,10 @@ VITE_FIREBASE_PUBLIC_VAPID_KEY=your-vapid-key
 # Backend URL
 VITE_BACKEND_URL=http://localhost:3001
 SERVER_URL=http://localhost:3001
+
+# Notifications & Thresholds
+# Optional: threshold (in currency units) above which a waste/damage event triggers a push notification
+WASTE_ALERT_THRESHOLD=100
 ```
 
 ---

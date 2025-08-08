@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './Transactions.css';
+import Modal from '../components/Modal';
 import { fetchAdvancedTransactions, createAdvancedTransaction, type AdvancedTransaction, type CreateTransactionInput } from '../utils/advancedApi';
 
 export default function Transactions() {
@@ -450,53 +451,34 @@ export default function Transactions() {
         </div>
       </div>
 
-      {/* Create Transaction Modal (placeholder) */}
-      {showCreateForm && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
+      {/* Create Transaction Modal */}
+      <Modal isOpen={showCreateForm} onClose={() => setShowCreateForm(false)} title="➕ Create New Transaction">
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          try {
+            const newTransactionData = await createAdvancedTransaction(newTransaction);
+            setTransactions(prev => [...prev, newTransactionData]);
+            setShowCreateForm(false);
+            setNewTransaction({
+              productName: '',
+              type: 'adjustment',
+              quantity: 0,
+              reason: '',
+              fromLocation: '',
+              toLocation: ''
+            });
+          } catch (error) {
+            console.error('Error creating transaction:', error);
+          }
         }}>
-          <div style={{
-            background: 'white',
-            borderRadius: '1rem',
-            padding: '2rem',
-            maxWidth: '600px',
-            width: '90%'
-          }}>
-            <h3 style={{ margin: '0 0 1rem 0' }}>Create New Transaction</h3>
-            <form onSubmit={async (e) => {
-              e.preventDefault();
-              try {
-                const newTransactionData = await createAdvancedTransaction(newTransaction);
-                setTransactions(prev => [...prev, newTransactionData]);
-                setShowCreateForm(false);
-                setNewTransaction({
-                  productName: '',
-                  type: 'adjustment',
-                  quantity: 0,
-                  reason: '',
-                  fromLocation: '',
-                  toLocation: ''
-                });
-              } catch (error) {
-                console.error('Error creating transaction:', error);
-              }
-            }}>
-              <div style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
                       Product *
                     </label>
                     <select
+                      data-testid="txn-product"
                       value={newTransaction.productName}
                       onChange={(e) => setNewTransaction({ ...newTransaction, productName: e.target.value })}
                       required
@@ -519,6 +501,7 @@ export default function Transactions() {
                       Transaction Type *
                     </label>
                     <select
+                      data-testid="txn-type"
                       value={newTransaction.type}
                       onChange={(e) => setNewTransaction({ ...newTransaction, type: e.target.value })}
                       required
@@ -548,6 +531,7 @@ export default function Transactions() {
                     Quantity *
                   </label>
                   <input
+                    data-testid="txn-quantity"
                     type="number"
                     value={newTransaction.quantity}
                     onChange={(e) => setNewTransaction({ ...newTransaction, quantity: parseInt(e.target.value) || 0 })}
@@ -609,6 +593,7 @@ export default function Transactions() {
                     Reason/Notes
                   </label>
                   <textarea
+                    data-testid="txn-notes"
                     value={newTransaction.reason}
                     onChange={(e) => setNewTransaction({ ...newTransaction, reason: e.target.value })}
                     style={{
@@ -623,42 +608,18 @@ export default function Transactions() {
                     placeholder="Enter reason for this transaction..."
                   />
                 </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowCreateForm(false)}
-                  style={{
-                    background: '#6b7280',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    padding: '0.75rem 1.5rem',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  style={{
-                    background: '#10b981',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    padding: '0.75rem 1.5rem',
-                    cursor: 'pointer',
-                    fontWeight: '600'
-                  }}
-                >
-                  Create Transaction
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+            <button type="button" onClick={() => setShowCreateForm(false)} className="btn btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-primary">
+              Create Transaction
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -43,10 +43,11 @@ describe('InventoryService', () => {
   const priceHistoryService = {
     trackPriceChange: jest.fn(),
   } as any;
+  const config = { get: jest.fn(() => undefined) } as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new InventoryService(productRepo, categoryRepo, productNoteRepo, txRepo, notifications, priceHistoryService);
+  service = new InventoryService(productRepo, categoryRepo, productNoteRepo, txRepo, notifications, priceHistoryService, config);
   });
 
   it('creates a product', async () => {

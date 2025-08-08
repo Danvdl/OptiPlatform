@@ -5,9 +5,11 @@ import { graphql } from './inventoryApi';
 export interface Supplier {
   id: number;
   name: string;
-  supplierCode: string;
-  supplierType: 'distributor' | 'manufacturer' | 'retailer';
-  status: 'active' | 'inactive' | 'pending';
+  // Optional: backend currently doesn't expose this; keep optional for UI display fallback
+  supplierCode?: string;
+  // Normalized to lowercase for UI convenience (backend returns enum)
+  type: 'manufacturer' | 'distributor' | 'wholesaler' | 'retailer' | 'service_provider';
+  status: 'active' | 'inactive' | 'suspended' | 'pending_approval';
   contactPerson?: string;
   email?: string;
   phone?: string;
@@ -18,11 +20,15 @@ export interface Supplier {
 
 export interface CreateSupplierInput {
   name: string;
-  supplierCode: string;
-  supplierType: 'distributor' | 'manufacturer' | 'retailer';
+  supplierCode?: string; // currently unused by backend
+  supplierType: 'distributor' | 'manufacturer' | 'retailer' | 'wholesaler' | 'service_provider';
   contactPerson?: string;
   email?: string;
   phone?: string;
+  description?: string;
+  address?: string;
+  discountPercentage?: number;
+  freeShippingThreshold?: number;
 }
 
 // Purchase Order types and interfaces
@@ -89,8 +95,8 @@ export async function fetchSuppliers(): Promise<Supplier[]> {
       suppliers {
         id
         name
-        supplierCode
-        supplierType
+  supplierCode
+        type
         status
         contactPerson
         email
@@ -103,39 +109,36 @@ export async function fetchSuppliers(): Promise<Supplier[]> {
   `;
   
   try {
-    const data = await graphql<{ suppliers: Supplier[] }>(query);
-    return data.suppliers;
+    const data = await graphql<{ suppliers: Array<{
+      id: number;
+      name: string;
+      supplierCode?: string;
+      type: string; // GraphQL enum value
+      status: string; // GraphQL enum value
+      contactPerson?: string;
+      email?: string;
+      phone?: string;
+      reliabilityScore?: number;
+      qualityScore?: number;
+      onTimeDeliveryRate?: number;
+    }> }>(query);
+    // Normalize enum values to lowercase strings expected by UI
+    return data.suppliers.map(s => ({
+      id: s.id,
+      name: s.name,
+      supplierCode: s.supplierCode,
+      type: s.type?.toLowerCase() as Supplier['type'],
+      status: s.status?.toLowerCase() as Supplier['status'],
+      contactPerson: s.contactPerson,
+      email: s.email,
+      phone: s.phone,
+      reliabilityScore: s.reliabilityScore,
+      qualityScore: s.qualityScore,
+      onTimeDeliveryRate: s.onTimeDeliveryRate,
+    }));
   } catch (error) {
     console.error('Error fetching suppliers:', error);
-    // Return demo data as fallback
-    return [
-      {
-        id: 1,
-        name: 'Tech Supply Co',
-        supplierCode: 'TSC001',
-        supplierType: 'distributor',
-        status: 'active',
-        contactPerson: 'John Smith',
-        email: 'john@techsupply.com',
-        phone: '+1-555-0101',
-        reliabilityScore: 4.5,
-        qualityScore: 4.2,
-        onTimeDeliveryRate: 95.5
-      },
-      {
-        id: 2,
-        name: 'Global Electronics',
-        supplierCode: 'GE002',
-        supplierType: 'manufacturer',
-        status: 'active',
-        contactPerson: 'Sarah Johnson',
-        email: 'sarah@globalelec.com',
-        phone: '+1-555-0102',
-        reliabilityScore: 4.8,
-        qualityScore: 4.7,
-        onTimeDeliveryRate: 98.2
-      }
-    ];
+    return [];
   }
 }
 
@@ -145,12 +148,16 @@ export async function createSupplier(input: CreateSupplierInput): Promise<Suppli
       createSupplier(input: $input) {
         id
         name
-        supplierCode
-        supplierType
+  supplierCode
+        type
         status
         contactPerson
         email
         phone
+  description
+  address
+  discountPercentage
+  freeShippingThreshold
         reliabilityScore
         qualityScore
         onTimeDeliveryRate
@@ -159,19 +166,50 @@ export async function createSupplier(input: CreateSupplierInput): Promise<Suppli
   `;
   
   try {
-    const data = await graphql<{ createSupplier: Supplier }>(mutation, { input });
-    return data.createSupplier;
+    // Map UI input to backend schema (GraphQL enums are uppercase)
+    const serverInput: Record<string, any> = {
+      name: input.name,
+      supplierCode: input.supplierCode,
+      type: input.supplierType?.toUpperCase(),
+      contactPerson: input.contactPerson,
+      email: input.email,
+      phone: input.phone,
+      description: input.description,
+      address: input.address,
+      discountPercentage: input.discountPercentage,
+      freeShippingThreshold: input.freeShippingThreshold,
+    };
+    const data = await graphql<{ createSupplier: {
+      id: number; name: string; supplierCode?: string; type: string; status: string; contactPerson?: string; email?: string; phone?: string;
+      description?: string; address?: string; discountPercentage?: number; freeShippingThreshold?: number;
+      reliabilityScore?: number; qualityScore?: number; onTimeDeliveryRate?: number;
+    } }>(mutation, { input: serverInput });
+    const s = data.createSupplier;
+    return {
+      id: s.id,
+      name: s.name,
+      supplierCode: s.supplierCode,
+      type: s.type.toLowerCase() as Supplier['type'],
+      status: s.status.toLowerCase() as Supplier['status'],
+      contactPerson: s.contactPerson,
+      email: s.email,
+      phone: s.phone,
+      // allow UI to pick up optional new fields if needed
+      // @ts-ignore
+      description: s.description,
+      // @ts-ignore
+      address: s.address,
+      // @ts-ignore
+      discountPercentage: s.discountPercentage,
+      // @ts-ignore
+      freeShippingThreshold: s.freeShippingThreshold,
+      reliabilityScore: s.reliabilityScore,
+      qualityScore: s.qualityScore,
+      onTimeDeliveryRate: s.onTimeDeliveryRate,
+    };
   } catch (error) {
     console.error('Error creating supplier:', error);
-    // Return mock response for development
-    return {
-      id: Date.now(),
-      ...input,
-      status: 'active',
-      reliabilityScore: 0,
-      qualityScore: 0,
-      onTimeDeliveryRate: 0
-    };
+  throw error;
   }
 }
 
@@ -199,45 +237,7 @@ export async function fetchPurchaseOrders(): Promise<PurchaseOrder[]> {
     return data.purchaseOrders;
   } catch (error) {
     console.error('Error fetching purchase orders:', error);
-    // Return demo data as fallback
-    return [
-      {
-        id: 1,
-        poNumber: 'PO250801001',
-        supplierName: 'Tech Supply Co',
-        status: 'pending_approval',
-        priority: 'normal',
-        totalAmount: 2500.00,
-        currency: 'USD',
-        orderDate: '2025-08-01',
-        expectedDeliveryDate: '2025-08-15',
-        itemCount: 5
-      },
-      {
-        id: 2,
-        poNumber: 'PO250801002',
-        supplierName: 'Global Electronics',
-        status: 'sent',
-        priority: 'high',
-        totalAmount: 5750.50,
-        currency: 'USD',
-        orderDate: '2025-07-30',
-        expectedDeliveryDate: '2025-08-10',
-        itemCount: 12
-      },
-      {
-        id: 3,
-        poNumber: 'PO250731001',
-        supplierName: 'Office Supplies Plus',
-        status: 'received',
-        priority: 'low',
-        totalAmount: 890.25,
-        currency: 'USD',
-        orderDate: '2025-07-25',
-        expectedDeliveryDate: '2025-08-05',
-        itemCount: 8
-      }
-    ];
+  return [];
   }
 }
 
@@ -264,19 +264,7 @@ export async function createPurchaseOrder(input: CreatePurchaseOrderInput): Prom
     return data.createPurchaseOrder;
   } catch (error) {
     console.error('Error creating purchase order:', error);
-    // Return mock response for development
-    return {
-      id: Date.now(),
-      poNumber: `PO${new Date().getFullYear()}${String(Date.now()).slice(-6)}`,
-      supplierName: input.supplierName,
-      status: 'draft',
-      priority: input.priority,
-      totalAmount: 0,
-      currency: 'USD',
-      orderDate: new Date().toISOString().split('T')[0],
-      expectedDeliveryDate: input.expectedDeliveryDate,
-      itemCount: 0
-    };
+  throw error;
   }
 }
 
@@ -315,36 +303,7 @@ export async function fetchPricingData(): Promise<PricingData[]> {
     }));
   } catch (error) {
     console.error('Error fetching pricing data:', error);
-    // Return demo data as fallback
-    return [
-      {
-        id: 1,
-        productName: 'Wireless Mouse',
-        costPrice: 15.50,
-        sellingPrice: 29.99,
-        margin: 48.3,
-        inventoryValue: 1550.00,
-        potentialRevenue: 2999.00
-      },
-      {
-        id: 2,
-        productName: 'USB Cable Type-C',
-        costPrice: 8.99,
-        sellingPrice: 19.99,
-        margin: 55.0,
-        inventoryValue: 899.00,
-        potentialRevenue: 1999.00
-      },
-      {
-        id: 3,
-        productName: 'Laptop Stand',
-        costPrice: 25.00,
-        sellingPrice: 49.99,
-        margin: 50.0,
-        inventoryValue: 750.00,
-        potentialRevenue: 1499.70
-      }
-    ];
+  return [];
   }
 }
 
@@ -375,62 +334,7 @@ export async function fetchAdvancedTransactions(): Promise<AdvancedTransaction[]
     return data.transactions;
   } catch (error) {
     console.error('Error fetching transactions:', error);
-    // Return demo data as fallback
-    return [
-      {
-        id: 1,
-        productName: 'Wireless Mouse',
-        type: 'purchase',
-        quantity: 50,
-        unitCost: 15.50,
-        totalCost: 775.00,
-        status: 'completed',
-        occurredAt: '2025-08-01T10:30:00Z',
-        supplierName: 'Tech Supply Co',
-        reference: 'PO250801001'
-      },
-      {
-        id: 2,
-        productName: 'USB Cable Type-C',
-        type: 'sale',
-        quantity: -25,
-        unitCost: 8.99,
-        totalCost: 224.75,
-        status: 'completed',
-        occurredAt: '2025-08-01T14:15:00Z',
-        reference: 'SALE-2025-001'
-      },
-      {
-        id: 3,
-        productName: 'Laptop Stand',
-        type: 'adjustment',
-        quantity: -2,
-        reason: 'Damaged during shipping',
-        status: 'completed',
-        occurredAt: '2025-07-31T09:00:00Z'
-      },
-      {
-        id: 4,
-        productName: 'Wireless Mouse',
-        type: 'transfer_out',
-        quantity: -10,
-        status: 'pending',
-        occurredAt: '2025-08-01T16:45:00Z',
-        fromLocation: 'Warehouse A',
-        toLocation: 'Store Front',
-        reference: 'TXF-001'
-      },
-      {
-        id: 5,
-        productName: 'USB Cable Type-C',
-        type: 'return_to_supplier',
-        quantity: -5,
-        reason: 'Defective units',
-        status: 'completed',
-        occurredAt: '2025-07-30T11:20:00Z',
-        supplierName: 'Global Electronics'
-      }
-    ];
+  return [];
   }
 }
 
@@ -456,13 +360,22 @@ export async function createAdvancedTransaction(input: CreateTransactionInput): 
     return data.createAdvancedTransaction;
   } catch (error) {
     console.error('Error creating transaction:', error);
-    // Return mock response for development
-    return {
-      id: Date.now(),
-      ...input,
-      status: 'pending',
-      occurredAt: new Date().toISOString(),
-      reference: `TXN-${Date.now()}`
-    };
+    throw error;
+  }
+}
+
+// Reports API
+export async function fetchDashboardMetrics(periodDays: number): Promise<any> {
+  const query = `
+    query Dashboard($period: Int!) {
+      dashboardMetrics(period: $period)
+    }
+  `;
+  try {
+    const data = await graphql<{ dashboardMetrics: string }>(query, { period: periodDays });
+    return JSON.parse(data.dashboardMetrics || '{}');
+  } catch (error) {
+    console.error('Error fetching dashboard metrics:', error);
+    return {};
   }
 }

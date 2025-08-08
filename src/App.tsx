@@ -12,8 +12,6 @@ import UserManagement from './pages/UserManagement';
 import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
-  console.log('App component rendering...');
-  
   return (
     <AuthProvider>
       <div style={{ minHeight: '100vh', background: '#f0f0f0' }}>

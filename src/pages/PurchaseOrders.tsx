@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './PurchaseOrders.css';
+import Modal from '../components/Modal';
 import { fetchPurchaseOrders, createPurchaseOrder, type PurchaseOrder, type CreatePurchaseOrderInput } from '../utils/advancedApi';
 
 export default function PurchaseOrders() {
@@ -98,6 +99,7 @@ export default function PurchaseOrders() {
           </p>
         </div>
         <button
+          data-testid="po-open"
           onClick={() => setShowCreateForm(true)}
           style={{
             background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
@@ -419,143 +421,106 @@ export default function PurchaseOrders() {
         </div>
       </div>
 
-      {/* Create PO Modal (placeholder) */}
-      {showCreateForm && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
+      {/* Create PO Modal */}
+      <Modal isOpen={showCreateForm} onClose={() => setShowCreateForm(false)} title="🛒 Create Purchase Order">
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          try {
+            const newPurchaseOrder = await createPurchaseOrder(newPO);
+            setPurchaseOrders(prev => [...prev, newPurchaseOrder]);
+            setShowCreateForm(false);
+            setNewPO({ supplierName: '', priority: 'normal', expectedDeliveryDate: '' });
+          } catch (error) {
+            console.error('Error creating purchase order:', error);
+          }
         }}>
-          <div style={{
-            background: 'white',
-            borderRadius: '1rem',
-            padding: '2rem',
-            maxWidth: '600px',
-            width: '90%'
-          }}>
-            <h3 style={{ margin: '0 0 1rem 0' }}>Create Purchase Order</h3>
-            <form onSubmit={async (e) => {
-              e.preventDefault();
-              try {
-                const newPurchaseOrder = await createPurchaseOrder(newPO);
-                setPurchaseOrders(prev => [...prev, newPurchaseOrder]);
-                setShowCreateForm(false);
-                setNewPO({
-                  supplierName: '',
-                  priority: 'normal',
-                  expectedDeliveryDate: ''
-                });
-              } catch (error) {
-                console.error('Error creating purchase order:', error);
-              }
-            }}>
-              <div style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
-                    Supplier *
-                  </label>
-                  <select
-                    value={newPO.supplierName}
-                    onChange={(e) => setNewPO({ ...newPO, supplierName: e.target.value })}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '0.5rem',
-                      fontSize: '1rem'
-                    }}
-                  >
-                    <option value="">Select a supplier</option>
-                    <option value="Tech Supply Co">Tech Supply Co</option>
-                    <option value="Global Electronics">Global Electronics</option>
-                    <option value="Office Solutions Ltd">Office Solutions Ltd</option>
-                  </select>
-                </div>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
-                      Priority
-                    </label>
-                    <select
-                      value={newPO.priority}
-                      onChange={(e) => setNewPO({ ...newPO, priority: e.target.value as any })}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        border: '2px solid #e5e7eb',
-                        borderRadius: '0.5rem',
-                        fontSize: '1rem'
-                      }}
-                    >
-                      <option value="low">Low</option>
-                      <option value="normal">Normal</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
-                      Expected Delivery
-                    </label>
-                    <input
-                      type="date"
-                      value={newPO.expectedDeliveryDate}
-                      onChange={(e) => setNewPO({ ...newPO, expectedDeliveryDate: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        border: '2px solid #e5e7eb',
-                        borderRadius: '0.5rem',
-                        fontSize: '1rem'
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
+          <div style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
+                Supplier *
+              </label>
+              <select
+                data-testid="po-supplier"
+                value={newPO.supplierName}
+                onChange={(e) => setNewPO({ ...newPO, supplierName: e.target.value })}
+                required
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '0.5rem',
+                  fontSize: '1rem'
+                }}
+              >
+                <option value="">Select a supplier</option>
+                <option value="Tech Supply Co">Tech Supply Co</option>
+                <option value="Global Electronics">Global Electronics</option>
+                <option value="Office Solutions Ltd">Office Solutions Ltd</option>
+              </select>
+            </div>
 
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowCreateForm(false)}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
+                  Priority
+                </label>
+                <select
+                  data-testid="po-priority"
+                  value={newPO.priority}
+                  onChange={(e) => setNewPO({ ...newPO, priority: e.target.value as any })}
                   style={{
-                    background: '#6b7280',
-                    color: 'white',
-                    border: 'none',
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '2px solid #e5e7eb',
                     borderRadius: '0.5rem',
-                    padding: '0.75rem 1.5rem',
-                    cursor: 'pointer'
+                    fontSize: '1rem'
                   }}
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  style={{
-                    background: '#10b981',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    padding: '0.75rem 1.5rem',
-                    cursor: 'pointer',
-                    fontWeight: '600'
-                  }}
-                >
-                  Create Purchase Order
-                </button>
+                  <option value="low">Low</option>
+                  <option value="normal">Normal</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
               </div>
-            </form>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
+                  Expected Delivery
+                </label>
+                <input
+                  data-testid="po-expected-delivery"
+                  type="date"
+                  value={newPO.expectedDeliveryDate}
+                  onChange={(e) => setNewPO({ ...newPO, expectedDeliveryDate: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '0.5rem',
+                    fontSize: '1rem'
+                  }}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={() => setShowCreateForm(false)}
+              className="btn btn-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              data-testid="po-submit"
+              className="btn btn-primary"
+            >
+              Create Purchase Order
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

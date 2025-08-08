@@ -37,9 +37,11 @@ export default function Login() {
       const mutation = isRegister ? 'register' : 'login';
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
       
-      console.log('Making request to:', `${backendUrl}/graphql`);
-      console.log('Mutation:', mutation);
-      console.log('Data:', { username, password });
+      if (import.meta.env.MODE !== 'production') {
+        console.log('Making request to:', `${backendUrl}/graphql`);
+        console.log('Mutation:', mutation);
+        console.log('Data:', { username, password });
+      }
       
       const res = await fetch(`${backendUrl}/graphql`, {
         method: 'POST',
@@ -53,11 +55,15 @@ export default function Login() {
         }),
       });
       
-      console.log('Response status:', res.status);
-      console.log('Response headers:', res.headers);
+      if (import.meta.env.MODE !== 'production') {
+        console.log('Response status:', res.status);
+        console.log('Response headers:', res.headers);
+      }
       
       const json = await res.json();
-      console.log('Response data:', json);
+      if (import.meta.env.MODE !== 'production') {
+        console.log('Response data:', json);
+      }
       
       if (json.errors) {
         const code = json.errors[0].extensions?.code || ErrorCode.UNKNOWN;
@@ -180,11 +186,13 @@ export default function Login() {
           </button>
         </div>
 
-        <div className="login-demo-credentials">
-          <p className="login-demo-title">Demo Credentials:</p>
-          <p className="login-demo-text">Username: <strong>mvpuser2025</strong></p>
-          <p className="login-demo-text">Password: <strong>mvppass123</strong></p>
-        </div>
+        {import.meta.env.MODE !== 'production' && (
+          <div className="login-demo-credentials">
+            <p className="login-demo-title">Demo Credentials:</p>
+            <p className="login-demo-text">Username: <strong>mvpuser2025</strong></p>
+            <p className="login-demo-text">Password: <strong>mvppass123</strong></p>
+          </div>
+        )}
       </div>
     </div>
   );

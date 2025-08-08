@@ -39,56 +39,7 @@ export async function fetchUsers(): Promise<User[]> {
     return data.users;
   } catch (error) {
     console.error('Error fetching users:', error);
-    // Return demo data as fallback
-    return [
-      {
-        id: 1,
-        username: 'admin',
-        email: 'admin@optiplatform.local',
-        firstName: 'System',
-        lastName: 'Administrator',
-        role: UserRole.ADMIN,
-        status: UserStatus.ACTIVE,
-        department: 'IT',
-        position: 'System Administrator',
-        lastLoginAt: '2025-08-03T10:30:00Z',
-        createdAt: '2025-01-01T00:00:00Z',
-        updatedAt: '2025-08-03T10:30:00Z',
-        fullName: 'System Administrator'
-      },
-      {
-        id: 2,
-        username: 'manager1',
-        email: 'manager@optiplatform.local',
-        firstName: 'John',
-        lastName: 'Smith',
-        role: UserRole.MANAGER,
-        status: UserStatus.ACTIVE,
-        department: 'Operations',
-        position: 'Inventory Manager',
-        phoneNumber: '+1-555-0101',
-        lastLoginAt: '2025-08-02T16:45:00Z',
-        createdAt: '2025-02-01T00:00:00Z',
-        updatedAt: '2025-08-02T16:45:00Z',
-        fullName: 'John Smith'
-      },
-      {
-        id: 3,
-        username: 'staff1',
-        email: 'staff@optiplatform.local',
-        firstName: 'Jane',
-        lastName: 'Doe',
-        role: UserRole.STAFF,
-        status: UserStatus.ACTIVE,
-        department: 'Warehouse',
-        position: 'Inventory Clerk',
-        phoneNumber: '+1-555-0102',
-        lastLoginAt: '2025-08-03T09:15:00Z',
-        createdAt: '2025-03-01T00:00:00Z',
-        updatedAt: '2025-08-03T09:15:00Z',
-        fullName: 'Jane Doe'
-      }
-    ];
+  return [];
   }
 }
 
@@ -120,21 +71,7 @@ export async function fetchCurrentUser(): Promise<User> {
     return data.currentUser;
   } catch (error) {
     console.error('Error fetching current user:', error);
-    // Return demo current user
-    return {
-      id: 1,
-      username: 'admin',
-      email: 'admin@optiplatform.local',
-      firstName: 'System',
-      lastName: 'Administrator',
-      role: UserRole.ADMIN,
-      status: UserStatus.ACTIVE,
-      department: 'IT',
-      position: 'System Administrator',
-      createdAt: '2025-01-01T00:00:00Z',
-      updatedAt: '2025-08-03T10:30:00Z',
-      fullName: 'System Administrator'
-    };
+  throw error;
   }
 }
 
@@ -164,15 +101,7 @@ export async function createUser(input: CreateUserInput): Promise<User> {
     return data.createUser;
   } catch (error) {
     console.error('Error creating user:', error);
-    // Return mock response for development
-    return {
-      id: Date.now(),
-      ...input,
-      status: UserStatus.ACTIVE,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      fullName: input.firstName && input.lastName ? `${input.firstName} ${input.lastName}` : input.username
-    };
+  throw error;
   }
 }
 
@@ -253,16 +182,7 @@ export async function fetchUserPermissions(userId?: number): Promise<string[]> {
     return data.userPermissions;
   } catch (error) {
     console.error('Error fetching user permissions:', error);
-    // Return demo permissions
-    return [
-      'inventory:read',
-      'inventory:write',
-      'product:create',
-      'product:update',
-      'transaction:read',
-      'transaction:create',
-      'user:read'
-    ];
+  return [];
   }
 }
 
@@ -339,35 +259,8 @@ export async function fetchActivityLogs(filter: {
     return data.activityLogs;
   } catch (error) {
     console.error('Error fetching activity logs:', error);
-    // Return demo data
-    return [
-      {
-        id: 1,
-        userId: 1,
-        activityType: 'login',
-        description: 'User logged in',
-        createdAt: '2025-08-03T10:30:00Z',
-        user: {
-          id: 1,
-          username: 'admin',
-          fullName: 'System Administrator'
-        }
-      },
-      {
-        id: 2,
-        userId: 2,
-        activityType: 'create',
-        description: 'Created product: Wireless Mouse',
-        entityType: 'Product',
-        entityId: 1,
-        createdAt: '2025-08-03T09:15:00Z',
-        user: {
-          id: 2,
-          username: 'manager1',
-          fullName: 'John Smith'
-        }
-      }
-    ];
+  // Return empty array instead of demo data
+  return [];
   }
 }
 

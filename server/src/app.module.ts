@@ -57,6 +57,8 @@ import { ErrorHandlingModule } from './errors/error-handling.module';
           type: 'postgres',
           url: config.get<string>('DB_URL'),
           entities: [User, UserPermission, ActivityLog, UserPreferences, Product, Category, ProductNote, InventoryTransaction, PriceHistory, DeviceToken],
+          // Automatically load entities registered via TypeOrmModule.forFeature across modules
+          autoLoadEntities: true,
           synchronize: false, // Temporarily disabled to avoid schema conflicts
           schema: 'public', // Explicitly use public schema to avoid auth.users conflict
         };

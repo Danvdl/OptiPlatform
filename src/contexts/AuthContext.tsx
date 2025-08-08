@@ -34,10 +34,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // Check if there's a token before making API calls
       const token = await getToken();
-      console.log('🔑 Auth Debug - Token found:', !!token);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🔑 Auth Debug - Token found:', !!token);
+      }
       
       if (!token) {
-        console.log('❌ Auth Debug - No token found, setting user to null');
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('❌ Auth Debug - No token found, setting user to null');
+        }
         setUser(null);
         setPermissions([]);
         setLoading(false);
@@ -45,16 +49,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       setLoading(true);
-      console.log('📡 Auth Debug - Fetching current user...');
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('📡 Auth Debug - Fetching current user...');
+      }
       
       const currentUser = await fetchCurrentUser();
-      console.log('👤 Auth Debug - Current user:', currentUser);
-      console.log('🎭 Auth Debug - User role:', currentUser?.role, typeof currentUser?.role);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('👤 Auth Debug - Current user:', currentUser);
+        console.log('🎭 Auth Debug - User role:', currentUser?.role, typeof currentUser?.role);
+      }
       
       setUser(currentUser);
       
       // Load user permissions
-      console.log('🔐 Auth Debug - Fetching user permissions...');
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🔐 Auth Debug - Fetching user permissions...');
+      }
       
       const rawPermissions = await fetchUserPermissions();
       // Normalize GraphQL enum names (e.g., USER_READ) to code format (e.g., user:read)
@@ -63,12 +73,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .toLowerCase()
           .replace(/_/g, ':')
       );
-      console.log('🔐 Auth Debug - Raw permissions:', rawPermissions);
-      console.log('🔐 Auth Debug - Normalized permissions:', normalizedPermissions);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🔐 Auth Debug - Raw permissions:', rawPermissions);
+        console.log('🔐 Auth Debug - Normalized permissions:', normalizedPermissions);
+      }
       
       setPermissions(normalizedPermissions);
     } catch (error) {
-      console.error('Error loading user:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error loading user:', error);
+      }
       setUser(null);
       setPermissions([]);
     } finally {
@@ -104,14 +118,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Debug logging
-  console.log('🎭 Auth Context Values:', {
-    user: user ? { id: user.id, username: user.username, role: user.role } : null,
-    loading,
-    isAdmin: user?.role === UserRole.ADMIN,
-    userRole: user?.role,
-    UserRoleADMIN: UserRole.ADMIN,
-    roleComparison: user?.role === UserRole.ADMIN
-  });
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('🎭 Auth Context Values:', {
+      user: user ? { id: user.id, username: user.username, role: user.role } : null,
+      loading,
+      isAdmin: user?.role === UserRole.ADMIN,
+      userRole: user?.role,
+      UserRoleADMIN: UserRole.ADMIN,
+      roleComparison: user?.role === UserRole.ADMIN
+    });
+  }
 
   return (
     <AuthContext.Provider value={value}>

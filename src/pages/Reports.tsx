@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { fetchDashboardMetrics } from '../utils/advancedApi';
 
 interface ReportData {
   [key: string]: any;
@@ -25,31 +26,23 @@ export default function Reports() {
   const loadReportData = async (reportType: string) => {
     setLoading(true);
     try {
-      // This will be connected to the GraphQL API once frontend is fully integrated
-      console.log(`Loading ${reportType} report...`);
-      
-      // Simulate API call for now
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock data for demonstration
-      const mockData = {
-        dashboard: {
-          totalRevenue: 125420.50,
-          totalProfit: 45680.25,
-          inventoryValue: 89340.75,
-          turnoverRatio: 4.2,
-          lowStockItems: 12
-        },
-        'inventory-turnover': {
-          averageTurnover: 4.2,
-          topPerformers: ['Product A', 'Product B', 'Product C'],
-          slowMovers: ['Product X', 'Product Y']
-        }
-      };
-
-      setReportData({ [reportType]: mockData[reportType as keyof typeof mockData] || {} });
+      if (reportType === 'dashboard') {
+        const metrics = await fetchDashboardMetrics(30);
+        // Normalize to expected shape used in DashboardReport
+        const normalized = {
+          totalRevenue: metrics?.summary?.totalRevenue ?? 0,
+          totalProfit: metrics?.summary?.grossProfit ?? 0,
+          inventoryValue: metrics?.summary?.totalCost ?? 0,
+          turnoverRatio: metrics?.summary?.averageTurnover ?? 0,
+          lowStockItems: metrics?.summary?.lowStockItems ?? 0,
+        };
+        setReportData({ dashboard: normalized });
+      } else {
+        setReportData({ [reportType]: {} });
+      }
     } catch (error) {
       console.error('Failed to load report:', error);
+      setReportData({ [reportType]: {} });
     } finally {
       setLoading(false);
     }

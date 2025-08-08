@@ -11,6 +11,11 @@ export class CreateSupplierInput {
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
+  supplierCode?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   description?: string;
 
   @Field(() => SupplierType, { nullable: true })
@@ -157,6 +162,10 @@ export class CreateSupplierInput {
   @IsString()
   @IsOptional()
   tags?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  lastOrderDate?: Date;
 }
 
 @InputType()
@@ -173,6 +182,11 @@ export class UpdateSupplierInput {
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
+  supplierCode?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   description?: string;
 
   @Field(() => SupplierType, { nullable: true })
@@ -319,4 +333,8 @@ export class UpdateSupplierInput {
   @IsString()
   @IsOptional()
   tags?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  lastOrderDate?: Date;
 }

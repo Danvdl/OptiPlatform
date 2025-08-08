@@ -40,11 +40,16 @@ export class Supplier {
   name: string;
 
   @Field({ nullable: true })
+  @Column({ name: 'supplier_code', type: 'varchar', length: 100, unique: true, nullable: true })
+  supplierCode?: string;
+
+  @Field({ nullable: true })
   @Column({ type: 'text', nullable: true })
   description?: string;
 
   @Field(() => SupplierType)
   @Column({ 
+    name: 'supplier_type',
     type: 'enum', 
     enum: SupplierType,
     default: SupplierType.DISTRIBUTOR 
@@ -86,7 +91,7 @@ export class Supplier {
   city?: string;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Column({ name: 'state_province', nullable: true })
   state?: string;
 
   @Field({ nullable: true })
@@ -103,7 +108,7 @@ export class Supplier {
   taxId?: string;
 
   @Field({ nullable: true })
-  @Column({ name: 'registration_number', nullable: true })
+  @Column({ name: 'business_registration', nullable: true })
   registrationNumber?: string;
 
   // Payment & Terms
@@ -138,11 +143,11 @@ export class Supplier {
 
   // Performance Metrics
   @Field(() => Int, { nullable: true })
-  @Column({ name: 'reliability_score', nullable: true })
+  @Column({ name: 'reliability_score', type: 'int', nullable: true })
   reliabilityScore?: number; // 1-100
 
   @Field(() => Int, { nullable: true })
-  @Column({ name: 'quality_score', nullable: true })
+  @Column({ name: 'quality_score', type: 'int', nullable: true })
   qualityScore?: number; // 1-100
 
   @Field({ nullable: true })

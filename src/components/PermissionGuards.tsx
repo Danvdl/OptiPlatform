@@ -43,14 +43,16 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   const userRole = user?.role?.toLowerCase();
 
   // Debug logging with case-insensitive comparison
-  console.log('🛡️ RoleGuard Debug:', {
-    userRole: user?.role,
-    userRoleLower: userRole,
-    requiredRoles: roles,
-    requiredRolesLower: roles.map(r => r.toLowerCase()),
-    userExists: !!user,
-    includes: userRole ? roles.map(r => r.toLowerCase()).includes(userRole) : false
-  });
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('🛡️ RoleGuard Debug:', {
+      userRole: user?.role,
+      userRoleLower: userRole,
+      requiredRoles: roles,
+      requiredRolesLower: roles.map(r => r.toLowerCase()),
+      userExists: !!user,
+      includes: userRole ? roles.map(r => r.toLowerCase()).includes(userRole) : false
+    });
+  }
 
   if (!user || !userRole || !roles.map(r => r.toLowerCase()).includes(userRole)) {
     return <>{fallback}</>;

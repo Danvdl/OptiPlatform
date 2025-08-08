@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
@@ -38,6 +39,7 @@ export class InventoryService {
     private transactions: Repository<InventoryTransaction>,
     private notifications: NotificationsService,
     private priceHistoryService: PriceHistoryService,
+  private config: ConfigService,
   ) {}
 
   // Product operations
@@ -550,8 +552,10 @@ export class InventoryService {
     const savedTransaction = await this.transactions.save(transaction);
 
     // Create notification for significant waste
-    const wasteValue = (data.unitCost || product.purchasePrice || 0) * data.quantity;
-    if (wasteValue > 100) { // Threshold for significant waste
+  const wasteValue = (data.unitCost || product.purchasePrice || 0) * data.quantity;
+  const thresholdEnv = this.config?.get<string>('WASTE_ALERT_THRESHOLD');
+  const threshold = thresholdEnv ? Number(thresholdEnv) : 100;
+  if (wasteValue > threshold) { // Threshold for significant waste
       await this.notifications.sendWasteAlert({
         product: product.name,
         quantity: data.quantity,
