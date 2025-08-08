@@ -1,6 +1,4 @@
-## 🔧 Database Migration Required
-
-Your server is running but encountering database errors because the new pricing columns don't exist yet. Here's how to fix this:
+> This document has moved to ../docs/database/MIGRATION_GUIDE.md
 
 ### 📋 Migration Files Created:
 - `add_pricing_system.sql` - The migration script

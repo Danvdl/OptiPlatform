@@ -28,6 +28,11 @@ export class DatabaseErrorHandler {
    * Converts database-specific errors to standardized AppError
    */
   private static convertDatabaseError(error: any): AppError {
+    // If it's already an AppError, pass through
+    if (error instanceof AppError) {
+      return error;
+    }
+
     const errorInfo: DatabaseErrorInfo = {
       code: error.code || 'UNKNOWN',
       detail: error.detail,

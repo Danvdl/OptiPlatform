@@ -56,10 +56,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Load user permissions
       console.log('🔐 Auth Debug - Fetching user permissions...');
       
-      const userPermissions = await fetchUserPermissions();
-      console.log('🔐 Auth Debug - User permissions:', userPermissions);
+      const rawPermissions = await fetchUserPermissions();
+      // Normalize GraphQL enum names (e.g., USER_READ) to code format (e.g., user:read)
+      const normalizedPermissions = (rawPermissions || []).map(p =>
+        typeof p === 'string' && p.includes(':') ? p : String(p || '')
+          .toLowerCase()
+          .replace(/_/g, ':')
+      );
+      console.log('🔐 Auth Debug - Raw permissions:', rawPermissions);
+      console.log('🔐 Auth Debug - Normalized permissions:', normalizedPermissions);
       
-      setPermissions(userPermissions);
+      setPermissions(normalizedPermissions);
     } catch (error) {
       console.error('Error loading user:', error);
       setUser(null);
@@ -70,7 +77,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const checkPermission = (permission: string): boolean => {
-    return permissions.includes(permission);
+    const normalized = permission && (permission.includes(':')
+      ? permission
+      : permission.toLowerCase().replace(/_/g, ':'));
+    const has = permissions.includes(normalized);
+    // Debug single check
+    if (permission && process.env.NODE_ENV !== 'production') {
+      console.log('🔎 Permission check:', { input: permission, normalized, has, permissions });
+    }
+    return has;
   };
 
   useEffect(() => {

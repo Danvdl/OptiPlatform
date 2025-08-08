@@ -12,9 +12,16 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
   children, 
   fallback = null 
 }) => {
-  const { hasPermission } = useAuth();
+  const { hasPermission, user } = useAuth();
+  // Normalize permission code for comparison (GraphQL enums vs code strings)
+  const normalized = permission.includes(':') ? permission : permission.toLowerCase().replace(/_/g, ':');
+  // Admins bypass permission checks
+  const userRole = user?.role?.toLowerCase();
+  if (userRole === 'admin') {
+    return <>{children}</>;
+  }
 
-  if (!hasPermission(permission)) {
+  if (!hasPermission(normalized)) {
     return <>{fallback}</>;
   }
 
@@ -71,15 +78,20 @@ export const AccessGuard: React.FC<AccessGuardProps> = ({
   const { user, hasPermission } = useAuth();
 
   // Check role access
-  const hasRoleAccess = roles.length === 0 || (user && roles.includes(user.role as any));
+  const hasRoleAccess = roles.length === 0 || (user && roles.map(r => r.toLowerCase()).includes((user.role as string)?.toLowerCase()));
 
   // Check permission access
   let hasPermissionAccess = true;
   if (permissions.length > 0) {
-    if (requireAll) {
-      hasPermissionAccess = permissions.every(permission => hasPermission(permission));
+    // Admins bypass permission requirements
+    if ((user?.role as string)?.toLowerCase() === 'admin') {
+      hasPermissionAccess = true;
     } else {
-      hasPermissionAccess = permissions.some(permission => hasPermission(permission));
+      if (requireAll) {
+        hasPermissionAccess = permissions.every(permission => hasPermission(permission));
+      } else {
+        hasPermissionAccess = permissions.some(permission => hasPermission(permission));
+      }
     }
   }
 

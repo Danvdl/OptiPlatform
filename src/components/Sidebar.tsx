@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { clearToken } from '../utils/authStore';
 import { useAuth } from '../contexts/AuthContext';
-import { RoleGuard, PermissionGuard } from './PermissionGuards';
+import { RoleGuard, PermissionGuard, AccessGuard } from './PermissionGuards';
 import { UserRole } from '../types/user-management';
 
 export default function Sidebar() {
@@ -264,8 +264,8 @@ export default function Sidebar() {
           </li>
         </PermissionGuard>
         
-        {/* Admin Section */}
-        <RoleGuard roles={[UserRole.ADMIN]}>
+  {/* Admin Section */}
+  <AccessGuard roles={[UserRole.ADMIN]} permissions={['user:read']} requireAll={false}>
           <li style={{ 
             marginBottom: '0.5rem',
             borderTop: '1px solid rgba(255, 255, 255, 0.1)',
@@ -298,7 +298,7 @@ export default function Sidebar() {
               User Management
             </NavLink>
           </li>
-        </RoleGuard>
+        </AccessGuard>
       </ul>
 
       {/* User section */}
@@ -353,8 +353,8 @@ export default function Sidebar() {
                 gap: '0.25rem'
               }}>
                 <span style={{
-                  background: user?.role === UserRole.ADMIN ? '#dc2626' : 
-                             user?.role === UserRole.MANAGER ? '#d97706' : '#059669',
+                  background: (user?.role?.toLowerCase?.() === 'admin') ? '#dc2626' : 
+                             (user?.role?.toLowerCase?.() === 'manager') ? '#d97706' : '#059669',
                   color: 'white',
                   padding: '0.125rem 0.5rem',
                   borderRadius: '0.5rem',

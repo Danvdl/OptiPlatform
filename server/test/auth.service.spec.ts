@@ -1,5 +1,6 @@
 import { AuthService } from '../src/auth/auth.service';
 import type { JwtService } from '@nestjs/jwt';
+import { UserService } from '../src/user/user.service';
 
 import { Repository } from 'typeorm';
 import { User } from '../src/user/user.entity';
@@ -19,12 +20,15 @@ const usersRepo = {
     }
     return null;
   }),
+  create: jest.fn((u) => u),
+  save: jest.fn(async (u) => u),
 } as any;
 
 jest.spyOn(bcrypt, 'compare').mockImplementation(async (pass: string) => pass === 'test');
 
 describe('AuthService', () => {
-  const service = new AuthService(jwtService, usersRepo);
+  const mockUserService = { updateLastLogin: jest.fn() } as unknown as UserService;
+  const service = new AuthService(jwtService, usersRepo, mockUserService);
 
 
   it('validates a user with correct credentials', async () => {

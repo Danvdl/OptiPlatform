@@ -57,4 +57,30 @@ export class NotificationsService implements OnModuleInit {
       console.error('Failed to send FCM message', err);
     }
   }
+
+  async sendWasteAlert(params: { product: string; quantity: number; value: number; reason?: string }) {
+    if (!this.tokens.size) return;
+    const { product, quantity, value, reason } = params;
+    const message: admin.messaging.MulticastMessage = {
+      notification: {
+        title: 'Inventory Waste/Damage',
+        body: `${quantity} ${quantity === 1 ? 'unit' : 'units'} of ${product} marked as ${reason || 'waste/damage'} (≈ $${value.toFixed(
+          2
+        )})`,
+      },
+      data: {
+        type: 'waste_alert',
+        product,
+        quantity: String(quantity),
+        value: String(value),
+        reason: reason || '',
+      },
+      tokens: Array.from(this.tokens),
+    };
+    try {
+      await admin.messaging().sendEachForMulticast(message);
+    } catch (err) {
+      console.error('Failed to send FCM message', err);
+    }
+  }
 }

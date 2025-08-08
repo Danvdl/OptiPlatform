@@ -22,12 +22,8 @@
 - **📈 Stock Movement Analytics** - Track inventory flow patterns
 - **⚠️ Low Stock Trend Analysis** - Predict stockouts and reorder points
 - **📋 Category Performance** - Compare performance across categories
-- **💰 Cost Analysis Reports** - Track cost trends and profitability
-- **📱 Dashboard Metrics** - Real-time KPI overview
+- ** Dashboard Metrics** - Real-time KPI overview
 - **📥 Export Functionality** - PDF, CSV, Excel export capabilities
-
-### 🔄 **In Development**
-- **Frontend Reporting Dashboard** - Interactive charts and visualizations
 - **Scheduled Reports** - Automated report generation and delivery
 - **Advanced Filtering** - Enhanced search and filter capabilities
 - **Mobile App** - React Native mobile application

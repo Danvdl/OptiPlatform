@@ -1,4 +1,5 @@
 import { InventoryService } from '../src/inventory/inventory.service';
+import { TransactionType } from '../src/inventory/entities/inventory-transaction.entity';
 import { NotificationsService } from '../src/notifications/notifications.service';
 
 describe('InventoryService', () => {
@@ -49,8 +50,8 @@ describe('InventoryService', () => {
   });
 
   it('creates a product', async () => {
-    await service.createProduct({ name: 'Widget' });
-    expect(productRepo.create).toHaveBeenCalledWith({ name: 'Widget', restockThreshold: 5 });
+    await service.createProduct({ name: 'Widget', sku: 'W-1' } as any);
+    expect(productRepo.create).toHaveBeenCalledWith({ name: 'Widget', sku: 'W-1', restockThreshold: 5 });
     expect(productRepo.save).toHaveBeenCalled();
   });
 
@@ -61,7 +62,7 @@ describe('InventoryService', () => {
     await service.createTransaction({
       productId: 1,
       quantity: -2,
-      transactionType: 'remove',
+      transactionType: TransactionType.REMOVE,
     });
 
     expect(notifications.sendLowStockAlert).toHaveBeenCalledWith('Widget', 3);

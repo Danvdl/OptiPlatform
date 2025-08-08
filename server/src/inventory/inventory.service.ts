@@ -552,8 +552,18 @@ export class InventoryService {
     // Create notification for significant waste
     const wasteValue = (data.unitCost || product.purchasePrice || 0) * data.quantity;
     if (wasteValue > 100) { // Threshold for significant waste
-      // TODO: Implement waste notification
-      console.log(`Waste Alert: ${product.name} - ${data.quantity} units wasted/damaged. Value: $${wasteValue.toFixed(2)}. Reason: ${data.reasonCode}`);
+      await this.notifications.sendWasteAlert({
+        product: product.name,
+        quantity: data.quantity,
+        value: wasteValue,
+        reason: data.reasonCode,
+      });
+    }
+
+    // Also check for low stock after waste/damage
+    const newStock = currentStock - data.quantity;
+    if (newStock <= (product.restockThreshold || 5)) {
+      await this.notifications.sendLowStockAlert(product.name, newStock);
     }
 
     return savedTransaction;

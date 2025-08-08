@@ -1,6 +1,4 @@
-# 🔧 Quick Database Migration Guide
-
-## You have several options to apply the pricing system migration:
+> This document has moved to docs/QUICK_MIGRATION.md
 
 ### **Option 1: pgAdmin (GUI - Recommended)**
 

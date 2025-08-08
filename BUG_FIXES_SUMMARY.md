@@ -1,4 +1,4 @@
-# 🐛 Bug Fixes Summary
+> This document has moved to docs/BUG_FIXES_SUMMARY.md
 
 ## Issues Identified & Fixed
 

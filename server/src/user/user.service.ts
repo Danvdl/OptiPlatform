@@ -233,6 +233,12 @@ export class UserService {
   // Permission Management Methods
   @HandleDatabaseErrors()
   async getUserPermissions(userId: number): Promise<Permission[]> {
+    // Admins implicitly have all permissions
+    const user = await this.findById(userId);
+    if (user?.role === UserRole.ADMIN) {
+      return Object.values(Permission);
+    }
+
     const permissions = await this.permissionRepository.find({
       where: { userId },
       select: ['permission']
@@ -243,6 +249,12 @@ export class UserService {
 
   @HandleDatabaseErrors()
   async hasPermission(userId: number, permission: Permission): Promise<boolean> {
+    // Admins implicitly have all permissions
+    const user = await this.findById(userId);
+    if (user?.role === UserRole.ADMIN) {
+      return true;
+    }
+
     const userPermission = await this.permissionRepository.findOne({
       where: { userId, permission }
     });

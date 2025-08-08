@@ -1,13 +1,4 @@
-# Apply Pricing System Migration via Docker
-
-## Quick Migration (Recommended)
-
-If you're using Docker Compose, you can apply the migration easily:
-
-```bash
-# Apply the migration to your running database
-docker compose exec db psql -U postgres -d mydb -f /docker-entrypoint-initdb.d/add_pricing_system.sql
-```
+> This document has moved to ../docs/database/README_MIGRATION.md
 
 ## Manual Options
 

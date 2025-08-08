@@ -1,4 +1,4 @@
-# 📈 Advanced Reporting & Analytics System
+> This document has moved to docs/REPORTS_DOCUMENTATION.md
 
 ## Overview
 The OptiPlatform now includes a comprehensive reporting and analytics system that provides deep insights into inventory performance, cost analysis, and business metrics.
