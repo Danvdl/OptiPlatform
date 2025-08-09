@@ -116,7 +116,20 @@ export class InventoryService {
       );
     }
 
-    return this.products.save(data);
+    // Build an update payload without undefined values to avoid nulling required fields
+    const { id, ...rest } = data as any;
+    const updatePayload: Record<string, any> = {};
+    Object.keys(rest).forEach((key) => {
+      if (rest[key] !== undefined) {
+        updatePayload[key] = rest[key];
+      }
+    });
+
+    if (Object.keys(updatePayload).length > 0) {
+      await this.products.update({ id: data.id }, updatePayload);
+    }
+  // Return fully loaded entity to satisfy non-null GraphQL fields
+  return this.products.findOneBy({ id: data.id });
   }
 
   removeProduct(id: number) {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './PurchaseOrders.css';
 import Modal from '../components/Modal';
-import { fetchPurchaseOrders, createPurchaseOrder, type PurchaseOrder, type CreatePurchaseOrderInput } from '../utils/advancedApi';
+import { fetchPurchaseOrders, createPurchaseOrder, type PurchaseOrder, type CreatePurchaseOrderInput } from '../services/purchaseOrdersService';
 
 export default function PurchaseOrders() {
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);

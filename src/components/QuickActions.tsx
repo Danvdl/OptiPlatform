@@ -1,4 +1,5 @@
 import Modal from '../components/Modal';
+import { TRANSACTION_TYPE_OPTIONS } from '../utils/inventoryUtils';
 
 interface QuickActionsProps {
   showAddTransaction: boolean;
@@ -87,7 +88,7 @@ export default function QuickActions({
             <label className="form-label">Product:</label>
             <select
               value={transactionForm.productId}
-              onChange={(e) => setTransactionForm(prev => ({ ...prev, productId: parseInt(e.target.value) }))}
+              onChange={(e) => setTransactionForm((prev: any) => ({ ...prev, productId: parseInt(e.target.value) }))}
               className="form-input"
               style={styles.input}
             >
@@ -102,13 +103,13 @@ export default function QuickActions({
             <label className="form-label">Transaction Type:</label>
             <select
               value={transactionForm.transactionType}
-              onChange={(e) => setTransactionForm(prev => ({ ...prev, transactionType: e.target.value }))}
+              onChange={(e) => setTransactionForm((prev: any) => ({ ...prev, transactionType: e.target.value }))}
               className="form-input"
               style={styles.input}
             >
-              <option value="add">Add Stock</option>
-              <option value="remove">Remove Stock</option>
-              <option value="transfer">Transfer</option>
+              {TRANSACTION_TYPE_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
             </select>
           </div>
 
@@ -117,7 +118,7 @@ export default function QuickActions({
             <input
               type="number"
               value={transactionForm.quantity}
-              onChange={(e) => setTransactionForm(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
+              onChange={(e) => setTransactionForm((prev: any) => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
               className="form-input"
               style={styles.input}
               placeholder="Enter quantity"
@@ -128,7 +129,7 @@ export default function QuickActions({
             <label className="form-label">Notes:</label>
             <textarea
               value={transactionForm.notes}
-              onChange={(e) => setTransactionForm(prev => ({ ...prev, notes: e.target.value }))}
+              onChange={(e) => setTransactionForm((prev: any) => ({ ...prev, notes: e.target.value }))}
               className="form-input"
               style={{ ...styles.input, minHeight: '80px', resize: 'vertical' as const }}
               placeholder="Optional notes about this transaction"
@@ -167,7 +168,7 @@ export default function QuickActions({
             <input
               type="text"
               value={productForm.name}
-              onChange={(e) => setProductForm(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) => setProductForm((prev: any) => ({ ...prev, name: e.target.value }))}
               className="form-input"
               style={styles.input}
               placeholder="Enter product name"
@@ -179,7 +180,7 @@ export default function QuickActions({
             <input
               type="text"
               value={productForm.sku}
-              onChange={(e) => setProductForm(prev => ({ ...prev, sku: e.target.value }))}
+              onChange={(e) => setProductForm((prev: any) => ({ ...prev, sku: e.target.value }))}
               className="form-input"
               style={styles.input}
               placeholder="Product SKU"
@@ -190,7 +191,7 @@ export default function QuickActions({
             <label className="form-label">Category:</label>
             <select
               value={productForm.categoryId}
-              onChange={(e) => setProductForm(prev => ({ ...prev, categoryId: parseInt(e.target.value) }))}
+              onChange={(e) => setProductForm((prev: any) => ({ ...prev, categoryId: parseInt(e.target.value) }))}
               className="form-input"
               style={styles.input}
             >
@@ -206,7 +207,7 @@ export default function QuickActions({
             <input
               type="text"
               value={productForm.unit}
-              onChange={(e) => setProductForm(prev => ({ ...prev, unit: e.target.value }))}
+              onChange={(e) => setProductForm((prev: any) => ({ ...prev, unit: e.target.value }))}
               className="form-input"
               style={styles.input}
               placeholder="e.g., pieces, kg, liters"
@@ -218,7 +219,7 @@ export default function QuickActions({
             <input
               type="number"
               value={productForm.restockThreshold}
-              onChange={(e) => setProductForm(prev => ({ ...prev, restockThreshold: parseInt(e.target.value) || 0 }))}
+              onChange={(e) => setProductForm((prev: any) => ({ ...prev, restockThreshold: parseInt(e.target.value) || 0 }))}
               className="form-input"
               style={styles.input}
               placeholder="Minimum stock level"
@@ -229,7 +230,7 @@ export default function QuickActions({
             <label className="form-label">Description:</label>
             <textarea
               value={productForm.description}
-              onChange={(e) => setProductForm(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setProductForm((prev: any) => ({ ...prev, description: e.target.value }))}
               className="form-input"
               style={{ ...styles.input, minHeight: '80px', resize: 'vertical' as const }}
               placeholder="Product description"
@@ -268,7 +269,7 @@ export default function QuickActions({
             <input
               type="text"
               value={categoryForm.name}
-              onChange={(e) => setCategoryForm(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) => setCategoryForm((prev: any) => ({ ...prev, name: e.target.value }))}
               className="form-input"
               style={styles.input}
               placeholder="Enter category name"
@@ -279,7 +280,7 @@ export default function QuickActions({
             <label className="form-label">Description:</label>
             <textarea
               value={categoryForm.description}
-              onChange={(e) => setCategoryForm(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setCategoryForm((prev: any) => ({ ...prev, description: e.target.value }))}
               className="form-input"
               style={{ ...styles.input, minHeight: '80px', resize: 'vertical' as const }}
               placeholder="Category description"

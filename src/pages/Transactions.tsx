@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Transactions.css';
 import Modal from '../components/Modal';
-import { fetchAdvancedTransactions, createAdvancedTransaction, type AdvancedTransaction, type CreateTransactionInput } from '../utils/advancedApi';
+import { fetchAdvancedTransactions, createAdvancedTransaction, type AdvancedTransaction, type CreateTransactionInput } from '../services/transactionsService';
 
 export default function Transactions() {
   const [transactions, setTransactions] = useState<AdvancedTransaction[]>([]);

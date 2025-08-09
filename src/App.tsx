@@ -10,6 +10,7 @@ import Pricing from './pages/Pricing';
 import Transactions from './pages/Transactions';
 import UserManagement from './pages/UserManagement';
 import { AuthProvider } from './contexts/AuthContext';
+import RequireAuth from './components/AuthGuard';
 
 function App() {
   return (
@@ -17,7 +18,7 @@ function App() {
       <div style={{ minHeight: '100vh', background: '#f0f0f0' }}>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route element={<MainLayout />}>
+          <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/inventory" element={<Inventory />} />

@@ -17,6 +17,7 @@ import {
 } from '../utils/inventoryApi';
 import { useError } from '../components/ErrorProvider';
 import { getErrorMessage, ErrorCode } from '../utils/errorCodes';
+import { isAdditionType } from '../utils/inventoryUtils';
 
 type TabType = 'overview' | 'transactions' | 'products' | 'categories';
 
@@ -178,13 +179,13 @@ export default function Inventory() {
   const lowStockProducts = products.filter(p => {
     const currentStock = transactions
       .filter(t => t.product.id === p.id)
-      .reduce((sum, t) => sum + (t.transactionType === 'add' ? t.quantity : -t.quantity), 0);
+  .reduce((sum, t) => sum + (isAdditionType(t.transactionType) ? t.quantity : -t.quantity), 0);
     return currentStock <= p.restockThreshold;
   });
   const totalValue = products.reduce((sum, product) => {
     const stock = transactions
       .filter(t => t.product.id === product.id)
-      .reduce((sum, t) => sum + (t.transactionType === 'add' ? t.quantity : -t.quantity), 0);
+  .reduce((sum, t) => sum + (isAdditionType(t.transactionType) ? t.quantity : -t.quantity), 0);
     return sum + (stock * 10); // Assuming $10 average value per unit
   }, 0);
 
@@ -444,7 +445,7 @@ export default function Inventory() {
                         width: '40px',
                         height: '40px',
                         borderRadius: '50%',
-                        background: transaction.transactionType === 'add' 
+                        background: isAdditionType(transaction.transactionType) 
                           ? 'linear-gradient(135deg, #10b981, #059669)' 
                           : 'linear-gradient(135deg, #ef4444, #dc2626)',
                         display: 'flex',
@@ -454,12 +455,12 @@ export default function Inventory() {
                         fontSize: '1.2rem',
                         marginRight: '0.75rem'
                       }}>
-                        {transaction.transactionType === 'add' ? '➕' : '➖'}
+                        {isAdditionType(transaction.transactionType) ? '➕' : '➖'}
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: '500' }}>{transaction.product.name}</div>
                         <div style={{ color: '#64748b', fontSize: '0.875rem' }}>
-                          {transaction.transactionType === 'add' ? 'Added' : 'Removed'} {transaction.quantity} units
+                          {isAdditionType(transaction.transactionType) ? 'Added' : 'Removed'} {transaction.quantity} units
                         </div>
                       </div>
                     </div>
@@ -494,7 +495,7 @@ export default function Inventory() {
                     lowStockProducts.map((product) => {
                       const currentStock = transactions
                         .filter(t => t.product.id === product.id)
-                        .reduce((sum, t) => sum + (t.transactionType === 'add' ? t.quantity : -t.quantity), 0);
+                        .reduce((sum, t) => sum + (isAdditionType(t.transactionType) ? t.quantity : -t.quantity), 0);
                       
                       return (
                         <div key={product.id} className="alert alert-warning" style={{
@@ -672,12 +673,12 @@ export default function Inventory() {
                               borderRadius: '1rem',
                               fontSize: '0.75rem',
                               fontWeight: '500',
-                              background: transaction.transactionType === 'add' 
+                              background: isAdditionType(transaction.transactionType) 
                                 ? 'linear-gradient(135deg, #10b981, #059669)' 
                                 : 'linear-gradient(135deg, #ef4444, #dc2626)',
                               color: 'white'
                             }}>
-                              {transaction.transactionType === 'add' ? '➕ Add' : '➖ Remove'}
+                              {isAdditionType(transaction.transactionType) ? '➕ Add' : '➖ Remove'}
                             </span>
                           </td>
                           <td style={{ padding: '1rem', fontWeight: '500' }}>{transaction.quantity}</td>
@@ -893,7 +894,7 @@ export default function Inventory() {
                 {filteredProducts.map(product => {
                   const currentStock = transactions
                     .filter(t => t.product.id === product.id)
-                    .reduce((sum, t) => sum + (t.transactionType === 'add' ? t.quantity : -t.quantity), 0);
+                    .reduce((sum, t) => sum + (isAdditionType(t.transactionType) ? t.quantity : -t.quantity), 0);
                   
                   const isLowStock = currentStock <= product.restockThreshold;
                   

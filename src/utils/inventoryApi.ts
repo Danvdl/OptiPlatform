@@ -123,7 +123,7 @@ export async function fetchItems(): Promise<InventoryItem[]> {
 
 export async function addItem(productId: number, quantity: number, transactionType: string, notes?: string) {
   const mutation = `
-    mutation Add($productId: Int!, $quantity: Int!, $type: String!, $notes: String) {
+    mutation Add($productId: Int!, $quantity: Int!, $type: TransactionType!, $notes: String) {
       createTransaction(data: { 
         productId: $productId, 
         quantity: $quantity, 
@@ -134,7 +134,9 @@ export async function addItem(productId: number, quantity: number, transactionTy
       }
     }
   `;
-  await graphql(mutation, { productId, quantity, type: transactionType, notes });
+  // Normalize to GraphQL enum format (e.g., 'add' | 'remove' -> 'ADD' | 'REMOVE')
+  const enumType = String(transactionType || '').toUpperCase().replace(/-/g, '_');
+  await graphql(mutation, { productId, quantity, type: enumType, notes });
 }export async function updateItem(id: number, quantity: number, notes?: string) {
   const mutation = `
     mutation Update($id: Int!, $quantity: Int!, $notes: String) {

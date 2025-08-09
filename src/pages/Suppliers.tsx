@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './Suppliers.css';
-import { fetchSuppliers, createSupplier, type Supplier, type CreateSupplierInput } from '../utils/advancedApi';
+import { fetchSuppliers, createSupplier, type Supplier, type CreateSupplierInput } from '../services/suppliersService';
 
 export default function Suppliers() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);

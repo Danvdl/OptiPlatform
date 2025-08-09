@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [ dev, main ]
+  pull_request:
+    branches: [ dev, main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install root deps
+        run: npm ci
+      - name: Install server deps
+        run: npm ci
+        working-directory: server
+      - name: Lint (if configured)
+        run: |
+          npx eslint . || echo "eslint not configured or found"
+      - name: Typecheck frontend
+        run: npx tsc -p tsconfig.json --noEmit
+      - name: Typecheck backend
+        run: npx tsc -p server/tsconfig.json --noEmit
+      - name: Build frontend
+        run: npm run build
+      - name: Build backend
+        run: npm run build
+        working-directory: server

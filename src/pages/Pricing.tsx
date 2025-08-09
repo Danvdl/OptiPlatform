@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './Pricing.css';
-import { fetchPricingData, type PricingData } from '../utils/advancedApi';
+import { fetchPricingData, type PricingData, updateProductPrices, fetchPriceHistoryByProduct, type PriceHistoryEntry } from '../services/pricingService';
 
 interface PriceHistory {
   id: number;
@@ -28,7 +28,9 @@ interface Product {
 
 export default function Pricing() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([]);
+  const [priceHistory, setPriceHistory] = useState<PriceHistoryEntry[]>([]);
+  const [editingProduct, setEditingProduct] = useState<{ id: number; name: string; purchasePrice?: number; salePrice?: number; currency?: string } | null>(null);
+  const [editForm, setEditForm] = useState<{ purchasePrice?: number; salePrice?: number; currency?: string }>({});
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'bulk-update'>('overview');
 
@@ -52,29 +54,11 @@ export default function Pricing() {
         }));
         setProducts(mappedProducts);
 
-        // Sample price history data - in real implementation, this would come from GraphQL too
-        setPriceHistory([
-          {
-            id: 1,
-            productName: 'Wireless Mouse',
-            priceType: 'sale',
-            oldPrice: 24.99,
-            newPrice: 29.99,
-            currency: 'USD',
-            changedAt: '2025-07-15',
-            reason: 'Market price adjustment'
-          },
-          {
-            id: 2,
-            productName: 'USB Cable Type-C',
-            priceType: 'purchase',
-            oldPrice: 3.50,
-            newPrice: 3.25,
-            currency: 'USD',
-            changedAt: '2025-07-10',
-            reason: 'Supplier discount negotiated'
-          }
-        ]);
+        // Load history for the first product (simple default)
+        if (mappedProducts[0]) {
+          const history = await fetchPriceHistoryByProduct(mappedProducts[0].id);
+          setPriceHistory(history);
+        }
 
         setLoading(false);
       } catch (error) {
@@ -360,7 +344,12 @@ export default function Pricing() {
                             </div>
                           </td>
                           <td style={{ padding: '1rem' }}>
-                            <button style={{
+                            <button
+                              onClick={() => {
+                                setEditingProduct({ id: product.id, name: product.name, purchasePrice: product.purchasePrice, salePrice: product.salePrice, currency: product.currency });
+                                setEditForm({ purchasePrice: product.purchasePrice, salePrice: product.salePrice, currency: product.currency });
+                              }}
+                              style={{
                               padding: '0.5rem 1rem',
                               background: '#3b82f6',
                               color: 'white',
@@ -386,6 +375,24 @@ export default function Pricing() {
               <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.125rem', fontWeight: '600' }}>
                 Price Change History
               </h3>
+              {/* Simple product chooser to view history */}
+              {products.length > 0 && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ marginRight: '0.5rem' }}>Product:</label>
+                  <select
+                    onChange={async (e) => {
+                      const id = parseInt(e.target.value);
+                      const history = await fetchPriceHistoryByProduct(id);
+                      setPriceHistory(history);
+                    }}
+                    defaultValue={products[0]?.id}
+                  >
+                    {products.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
@@ -480,6 +487,73 @@ export default function Pricing() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {/* Update price simple modal */}
+          {editingProduct && (
+            <div style={{
+              position: 'fixed', inset: 0, background: '#00000055', display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              <div style={{ background: 'white', padding: '1.25rem', borderRadius: '0.75rem', minWidth: 360 }}>
+                <h3 style={{ marginTop: 0 }}>Update Price — {editingProduct.name}</h3>
+                <div className="form-group">
+                  <label className="form-label">Purchase Price</label>
+                  <input
+                    type="number"
+                    value={editForm.purchasePrice ?? ''}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, purchasePrice: e.target.value === '' ? undefined : parseFloat(e.target.value) }))}
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Sale Price</label>
+                  <input
+                    type="number"
+                    value={editForm.salePrice ?? ''}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, salePrice: e.target.value === '' ? undefined : parseFloat(e.target.value) }))}
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Currency</label>
+                  <input
+                    type="text"
+                    value={editForm.currency ?? 'USD'}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, currency: e.target.value }))}
+                    className="form-input"
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <button className="btn btn-secondary" onClick={() => setEditingProduct(null)}>Cancel</button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={async () => {
+                      await updateProductPrices({ id: editingProduct.id, ...editForm });
+                      // Refresh products and history
+                      const refreshed = await fetchPricingData();
+                      const mapped = refreshed.map((item) => ({
+                        id: item.id,
+                        name: item.productName,
+                        sku: `SKU${item.id.toString().padStart(3, '0')}`,
+                        purchasePrice: item.costPrice,
+                        salePrice: item.sellingPrice,
+                        currency: 'USD',
+                        currentStock: Math.floor(item.inventoryValue / (item.costPrice || 1)),
+                        inventoryValue: item.inventoryValue,
+                        potentialRevenue: item.potentialRevenue,
+                        potentialProfit: item.potentialRevenue - item.inventoryValue
+                      }));
+                      setProducts(mapped);
+                      const history = await fetchPriceHistoryByProduct(editingProduct.id);
+                      setPriceHistory(history);
+                      setEditingProduct(null);
+                    }}
+                  >
+                    Save
+                  </button>
+                </div>
               </div>
             </div>
           )}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchDashboardMetrics } from '../utils/advancedApi';
+import { fetchDashboardMetrics } from '../services/reportsService';
 
 interface ReportData {
   [key: string]: any;

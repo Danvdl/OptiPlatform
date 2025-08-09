@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { saveToken } from '../utils/authStore';
 import { useError } from '../components/ErrorProvider';
 import { getErrorMessage, ErrorCode } from '../utils/errorCodes';
 import './Login.css';
 
 export default function Login() {
+  const { user, loading } = useAuth();
+  const location = useLocation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -101,6 +105,12 @@ export default function Login() {
       `width=${w},height=${h},left=${x},top=${y}`
     );
   };
+
+  if (!loading && user) {
+    // Already logged in; redirect away from login
+    const redirectTo = (location.state as any)?.from || '/dashboard';
+    return <Navigate to={redirectTo} replace />;
+  }
 
   return (
     <div className="login-container">
