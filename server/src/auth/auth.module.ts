@@ -14,6 +14,7 @@ import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
+    ConfigModule,
     PassportModule,
     TypeOrmModule.forFeature([User]),
     forwardRef(() => UserModule),

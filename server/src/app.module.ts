@@ -59,7 +59,7 @@ import { ErrorHandlingModule } from './errors/error-handling.module';
           entities: [User, UserPermission, ActivityLog, UserPreferences, Product, Category, ProductNote, InventoryTransaction, PriceHistory, DeviceToken],
           // Automatically load entities registered via TypeOrmModule.forFeature across modules
           autoLoadEntities: true,
-          synchronize: false, // Temporarily disabled to avoid schema conflicts
+          synchronize: false, // Disabled to avoid conflicts with existing schema
           schema: 'public', // Explicitly use public schema to avoid auth.users conflict
         };
 
