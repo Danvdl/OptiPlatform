@@ -594,6 +594,7 @@ type Mutation {
   updatePurchaseOrderItem(input: UpdatePurchaseOrderItemInput!): PurchaseOrderItem!
   removePurchaseOrderItem(id: Int!): Boolean!
   receivePurchaseOrderItem(input: ReceivePurchaseOrderItemInput!): PurchaseOrderItem!
+  syncDocuments(docs: [SyncDocumentInput!]!): Boolean!
 }
 
 input LoginInput {
@@ -1000,4 +1001,11 @@ input ReceivePurchaseOrderItemInput {
   qualityRating: Float
   qualityApproved: Boolean
   notes: String
+}
+
+input SyncDocumentInput {
+  id: ID!
+  type: String!
+  data: String
+  lastUpdated: String
 }

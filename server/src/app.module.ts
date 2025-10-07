@@ -24,6 +24,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
 import { DeviceToken } from './notifications/entities/device-token.entity';
 import { AppError, ErrorCode } from './errors/error-codes';
 import { ErrorHandlingModule } from './errors/error-handling.module';
+import { SyncModule } from './sync/sync.module'; // Import the SyncModule for synchronization functionality
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { ErrorHandlingModule } from './errors/error-handling.module';
     ReportsModule,
     SuppliersModule,
     TypeOrmModule.forFeature([User, UserPermission, ActivityLog, UserPreferences, Product, Category, ProductNote, InventoryTransaction, PriceHistory, DeviceToken]),
+    SyncModule, // Include the SyncModule for document synchronization
   ],
   providers: [AppResolver],
 })
