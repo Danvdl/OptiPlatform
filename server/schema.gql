@@ -489,6 +489,8 @@ type Query {
   pendingApprovalPurchaseOrders: [PurchaseOrder!]!
   overduePurchaseOrders: [PurchaseOrder!]!
   purchaseOrderAnalytics(supplierId: Int, startDate: DateTime, endDate: DateTime): PurchaseOrderAnalytics!
+  productHealthScore(productId: Int!): String!
+  demandForecast(productId: Int!, horizon: Int): String!
 }
 
 """Available permissions in the system"""

@@ -69,6 +69,8 @@ This project uses **Supabase** as the PostgreSQL database. The database connecti
 
 > **✅ Database is pre-configured** - The Supabase connection details are set in your environment files. No additional database setup is required!
 
+> **ℹ️ Supabase Security Warnings:** If you see RLS warnings in Supabase dashboard, see [Supabase Security Guide](./docs/SUPABASE_SECURITY.md) for details. These warnings are expected with application-level authentication.
+
 ### 3. Environment Configuration
 
 The project uses multiple environment files to manage different deployment scenarios:
@@ -416,9 +418,12 @@ npm run tauri build
 
 ## 📚 Documentation
 
+- **🤖 [ML Analytics Architecture](./docs/ML_ANALYTICS_ARCHITECTURE.md)** - Advanced ML-powered analytics and forecasting system
+- **🚀 [ML Analytics Setup Guide](./docs/ML_ANALYTICS_SETUP_GUIDE.md)** - Step-by-step implementation guide
 - **📊 [Reporting System Documentation](./REPORTS_DOCUMENTATION.md)** - Complete guide to analytics and reporting features
 - **🔧 [API Documentation](http://localhost:3001/graphql)** - Interactive GraphQL playground
 - **🎯 [Business Intelligence Guide](./REPORTS_DOCUMENTATION.md#-key-metrics-explained)** - Understanding metrics and KPIs
+- **🔒 [Supabase Security Guide](./docs/SUPABASE_SECURITY.md)** - Database security and RLS configuration
 
 ---
 

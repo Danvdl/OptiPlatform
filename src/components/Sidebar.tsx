@@ -259,7 +259,37 @@ export default function Sidebar() {
               className="sidebar-link"
             >
               <span style={{ fontSize: '1.25rem' }}>📈</span>
-              Reports & Analytics
+              Reports
+            </NavLink>
+          </li>
+        </PermissionGuard>
+
+        <PermissionGuard permission="reports:read">
+          <li style={{ marginBottom: '0.5rem' }}>
+            <NavLink
+              to="/analytics"
+              style={({ isActive }) => ({
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.875rem 1rem',
+                borderRadius: '0.75rem',
+                textDecoration: 'none',
+                color: 'white',
+                fontWeight: '500',
+                transition: 'all 0.2s ease',
+                background: isActive 
+                  ? 'linear-gradient(135deg, #8b5cf6, #6d28d9)' 
+                  : 'transparent',
+                transform: isActive ? 'translateX(4px)' : 'none',
+                boxShadow: isActive 
+                  ? '0 4px 12px rgba(139, 92, 246, 0.4)' 
+                  : 'none'
+              })}
+              className="sidebar-link"
+            >
+              <span style={{ fontSize: '1.25rem' }}>🤖</span>
+              ML Analytics
             </NavLink>
           </li>
         </PermissionGuard>
