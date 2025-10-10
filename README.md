@@ -65,29 +65,57 @@ cd ..
 
 ### 2. Database Setup
 
-#### Option A: Supabase (Recommended)
-1. Create a [Supabase](https://supabase.com) project
-2. Run the initial schema: `database/schema.sql`
-3. Apply pricing system: `database/add_pricing_system.sql`
-4. Update `.env` with Supabase connection details
+This project uses **Supabase** as the PostgreSQL database. The database connection is already configured in the `.env` files.
 
-#### Option B: Local PostgreSQL
-```bash
-# Start local database
-docker-compose up -d db
-
-# Apply schema
-psql -h localhost -U postgres -d mydb -f database/schema.sql
-psql -h localhost -U postgres -d mydb -f database/add_pricing_system.sql
-```
+> **✅ Database is pre-configured** - The Supabase connection details are set in your environment files. No additional database setup is required!
 
 ### 3. Environment Configuration
+
+The project uses multiple environment files to manage different deployment scenarios:
+
+#### 📁 Environment Files
+
+| File | Purpose | Used When |
+|------|---------|-----------|
+| `.env.example` | Template with all available variables | Reference for setup |
+| `.env` | Main configuration file | Shared/committed config (without secrets) |
+| `.env.local` | **Local development** | Running `npm run dev` |
+| `.env.production` | **Production builds** | Running `npm run build` |
+
+#### 🔧 Setup Instructions
+
 ```bash
-# Copy environment template
+# 1. Copy the example template
 cp .env.example .env
 
-# Edit .env with your configuration
+# 2. Create local development config
+cp .env.example .env.local
+
+# 3. Create production config
+cp .env.example .env.production
 ```
+
+#### ⚙️ Configuration for Different Environments
+
+**For Local Development (`.env.local`):**
+```bash
+VITE_BACKEND_URL=http://localhost:3001
+SERVER_URL=http://localhost:3001
+# ... other local settings
+```
+
+**For Production (`.env.production`):**
+```bash
+VITE_BACKEND_URL=https://optiplatform-backend.onrender.com
+SERVER_URL=https://optiplatform-backend.onrender.com
+# ... other production settings
+```
+
+> **💡 Pro Tip:** Vite automatically loads the correct file based on the command:
+> - `npm run dev` → Uses `.env.local` (falls back to `.env`)
+> - `npm run build` → Uses `.env.production` (falls back to `.env`)
+
+> **⚠️ Security:** Never commit `.env.local` or `.env.production` with real secrets! Add them to `.gitignore`.
 
 ### 4. Start Development Servers
 
@@ -302,11 +330,72 @@ npm run test
 
 ## 🚀 Production Deployment
 
-### Backend Deployment
+### Deploying to Render (Backend)
+
+#### 1. Backend Deployment Settings
+
+| Setting | Value |
+|---------|-------|
+| **Root Directory** | `server` |
+| **Build Command** | `npm install; npm run build` |
+| **Start Command** | `npm run start` |
+| **Region** | Choose closest to your users |
+
+#### 2. Environment Variables on Render
+
+Add all variables from `.env.production` to your Render service:
+
 ```bash
+# Required Variables
+NODE_ENV=production
+JWT_SECRET=your-secret-key
+DB_HOST=your-database-host
+DB_PORT=6543
+DB_USERNAME=your-db-username
+DB_PASSWORD=your-db-password
+DB_NAME=postgres
+DB_URL=postgresql://username:password@host:port/database
+
+# Backend & Frontend URLs
+SERVER_URL=https://optiplatform-backend.onrender.com
+FRONTEND_URL=https://your-frontend-url.com  # Set to your actual frontend URL
+
+# Optional: OAuth & Firebase
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+# ... other optional variables
+```
+
+#### 3. CORS Configuration
+
+The backend automatically configures CORS based on `NODE_ENV`:
+- **Production:** Uses `FRONTEND_URL` environment variable
+- **Development:** Allows `localhost` origins
+
+#### 4. Frontend Deployment
+
+**Option A: Deploy frontend separately (Vercel/Netlify)**
+```bash
+# Build with production backend URL
+npm run build
+
+# Deploy the 'dist' folder
+```
+
+**Option B: Serve frontend from backend**
+- Build frontend and serve static files from NestJS
+- Single deployment, no CORS issues
+
+### Local Production Testing
+```bash
+# Backend
 cd server
 npm run build
 npm run start:prod
+
+# Frontend
+npm run build
+npm run preview
 ```
 
 ### Environment Variables for Production

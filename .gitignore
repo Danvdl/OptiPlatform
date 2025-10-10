@@ -2,5 +2,10 @@ node_modules/
 
 **/node_modules/
 **/dist/
+
+# Environment files (keep .env.example for reference)
 .env
+.env.local
+.env.production
+.env*.local
 

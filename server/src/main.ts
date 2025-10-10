@@ -9,9 +9,10 @@ async function bootstrap() {
   app.enableCors({
     origin: process.env.NODE_ENV === 'production' 
       ? [
-          process.env.FRONTEND_URL || 'https://optiplatform-backend.onrender.com', // Your production frontend URL
+          process.env.FRONTEND_URL, // Set this env var to your production frontend URL
           'http://localhost:5173', // Keep for local testing
-        ]
+        ].filter(Boolean) // Remove undefined values
+
       : [
           'http://localhost:5173', // Vite dev server default port
           'http://localhost:5174', // Alternative Vite port
