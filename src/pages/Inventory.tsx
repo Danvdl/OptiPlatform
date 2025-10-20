@@ -513,7 +513,20 @@ export default function Inventory() {
                               Stock: {currentStock} (Threshold: {product.restockThreshold})
                             </div>
                           </div>
-                          <button className="btn btn-primary" style={{ fontSize: '0.75rem' }}>
+                          <button 
+                            className="btn btn-primary" 
+                            style={{ fontSize: '0.75rem' }}
+                            onClick={() => {
+                              setTransactionForm({
+                                productId: product.id,
+                                quantity: product.restockThreshold * 2, // Suggest restocking to 2x threshold
+                                transactionType: 'add',
+                                notes: `Restocking ${product.name} - low stock alert`
+                              });
+                              setShowAddTransaction(true);
+                              setActiveTab('transactions');
+                            }}
+                          >
                             Restock
                           </button>
                         </div>

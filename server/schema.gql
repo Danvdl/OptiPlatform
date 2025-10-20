@@ -491,6 +491,15 @@ type Query {
   purchaseOrderAnalytics(supplierId: Int, startDate: DateTime, endDate: DateTime): PurchaseOrderAnalytics!
   productHealthScore(productId: Int!): String!
   demandForecast(productId: Int!, horizon: Int): String!
+
+  """Detect inventory anomalies across all products"""
+  detectInventoryAnomalies(startDate: String, endDate: String, threshold: Float): String!
+
+  """Detect anomalies for a specific product"""
+  detectProductAnomalies(productId: Float!, startDate: String, endDate: String, threshold: Float): String!
+
+  """Detect velocity changes for a product"""
+  detectVelocityChanges(productId: Float!): String!
 }
 
 """Available permissions in the system"""
