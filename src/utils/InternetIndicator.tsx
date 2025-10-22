@@ -1,7 +1,8 @@
+// src/utils/InternetIndicator.tsx
 import React, { useEffect, useState } from 'react';
-import { NetworkTracker, NetworkStatus } from './internetIndicate'; // named import
+import { NetworkTracker, NetworkStatus } from './internetIndicate';
 
-export default function InternetIndicator() {
+const InternetIndicator: React.FC = () => {
   const [status, setStatus] = useState<NetworkStatus>({
     connected: null,
     onlineEvent: null,
@@ -10,29 +11,57 @@ export default function InternetIndicator() {
 
   useEffect(() => {
     const tracker = new NetworkTracker({
-      onChange: (newStatus: NetworkStatus) => setStatus(newStatus),
+      onChange: (updatedStatus) => {
+        setStatus(updatedStatus);
+      },
     });
 
     return () => tracker.destroy();
   }, []);
 
-  const getLabel = () => {
-    if (status.connected === null) return 'Checking...';
-    return status.connected ? '🟢 Online' : '🔴 Offline';
-  };
+  // Determine display label
+  const label = status.connected
+    ? status.viaWifi
+      ? `Online (${status.viaWifi})`
+      : 'Online'
+    : 'Offline';
+
+  // Choose colors
+  const color = status.connected ? '#22c55e' : '#ef4444'; // green/red
+  const bg = status.connected
+    ? 'rgba(34, 197, 94, 0.15)'
+    : 'rgba(239, 68, 68, 0.15)';
 
   return (
-    <div style={{
-      padding: '0.25rem 0.5rem',
-      borderRadius: '0.5rem',
-      fontSize: '0.75rem',
-      fontWeight: 600,
-      background: status.connected ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)',
-      color: status.connected ? '#22c55e' : '#ef4444',
-      display: 'inline-block'
-    }}>
-      {getLabel()}
-      {status.viaWifi ? ` | ${status.viaWifi}` : ''}
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        background: bg,
+        border: `1px solid ${color}`,
+        color,
+        borderRadius: '0.5rem',
+        padding: '0.5rem 0.75rem',
+        fontSize: '0.875rem',
+        fontWeight: 500,
+        width: 'fit-content',
+        margin: '0 auto',
+        transition: 'all 0.3s ease',
+      }}
+    >
+      <span
+        style={{
+          display: 'inline-block',
+          width: '10px',
+          height: '10px',
+          borderRadius: '50%',
+          background: color,
+        }}
+      ></span>
+      <span>{label}</span>
     </div>
   );
-}
+};
+
+export default InternetIndicator;
