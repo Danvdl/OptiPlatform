@@ -5,6 +5,7 @@ module.exports = {
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
   },
+  collectCoverage: false, // Set to true when running with --coverage flag
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.spec.ts',
@@ -14,7 +15,7 @@ module.exports = {
     '!src/scripts/**',
   ],
   coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
   // TODO: Increase test coverage to meet these thresholds
   // coverageThreshold: {
   //   global: {
