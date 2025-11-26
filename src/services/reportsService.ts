@@ -3,7 +3,7 @@ import { logError } from '../utils/frontendLogger';
 
 export async function fetchDashboardMetrics(periodDays: number): Promise<any> {
   const query = `
-    query Dashboard($period: Int!) {
+    query Dashboard($period: Float!) {
       dashboardMetrics(period: $period)
     }
   `;
