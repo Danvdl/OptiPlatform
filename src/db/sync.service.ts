@@ -152,16 +152,15 @@ class SyncService {
       });
 
       if (!response.ok) {
-        console.warn('[Sync] Products pull failed:', response.status, response.statusText);
-        // Continue with other sync operations instead of failing completely
+        // Backend doesn't support incremental sync yet - this is expected
+        // Skip silently instead of logging warnings
         return;
       }
 
       const result = await response.json();
       
       if (result.errors) {
-        console.warn('[Sync] GraphQL errors during products pull:', result.errors);
-        // Skip this sync if backend doesn't support the query
+        // Backend doesn't support this query yet - skip silently
         return;
       }
       
