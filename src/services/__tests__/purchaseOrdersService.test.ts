@@ -28,25 +28,27 @@ describe('purchaseOrdersService', () => {
       {
         id: 1,
         poNumber: 'PO-2024-001',
-        supplierName: 'ABC Supplier',
+        supplierId: 1,
+        supplier: { id: 1, name: 'ABC Supplier' },
         status: 'pending',
         priority: 'high',
         totalAmount: 15000,
         currency: 'USD',
         orderDate: '2024-01-15T00:00:00Z',
         expectedDeliveryDate: '2024-02-01T00:00:00Z',
-        itemCount: 5,
+        items: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
       },
       {
         id: 2,
         poNumber: 'PO-2024-002',
-        supplierName: 'XYZ Corp',
+        supplierId: 2,
+        supplier: { id: 2, name: 'XYZ Corp' },
         status: 'approved',
         priority: 'normal',
         totalAmount: 8500,
         currency: 'USD',
         orderDate: '2024-01-16T00:00:00Z',
-        itemCount: 3,
+        items: [{ id: 6 }, { id: 7 }, { id: 8 }],
       },
     ];
 
@@ -154,21 +156,23 @@ describe('purchaseOrdersService', () => {
     const mockCreatedOrder: PurchaseOrder = {
       id: 10,
       poNumber: 'PO-2024-010',
-      supplierName: 'New Supplier',
+      supplierId: 3,
+      supplier: { id: 3, name: 'New Supplier' },
       status: 'pending',
       priority: 'urgent',
       totalAmount: 0,
       currency: 'USD',
       orderDate: '2024-01-20T00:00:00Z',
       expectedDeliveryDate: '2024-02-15T00:00:00Z',
-      itemCount: 0,
+      items: [],
     };
 
     test('creates purchase order successfully', async () => {
       const input: CreatePurchaseOrderInput = {
-        supplierName: 'New Supplier',
+        supplierId: 3,
         priority: 'urgent',
         expectedDeliveryDate: '2024-02-15',
+        items: [{ productId: 1, quantityOrdered: 10, unitPrice: 100 }],
       };
 
       vi.mocked(graphql).mockResolvedValue({
@@ -186,8 +190,9 @@ describe('purchaseOrdersService', () => {
 
     test('creates purchase order without optional fields', async () => {
       const input: CreatePurchaseOrderInput = {
-        supplierName: 'Simple Supplier',
+        supplierId: 3,
         priority: 'normal',
+        items: [],
       };
 
       vi.mocked(graphql).mockResolvedValue({
@@ -206,8 +211,9 @@ describe('purchaseOrdersService', () => {
 
       for (const priority of priorities) {
         const input: CreatePurchaseOrderInput = {
-          supplierName: 'Test Supplier',
+          supplierId: 3,
           priority,
+          items: [],
         };
 
         vi.mocked(graphql).mockResolvedValue({
@@ -221,8 +227,9 @@ describe('purchaseOrdersService', () => {
 
     test('throws error on GraphQL failure', async () => {
       const input: CreatePurchaseOrderInput = {
-        supplierName: 'Failed Supplier',
+        supplierId: 3,
         priority: 'high',
+        items: [],
       };
 
       const error = new Error('GraphQL mutation failed');
@@ -237,8 +244,9 @@ describe('purchaseOrdersService', () => {
 
     test('logs non-Error exceptions correctly', async () => {
       const input: CreatePurchaseOrderInput = {
-        supplierName: 'Test',
+        supplierId: 3,
         priority: 'normal',
+        items: [],
       };
 
       vi.mocked(graphql).mockRejectedValue('String error');

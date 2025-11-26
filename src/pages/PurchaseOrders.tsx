@@ -430,7 +430,7 @@ export default function PurchaseOrders() {
             const newPurchaseOrder = await createPurchaseOrder(newPO);
             setPurchaseOrders(prev => [...prev, newPurchaseOrder]);
             setShowCreateForm(false);
-            setNewPO({ supplierName: '', priority: 'normal', expectedDeliveryDate: '' });
+            setNewPO({ supplierId: 0, priority: 'normal', expectedDeliveryDate: '', items: [] });
           } catch (error) {
             console.error('Error creating purchase order:', error);
           }
@@ -442,8 +442,8 @@ export default function PurchaseOrders() {
               </label>
               <select
                 data-testid="po-supplier"
-                value={newPO.supplierName}
-                onChange={(e) => setNewPO({ ...newPO, supplierName: e.target.value })}
+                value={newPO.supplierId}
+                onChange={(e) => setNewPO({ ...newPO, supplierId: Number(e.target.value) })}
                 required
                 style={{
                   width: '100%',
@@ -453,10 +453,10 @@ export default function PurchaseOrders() {
                   fontSize: '1rem'
                 }}
               >
-                <option value="">Select a supplier</option>
-                <option value="Tech Supply Co">Tech Supply Co</option>
-                <option value="Global Electronics">Global Electronics</option>
-                <option value="Office Solutions Ltd">Office Solutions Ltd</option>
+                <option value="0">Select a supplier</option>
+                <option value="1">Tech Supply Co</option>
+                <option value="2">Global Electronics</option>
+                <option value="3">Office Solutions Ltd</option>
               </select>
             </div>
 
