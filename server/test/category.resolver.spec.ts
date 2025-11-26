@@ -45,60 +45,65 @@ describe('CategoryResolver', () => {
 
   describe('categories', () => {
     it('should return an array of categories', async () => {
+      const tenantId = 'test-tenant-123';
       const categories = [mockCategory];
       mockInventoryService.findAllCategories.mockResolvedValue(categories);
 
-      const result = await resolver.categories();
+      const result = await resolver.categories(tenantId);
 
       expect(result).toEqual(categories);
-      expect(service.findAllCategories).toHaveBeenCalled();
+      expect(service.findAllCategories).toHaveBeenCalledWith(tenantId);
     });
   });
 
   describe('category', () => {
     it('should return a single category by id', async () => {
+      const tenantId = 'test-tenant-123';
       mockInventoryService.findCategory.mockResolvedValue(mockCategory);
 
-      const result = await resolver.category(1);
+      const result = await resolver.category(1, tenantId);
 
       expect(result).toEqual(mockCategory);
-      expect(service.findCategory).toHaveBeenCalledWith(1);
+      expect(service.findCategory).toHaveBeenCalledWith(1, tenantId);
     });
   });
 
   describe('createCategory', () => {
     it('should create a new category', async () => {
+      const tenantId = 'test-tenant-123';
       const input = { name: 'Electronics', description: 'Electronic devices' };
       mockInventoryService.createCategory.mockResolvedValue(mockCategory);
 
-      const result = await resolver.createCategory(input);
+      const result = await resolver.createCategory(input, tenantId);
 
       expect(result).toEqual(mockCategory);
-      expect(service.createCategory).toHaveBeenCalledWith(input);
+      expect(service.createCategory).toHaveBeenCalledWith(input, tenantId);
     });
   });
 
   describe('updateCategory', () => {
     it('should update an existing category', async () => {
+      const tenantId = 'test-tenant-123';
       const input = { id: 1, name: 'Updated Electronics' };
       const updated = { ...mockCategory, name: 'Updated Electronics' };
       mockInventoryService.updateCategory.mockResolvedValue(updated);
 
-      const result = await resolver.updateCategory(input);
+      const result = await resolver.updateCategory(input, tenantId);
 
       expect(result).toEqual(updated);
-      expect(service.updateCategory).toHaveBeenCalledWith(input);
+      expect(service.updateCategory).toHaveBeenCalledWith(input, tenantId);
     });
   });
 
   describe('removeCategory', () => {
     it('should remove a category and return true', async () => {
+      const tenantId = 'test-tenant-123';
       mockInventoryService.removeCategory.mockResolvedValue(undefined);
 
-      const result = await resolver.removeCategory(1);
+      const result = await resolver.removeCategory(1, tenantId);
 
       expect(result).toBe(true);
-      expect(service.removeCategory).toHaveBeenCalledWith(1);
+      expect(service.removeCategory).toHaveBeenCalledWith(1, tenantId);
     });
   });
 
@@ -109,10 +114,11 @@ describe('CategoryResolver', () => {
       const result = await resolver.testCreateCategory('Test Category');
 
       expect(result).toEqual(mockCategory);
-      expect(service.createCategory).toHaveBeenCalledWith({
-        name: 'Test Category',
-        description: 'Test category from API',
-      });
+      // testCreateCategory uses hardcoded tenantId 'test-tenant-id'
+      expect(service.createCategory).toHaveBeenCalledWith(
+        { name: 'Test Category', description: 'Test category from API' },
+        'test-tenant-id'
+      );
     });
   });
 });
