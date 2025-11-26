@@ -10,6 +10,7 @@ export default defineConfig({
     include: ['**/?(*.)+(spec|test).ts'],
     exclude: ['node_modules', 'dist', 'coverage'],
     setupFiles: ['./test/vitest-setup.ts'],
+    reporters: ['verbose'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'html', 'json-summary'],
