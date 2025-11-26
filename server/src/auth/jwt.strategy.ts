@@ -34,7 +34,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       metadata: { payload, payloadKeys: Object.keys(payload) }
     });
     
-    const user = { id: payload.sub, userId: payload.sub, username: payload.username };
+    const user = { 
+      id: payload.sub, 
+      userId: payload.sub, 
+      username: payload.username,
+      tenantId: payload.tenantId,
+      tenantRole: payload.tenantRole
+    };
     
     this.loggingService.logInfo('JWT Strategy returning user', {
       module: 'JwtStrategy',

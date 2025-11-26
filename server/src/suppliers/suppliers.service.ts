@@ -33,16 +33,16 @@ export class SuppliersService {
   // Supplier Management
 
   @HandleDatabaseErrors()
-  async createSupplier(data: CreateSupplierInput): Promise<Supplier> {
+  async createSupplier(data: CreateSupplierInput, tenantId: string): Promise<Supplier> {
     DatabaseErrorHandler.validateEntity(data, ['name']);
     
-    const supplier = this.suppliers.create(data);
+    const supplier = this.suppliers.create({ ...data, tenantId });
     return await this.suppliers.save(supplier);
   }
 
   @HandleDatabaseErrors()
-  async updateSupplier(data: UpdateSupplierInput): Promise<Supplier> {
-    const supplier = await this.suppliers.findOneBy({ id: data.id });
+  async updateSupplier(data: UpdateSupplierInput, tenantId: string): Promise<Supplier> {
+    const supplier = await this.suppliers.findOneBy({ id: data.id, tenantId });
     if (!supplier) {
       throw new AppError(ErrorCode.NOT_FOUND, 'Supplier not found');
     }
@@ -53,8 +53,9 @@ export class SuppliersService {
     return await this.suppliers.save(supplier);
   }
 
-  async findAllSuppliers(): Promise<Supplier[]> {
+  async findAllSuppliers(tenantId: string): Promise<Supplier[]> {
     return await this.suppliers.find({
+      where: { tenantId },
       select: [
         'id',
         'name',
@@ -77,9 +78,9 @@ export class SuppliersService {
     });
   }
 
-  async findSupplier(id: number): Promise<Supplier> {
+  async findSupplier(id: number, tenantId: string): Promise<Supplier> {
     const supplier = await this.suppliers.findOne({
-      where: { id },
+      where: { id, tenantId },
       relations: ['supplierProducts', 'supplierProducts.product', 'purchaseOrders']
     });
 
@@ -90,9 +91,9 @@ export class SuppliersService {
     return supplier;
   }
 
-  async findActiveSuppliers(): Promise<Supplier[]> {
+  async findActiveSuppliers(tenantId: string): Promise<Supplier[]> {
     return await this.suppliers.find({
-      where: { status: SupplierStatus.ACTIVE },
+      where: { status: SupplierStatus.ACTIVE, tenantId },
       select: [
         'id',
         'name',
@@ -116,11 +117,12 @@ export class SuppliersService {
   }
 
   @HandleDatabaseErrors()
-  async deleteSupplier(id: number): Promise<boolean> {
+  async deleteSupplier(id: number, tenantId: string): Promise<boolean> {
     // Check if supplier has active purchase orders
     const activePOs = await this.purchaseOrders.count({
       where: { 
-        supplierId: id, 
+        supplierId: id,
+        tenantId,
         status: ['pending_approval', 'approved', 'sent', 'acknowledged', 'partially_received'] as any
       }
     });
@@ -132,7 +134,7 @@ export class SuppliersService {
       );
     }
 
-    const result = await this.suppliers.delete(id);
+    const result = await this.suppliers.delete({ id, tenantId });
     return result.affected > 0;
   }
 
@@ -566,11 +568,11 @@ export class SuppliersService {
 
   // Analytics and Reporting
 
-  async getSupplierPerformanceMetrics(supplierId: number) {
-    const supplier = await this.findSupplier(supplierId);
+  async getSupplierPerformanceMetrics(supplierId: number, tenantId: string) {
+    const supplier = await this.findSupplier(supplierId, tenantId);
     
     const purchaseOrders = await this.purchaseOrders.find({
-      where: { supplierId },
+      where: { supplierId, tenantId },
       relations: ['items']
     });
 

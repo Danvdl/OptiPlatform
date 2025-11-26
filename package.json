@@ -16,6 +16,7 @@
     "test:all": "npm run test:backend && npm run test:frontend"
   },
   "dependencies": {
+    "@apollo/client": "^4.0.9",
     "@tauri-apps/plugin-store": "^2.2.0",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
@@ -23,6 +24,7 @@
     "dexie": "^4.2.1",
     "firebase": "^9.22.0",
     "framer-motion": "^12.23.12",
+    "graphql": "^16.12.0",
     "pg": "^8.16.3",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

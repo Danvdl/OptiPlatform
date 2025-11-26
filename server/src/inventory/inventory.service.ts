@@ -44,12 +44,13 @@ export class InventoryService {
 
   // Product operations
   @HandleDatabaseErrors()
-  async createProduct(data: CreateProductInput, userId?: number) {
+  async createProduct(data: CreateProductInput, tenantId: string, userId?: number) {
     // Validate required fields
     DatabaseErrorHandler.validateEntity(data, ['name', 'sku']);
     
     const product = this.products.create({
       ...data,
+      tenantId,
       restockThreshold: data.restockThreshold || 5
     });
     const savedProduct = await this.products.save(product);
@@ -83,9 +84,9 @@ export class InventoryService {
   }
 
   @HandleDatabaseErrors()
-  async updateProduct(data: UpdateProductInput, userId?: number) {
-    // Get current product to compare prices
-    const currentProduct = await this.products.findOneBy({ id: data.id });
+  async updateProduct(data: UpdateProductInput, tenantId: string, userId?: number) {
+    // Get current product to compare prices (with tenant isolation)
+    const currentProduct = await this.products.findOneBy({ id: data.id, tenantId });
     
     if (!currentProduct) {
       throw new AppError(ErrorCode.NOT_FOUND, 'Product not found');
@@ -132,16 +133,16 @@ export class InventoryService {
   return this.products.findOneBy({ id: data.id });
   }
 
-  removeProduct(id: number) {
-    return this.products.delete(id);
+  removeProduct(id: number, tenantId: string) {
+    return this.products.delete({ id, tenantId });
   }
 
-  findAllProducts() {
-    return this.products.find({ relations: ['category'] });
+  findAllProducts(tenantId: string) {
+    return this.products.find({ where: { tenantId }, relations: ['category'] });
   }
 
-  findProduct(id: number) {
-    return this.products.findOne({ where: { id }, relations: ['category'] });
+  findProduct(id: number, tenantId: string) {
+    return this.products.findOne({ where: { id, tenantId }, relations: ['category'] });
   }
 
   findProductsByCategory(categoryId: number) {
@@ -152,25 +153,30 @@ export class InventoryService {
   }
 
   // Category operations
-  createCategory(data: CreateCategoryInput) {
-    const category = this.categories.create(data);
+  createCategory(data: CreateCategoryInput, tenantId: string) {
+    const category = this.categories.create({ ...data, tenantId });
     return this.categories.save(category);
   }
 
-  updateCategory(data: UpdateCategoryInput) {
-    return this.categories.save(data);
+  async updateCategory(data: UpdateCategoryInput, tenantId: string) {
+    // Verify category belongs to tenant before updating
+    const category = await this.categories.findOneBy({ id: data.id, tenantId });
+    if (!category) {
+      throw new AppError(ErrorCode.NOT_FOUND, 'Category not found');
+    }
+    return this.categories.save({ ...category, ...data });
   }
 
-  removeCategory(id: number) {
-    return this.categories.delete(id);
+  removeCategory(id: number, tenantId: string) {
+    return this.categories.delete({ id, tenantId });
   }
 
-  findAllCategories() {
-    return this.categories.find({ relations: ['products'] });
+  findAllCategories(tenantId: string) {
+    return this.categories.find({ where: { tenantId }, relations: ['products'] });
   }
 
-  findCategory(id: number) {
-    return this.categories.findOne({ where: { id }, relations: ['products'] });
+  findCategory(id: number, tenantId: string) {
+    return this.categories.findOne({ where: { id, tenantId }, relations: ['products'] });
   }
 
   // Product Notes operations
@@ -277,12 +283,12 @@ export class InventoryService {
     return lowStockProducts;
   }
 
-  async getInventorySummary() {
-    const totalProducts = await this.products.count();
-    const totalCategories = await this.categories.count();
-    const recentTransactions = await this.transactions.count();
+  async getInventorySummary(tenantId: string) {
+    const totalProducts = await this.products.count({ where: { tenantId } });
+    const totalCategories = await this.categories.count({ where: { tenantId } });
+    const recentTransactions = await this.transactions.count({ where: { tenantId } });
     const lowStockProducts = await this.getLowStockProducts();
-    const inventoryValuation = await this.getInventoryValuation();
+    const inventoryValuation = await this.getInventoryValuation(tenantId);
     
     return {
       totalProducts,
@@ -295,8 +301,8 @@ export class InventoryService {
   }
 
   // Pricing and valuation methods
-  async getInventoryValuation() {
-    const products = await this.products.find();
+  async getInventoryValuation(tenantId: string) {
+    const products = await this.products.find({ where: { tenantId } });
     let totalPurchaseValue = 0;
     let totalSaleValue = 0;
     let totalCostValue = 0;
@@ -349,8 +355,8 @@ export class InventoryService {
     return totalQuantity > 0 ? totalCost / totalQuantity : 0;
   }
 
-  async getProductProfitability(productId: number) {
-    const product = await this.products.findOneBy({ id: productId });
+  async getProductProfitability(productId: number, tenantId: string) {
+    const product = await this.products.findOneBy({ id: productId, tenantId });
     if (!product) return null;
     
     const stock = await this.getCurrentStock(productId);
@@ -374,12 +380,12 @@ export class InventoryService {
     };
   }
 
-  async getTopProfitableProducts(limit = 10) {
-    const products = await this.products.find();
+  async getTopProfitableProducts(limit = 10, tenantId: string) {
+    const products = await this.products.find({ where: { tenantId } });
     const profitabilityData = [];
     
     for (const product of products) {
-      const profitability = await this.getProductProfitability(product.id);
+      const profitability = await this.getProductProfitability(product.id, tenantId);
       if (profitability && profitability.currentStock > 0) {
         profitabilityData.push(profitability);
       }

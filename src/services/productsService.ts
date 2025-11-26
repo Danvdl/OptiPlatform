@@ -4,6 +4,7 @@ import { syncService } from '../db/sync.service';
 import { isOnline } from '../db/offline.service';
 import { getToken } from '../utils/authStore';
 import { logError } from '../utils/frontendLogger';
+import { getCurrentTenantIdSync } from '../utils/authUtils';
 
 export interface Product {
   id: number;
@@ -42,10 +43,15 @@ export interface UpdateProductInput {
   cost?: number;
 }
 
-// Get current tenant ID from auth context
-// TODO: Extract from JWT or global state
+// Get current tenant ID from JWT
 function getCurrentTenantId(): string {
-  return 'current'; // Placeholder until tenant context is implemented
+  const tenantId = getCurrentTenantIdSync();
+  
+  if (!tenantId) {
+    throw new Error('No tenant context - user must login first');
+  }
+  
+  return tenantId;
 }
 
 /**

@@ -22,6 +22,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ReportsModule } from './reports/reports.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { AdvancedAnalyticsModule } from './analytics/advanced-analytics.module';
+import { TenantsModule } from './tenants/tenants.module';
 import { DeviceToken } from './notifications/entities/device-token.entity';
 import { AppError, ErrorCode } from './errors/error-codes';
 import { ErrorHandlingModule } from './errors/error-handling.module';
@@ -82,6 +83,7 @@ import { ErrorHandlingModule } from './errors/error-handling.module';
     ReportsModule,
     SuppliersModule,
     AdvancedAnalyticsModule,
+    TenantsModule,
     TypeOrmModule.forFeature([User, UserPermission, ActivityLog, UserPreferences, Product, Category, ProductNote, InventoryTransaction, PriceHistory, DeviceToken]),
   ],
   providers: [AppResolver],

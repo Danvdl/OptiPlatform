@@ -7,6 +7,7 @@ import { CreateSupplierInput, UpdateSupplierInput } from './dto/supplier.input';
 import { CreateSupplierProductInput, UpdateSupplierProductInput, SupplierPriceComparisonInput } from './dto/supplier-product.input';
 import { SupplierPriceComparison, LowStockProduct, SupplierPerformanceMetrics } from './dto/supplier-response.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { TenantId } from '../common/tenant.decorator';
 import { User } from '../user/user.entity';
 
 @Resolver(() => Supplier)
@@ -17,18 +18,18 @@ export class SuppliersResolver {
   // Supplier Queries
 
   @Query(() => [Supplier])
-  async suppliers(): Promise<Supplier[]> {
-    return this.suppliersService.findAllSuppliers();
+  async suppliers(@TenantId() tenantId: string): Promise<Supplier[]> {
+    return this.suppliersService.findAllSuppliers(tenantId);
   }
 
   @Query(() => Supplier)
-  async supplier(@Args('id', { type: () => Int }) id: number): Promise<Supplier> {
-    return this.suppliersService.findSupplier(id);
+  async supplier(@Args('id', { type: () => Int }) id: number, @TenantId() tenantId: string): Promise<Supplier> {
+    return this.suppliersService.findSupplier(id, tenantId);
   }
 
   @Query(() => [Supplier])
-  async activeSuppliers(): Promise<Supplier[]> {
-    return this.suppliersService.findActiveSuppliers();
+  async activeSuppliers(@TenantId() tenantId: string): Promise<Supplier[]> {
+    return this.suppliersService.findActiveSuppliers(tenantId);
   }
 
   // Supplier Mutations
@@ -36,25 +37,25 @@ export class SuppliersResolver {
   @Mutation(() => Supplier)
   async createSupplier(
     @Args('input', { type: () => CreateSupplierInput }) input: CreateSupplierInput,
-    // @CurrentUser() user: User, // Comment out until decorator is available
+    @TenantId() tenantId: string,
   ): Promise<Supplier> {
-    return this.suppliersService.createSupplier(input);
+    return this.suppliersService.createSupplier(input, tenantId);
   }
 
   @Mutation(() => Supplier)
   async updateSupplier(
     @Args('input', { type: () => UpdateSupplierInput }) input: UpdateSupplierInput,
-    // @CurrentUser() user: User, // Comment out until decorator is available
+    @TenantId() tenantId: string,
   ): Promise<Supplier> {
-    return this.suppliersService.updateSupplier(input);
+    return this.suppliersService.updateSupplier(input, tenantId);
   }
 
   @Mutation(() => Boolean)
   async deleteSupplier(
     @Args('id', { type: () => Int }) id: number,
-    // @CurrentUser() user: User, // Comment out until decorator is available
+    @TenantId() tenantId: string,
   ): Promise<boolean> {
-    return this.suppliersService.deleteSupplier(id);
+    return this.suppliersService.deleteSupplier(id, tenantId);
   }
 
   // Supplier Product Queries
@@ -110,7 +111,8 @@ export class SuppliersResolver {
   @Query(() => SupplierPerformanceMetrics)
   async supplierPerformance(
     @Args('supplierId', { type: () => Int }) supplierId: number,
+    @TenantId() tenantId: string,
   ): Promise<SupplierPerformanceMetrics> {
-    return this.suppliersService.getSupplierPerformanceMetrics(supplierId);
+    return this.suppliersService.getSupplierPerformanceMetrics(supplierId, tenantId);
   }
 }
