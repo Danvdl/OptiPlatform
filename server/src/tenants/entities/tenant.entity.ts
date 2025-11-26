@@ -201,11 +201,11 @@ export class Tenant {
   // Additional Settings (JSON)
   @Field({ nullable: true })
   @Column({ type: 'jsonb', default: '{}' })
-  settings?: Record<string, any>;
+  settings?: string; // Store as JSON string
 
   @Field({ nullable: true })
   @Column({ type: 'jsonb', nullable: true })
-  features?: Record<string, boolean>; // Feature flags
+  features?: string; // Store as JSON string for feature flags
 
   // Onboarding
   @Field({ nullable: true })
