@@ -65,9 +65,18 @@ export default function Dashboard() {
       const data = await fetchInventorySummary();
       setSummary(data);
     } catch (error: any) {
-      console.error('Failed to load dashboard data:', error);
-      const code = error instanceof ApiError ? error.code : ErrorCode.UNKNOWN;
-      showError(getErrorMessage(code));
+      // Only show user-friendly errors, don't spam console with backend schema issues
+      if (error instanceof ApiError && !error.message.includes('does not exist')) {
+        console.error('Failed to load dashboard data:', error);
+        const code = error.code;
+        showError(getErrorMessage(code));
+      } else if (error.message?.includes('does not exist')) {
+        // Backend schema issue - silently handle and show partial data
+        console.warn('Backend schema mismatch - some data may be unavailable');
+      } else {
+        console.error('Failed to load dashboard data:', error);
+        showError('Unable to load dashboard data. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }

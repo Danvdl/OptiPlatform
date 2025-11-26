@@ -43,13 +43,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   const { user } = useAuth();
   const userRole = user?.role?.toLowerCase();
 
-  // Log role check for debugging
   const hasAccess = userRole && roles.map(r => r.toLowerCase()).includes(userRole);
-  logInfo('RoleGuard: Access check', {
-    userRole: user?.role,
-    requiredRoles: roles.map(r => String(r)),
-    granted: !!hasAccess
-  });
 
   if (!user || !userRole || !roles.map(r => r.toLowerCase()).includes(userRole)) {
     return <>{fallback}</>;

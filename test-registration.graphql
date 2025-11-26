@@ -1,0 +1,297 @@
+# ============================================================================
+# BUSINESS REGISTRATION SYSTEM - TEST QUERIES
+# Copy these to GraphQL Playground: http://localhost:3000/graphql
+# ============================================================================
+
+# TEST 1: Register a New Business
+# This should create both tenant and owner user
+# ============================================================================
+mutation RegisterBusiness {
+  registerBusiness(input: {
+    username: "acmeowner"
+    email: "owner@acme.com"
+    password: "securepass123"
+    firstName: "John"
+    lastName: "Doe"
+    businessName: "Acme Corporation"
+    legalName: "Acme Corporation Inc."
+    taxId: "12-3456789"
+    industry: "retail"
+    companySize: "2-10"
+    website: "https://acme.com"
+    phoneNumber: "+1-555-0100"
+    addressLine1: "123 Main St"
+    city: "New York"
+    state: "NY"
+    postalCode: "10001"
+    country: "US"
+    currency: "USD"
+    timezone: "America/New_York"
+  }) {
+    accessToken
+    tenant {
+      id
+      name
+      slug
+      businessName
+      legalName
+      industry
+      plan
+      status
+      trialEndsAt
+      maxUsers
+      maxProducts
+      onboardingCompleted
+      onboardingStep
+    }
+    user {
+      id
+      username
+      email
+      firstName
+      lastName
+      tenantRole
+    }
+    message
+  }
+}
+
+# ============================================================================
+# TEST 2: Get My Business (requires JWT from test 1)
+# Add to HTTP Headers: { "Authorization": "Bearer YOUR_TOKEN_HERE" }
+# ============================================================================
+query MyBusiness {
+  myBusiness {
+    id
+    name
+    slug
+    businessName
+    legalName
+    taxId
+    industry
+    companySize
+    website
+    phoneNumber
+    supportEmail
+    addressLine1
+    addressLine2
+    city
+    state
+    postalCode
+    country
+    currency
+    timezone
+    language
+    plan
+    status
+    trialEndsAt
+    maxUsers
+    maxProducts
+    onboardingCompleted
+    onboardingStep
+  }
+}
+
+# ============================================================================
+# TEST 3: Get Business Settings (requires JWT)
+# ============================================================================
+query BusinessSettings {
+  businessSettings {
+    tenant {
+      businessName
+      plan
+      status
+      maxUsers
+      maxProducts
+      trialEndsAt
+    }
+    totalUsers
+    totalProducts
+    storageUsed
+    daysUntilTrialEnds
+  }
+}
+
+# ============================================================================
+# TEST 4: Update Business Profile (requires JWT)
+# ============================================================================
+mutation UpdateBusiness {
+  updateBusiness(input: {
+    phoneNumber: "+1-555-0101"
+    website: "https://www.acme.com"
+    addressLine2: "Suite 500"
+    supportEmail: "support@acme.com"
+  }) {
+    id
+    businessName
+    phoneNumber
+    website
+    addressLine2
+    supportEmail
+  }
+}
+
+# ============================================================================
+# TEST 5: Create Team Member (requires JWT, owner/admin only)
+# ============================================================================
+mutation CreateTeamMember {
+  createTeamMember(input: {
+    username: "janedoe"
+    email: "jane@acme.com"
+    password: "password123"
+    firstName: "Jane"
+    lastName: "Doe"
+    tenantRole: "manager"
+    department: "Warehouse"
+    position: "Warehouse Manager"
+    phoneNumber: "+1-555-0102"
+  }) {
+    user {
+      id
+      username
+      email
+      firstName
+      lastName
+      tenantRole
+      department
+      position
+      phoneNumber
+      status
+    }
+    invitationSent
+  }
+}
+
+# ============================================================================
+# TEST 6: List All Team Members (requires JWT)
+# ============================================================================
+query TeamMembers {
+  teamMembers {
+    id
+    username
+    email
+    firstName
+    lastName
+    tenantRole
+    department
+    position
+    phoneNumber
+    status
+    lastLoginAt
+    createdAt
+    updatedAt
+  }
+}
+
+# ============================================================================
+# TEST 7: Update Team Member (requires JWT, owner/admin only)
+# ============================================================================
+mutation UpdateTeamMember {
+  updateTeamMember(input: {
+    userId: 2  # Replace with Jane's actual user ID
+    tenantRole: "admin"
+    department: "Operations"
+    position: "Operations Manager"
+  }) {
+    id
+    username
+    tenantRole
+    department
+    position
+  }
+}
+
+# ============================================================================
+# TEST 8: Test Owner Protection (should fail)
+# Try to change the owner's role - this should throw an error
+# ============================================================================
+mutation TestOwnerProtection {
+  updateTeamMember(input: {
+    userId: 1  # Owner's user ID
+    tenantRole: "admin"
+  }) {
+    id
+  }
+}
+
+# ============================================================================
+# TEST 9: Test Plan Limit (should fail after 5 users)
+# Create additional users until limit is reached
+# ============================================================================
+mutation CreateUser3 {
+  createTeamMember(input: {
+    username: "user3"
+    email: "user3@acme.com"
+    password: "password123"
+    firstName: "User"
+    lastName: "Three"
+    tenantRole: "member"
+  }) {
+    user { id, username }
+  }
+}
+
+mutation CreateUser4 {
+  createTeamMember(input: {
+    username: "user4"
+    email: "user4@acme.com"
+    password: "password123"
+    firstName: "User"
+    lastName: "Four"
+    tenantRole: "member"
+  }) {
+    user { id, username }
+  }
+}
+
+mutation CreateUser5 {
+  createTeamMember(input: {
+    username: "user5"
+    email: "user5@acme.com"
+    password: "password123"
+    firstName: "User"
+    lastName: "Five"
+    tenantRole: "readonly"
+  }) {
+    user { id, username }
+  }
+}
+
+# This should FAIL with "User limit reached"
+mutation CreateUser6ShouldFail {
+  createTeamMember(input: {
+    username: "user6"
+    email: "user6@acme.com"
+    password: "password123"
+    firstName: "User"
+    lastName: "Six"
+    tenantRole: "member"
+  }) {
+    user { id, username }
+  }
+}
+
+# ============================================================================
+# TEST 10: Remove Team Member (requires JWT, owner/admin only)
+# ============================================================================
+mutation RemoveTeamMember {
+  removeTeamMember(userId: 2) # Replace with actual user ID
+}
+
+# ============================================================================
+# TEST 11: Try to Remove Owner (should fail)
+# ============================================================================
+mutation TestRemoveOwner {
+  removeTeamMember(userId: 1) # Owner's user ID - should fail
+}
+
+# ============================================================================
+# TEST 12: Complete Onboarding Step
+# ============================================================================
+mutation CompleteOnboarding {
+  completeOnboardingStep(step: 2) {
+    id
+    onboardingStep
+    onboardingCompleted
+  }
+}

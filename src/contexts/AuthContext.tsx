@@ -111,19 +111,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refreshUser: loadUser
   };
 
-  // Log context state for debugging
-  if (user) {
-    logInfo('Auth: Context initialized', {
-      userId: user.id,
-      username: user.username,
-      role: user.role,
-      isAdmin: value.isAdmin,
-      isManager: value.isManager,
-      isStaff: value.isStaff,
-      permissionsCount: permissions.length
-    });
-  }
-
   return (
     <AuthContext.Provider value={value}>
       {children}

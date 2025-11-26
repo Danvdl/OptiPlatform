@@ -60,7 +60,8 @@ class FrontendLogger {
    * Log an info message
    */
   logInfo(message: string, context?: Record<string, any>) {
-    if (import.meta.env.DEV) {
+    // Only log in development mode and if not spammy
+    if (import.meta.env.DEV && !message.includes('RoleGuard') && !message.includes('Auth: Context initialized')) {
       console.log('[Info]', message, context);
     }
 

@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import MainLayout from './layout/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import Settings from './pages/Settings';
 import Inventory from './pages/Inventory';
 import Reports from './pages/Reports';
 import Analytics from './pages/Analytics';
@@ -37,6 +39,7 @@ function AppContent() {
     <div style={{ minHeight: '100vh', background: '#f0f0f0' }}>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -48,6 +51,7 @@ function AppContent() {
           <Route path="/reports" element={<Reports />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/users" element={<UserManagement />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>
 

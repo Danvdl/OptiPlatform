@@ -149,13 +149,17 @@ export default function Login() {
             <button
               type="button"
               onClick={() => {
-                setIsRegister(!isRegister);
-                setError('');
+                if (isRegister) {
+                  setIsRegister(false);
+                  setError('');
+                } else {
+                  window.location.href = '/register';
+                }
               }}
               className="login-toggle-button"
               disabled={isLoading}
             >
-              {isRegister ? 'Sign In' : 'Create Account'}
+              {isRegister ? 'Sign In' : 'Create Business Account'}
             </button>
           </div>
         </form>
