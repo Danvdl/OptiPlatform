@@ -57,12 +57,12 @@ jobs:
         working-directory: server
       
       - name: Run backend unit tests
-        run: npm run test -- --coverage --verbose --coverageThreshold='{}'
+        run: npm run test:coverage
         working-directory: server
         continue-on-error: false
       
       - name: Run frontend unit tests
-        run: npm run test:frontend -- --coverage --verbose
+        run: npm run test:frontend -- --coverage
         continue-on-error: false
       
       - name: Upload backend test coverage
