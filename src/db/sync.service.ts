@@ -144,6 +144,7 @@ class SyncService {
 
     // Pull products
     if (await this.shouldPull('products', lastSyncTimes.products)) {
+      console.log('[Sync] Pulling products from backend');
       const query = `
         query GetProducts {
           products {
