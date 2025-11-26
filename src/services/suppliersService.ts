@@ -1,4 +1,5 @@
 import { graphql } from './apiClient';
+import { logError } from '../utils/frontendLogger';
 
 export interface Supplier {
   id: number;

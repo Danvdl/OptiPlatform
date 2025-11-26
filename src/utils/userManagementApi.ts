@@ -133,7 +133,7 @@ export async function updateUser(input: UpdateUserInput): Promise<User> {
     const data = await graphql<{ updateUser: User }>(mutation, { input });
     return data.updateUser;
   } catch (error) {
-    logError(error instanceof Error ? error : new Error('Error updating user'), { context: 'updateUser', userId: id });
+    logError(error instanceof Error ? error : new Error('Error updating user'), { context: 'updateUser', userId: input.id });
     throw error;
   }
 }
@@ -149,7 +149,7 @@ export async function changePassword(input: ChangePasswordInput): Promise<boolea
     const data = await graphql<{ changePassword: boolean }>(mutation, { input });
     return data.changePassword;
   } catch (error) {
-    logError(error instanceof Error ? error : new Error('Error changing password'), { context: 'changePassword', userId: id });
+    logError(error instanceof Error ? error : new Error('Error changing password'), { context: 'changePassword' });
     throw error;
   }
 }
@@ -309,7 +309,7 @@ export async function setUserPreference(preferenceType: string, value: string): 
     });
     return data.setUserPreference;
   } catch (error) {
-    logError(error instanceof Error ? error : new Error('Error setting user preference'), { context: 'setUserPreference', key, value });
+    logError(error instanceof Error ? error : new Error('Error setting user preference'), { context: 'setUserPreference', preferenceType, value });
     throw error;
   }
 }

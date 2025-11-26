@@ -1,4 +1,5 @@
 import { graphql } from '../utils/inventoryApi';
+import { logError } from '../utils/frontendLogger';
 
 // Type definitions
 export interface ProductHealthScore {
@@ -84,7 +85,7 @@ export async function fetchDemandForecast(
     
     return forecast;
   } catch (error) {
-    logError(error instanceof Error ? error : new Error('Failed to fetch demand forecast'), { context: 'fetchDemandForecast', productId, daysAhead });
+    logError(error instanceof Error ? error : new Error('Failed to fetch demand forecast'), { context: 'fetchDemandForecast', productId, horizon });
     throw error;
   }
 }
