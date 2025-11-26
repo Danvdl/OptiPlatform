@@ -9,10 +9,11 @@ export interface LocalProduct {
   description?: string;
   sku: string;
   categoryId?: number;
-  quantity: number;
+  unit?: string;
   restockThreshold: number;
-  price?: number;
-  cost?: number;
+  purchasePrice?: number;
+  salePrice?: number;
+  currency?: string;
   // Sync metadata
   synced: boolean;
   lastModified: number;

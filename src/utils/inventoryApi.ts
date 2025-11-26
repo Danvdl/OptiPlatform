@@ -36,8 +36,12 @@ export interface Product {
   unit?: string;
   restockThreshold: number;
   categoryId?: number;
+  purchasePrice?: number;
+  salePrice?: number;
+  currency?: string;
   category?: Category;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Category {

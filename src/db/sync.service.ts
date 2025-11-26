@@ -144,11 +144,10 @@ class SyncService {
 
     // Pull products
     if (await this.shouldPull('products', lastSyncTimes.products)) {
-      console.log('[Sync] Pulling products from backend');
       const query = `
         query GetProducts {
           products {
-            id name description sku categoryId quantity restockThreshold price cost updatedAt
+            id name description sku categoryId unit restockThreshold purchasePrice salePrice currency updatedAt
           }
         }
       `;

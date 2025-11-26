@@ -12,10 +12,11 @@ export interface Product {
   description?: string;
   sku: string;
   categoryId?: number;
-  quantity: number;
+  unit?: string;
   restockThreshold?: number;
-  price?: number;
-  cost?: number;
+  purchasePrice?: number;
+  salePrice?: number;
+  currency?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -25,10 +26,11 @@ export interface CreateProductInput {
   description?: string;
   sku: string;
   categoryId?: number;
-  quantity: number;
+  unit?: string;
   restockThreshold?: number;
-  price?: number;
-  cost?: number;
+  purchasePrice?: number;
+  salePrice?: number;
+  currency?: string;
 }
 
 export interface UpdateProductInput {
@@ -132,10 +134,11 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
     description: input.description || '',
     sku: input.sku,
     categoryId: input.categoryId,
-    quantity: input.quantity,
+    unit: input.unit,
     restockThreshold: input.restockThreshold ?? 0,
-    price: input.price,
-    cost: input.cost,
+    purchasePrice: input.purchasePrice,
+    salePrice: input.salePrice,
+    currency: input.currency,
     synced: false,
     lastModified: now,
     deleted: false,
@@ -247,19 +250,20 @@ export async function searchProducts(query: string): Promise<Product[]> {
 }
 
 /**
- * Get low stock products (local-first)
+ * Get products that are low on stock
  */
 export async function getLowStockProducts(): Promise<Product[]> {
   const tenantId = getCurrentTenantId();
 
-  const results = await db.products
+  // Get all products
+  const allProducts = await db.products
     .where('[tenantId+deleted]')
     .equals([tenantId, undefined] as any)
-    .filter(p => {
-      const threshold = p.restockThreshold ?? 0;
-      return p.quantity <= threshold;
-    })
     .toArray();
+
+  // TODO: Calculate current stock from inventory_transactions
+  // For now, return products with restock threshold > 0 (indicating they need tracking)
+  const results = allProducts.filter(p => (p.restockThreshold ?? 0) > 0);
 
   return results.map(localToProduct);
 }
@@ -278,11 +282,12 @@ function localToProduct(local: LocalProduct): Product {
     description: local.description,
     sku: local.sku,
     categoryId: local.categoryId,
-    quantity: local.quantity,
+    unit: local.unit,
     restockThreshold: local.restockThreshold,
-    price: local.price,
-    cost: local.cost,
-    // Convert timestamp to ISO string
+    purchasePrice: local.purchasePrice,
+    salePrice: local.salePrice,
+    currency: local.currency,
+    createdAt: new Date(local.lastModified).toISOString(),
     updatedAt: new Date(local.lastModified).toISOString(),
   };
 }
@@ -300,10 +305,11 @@ async function saveProductLocally(product: Product): Promise<void> {
     description: product.description || '',
     sku: product.sku,
     categoryId: product.categoryId,
-    quantity: product.quantity,
+    unit: product.unit,
     restockThreshold: product.restockThreshold ?? 0,
-    price: product.price,
-    cost: product.cost,
+    purchasePrice: product.purchasePrice,
+    salePrice: product.salePrice,
+    currency: product.currency,
     synced: true,
     lastModified: product.updatedAt ? new Date(product.updatedAt).getTime() : Date.now(),
     deleted: false,
