@@ -319,7 +319,7 @@ describe('inventoryApi', () => {
         description: 'Description 1',
         createdAt: '2024-01-01T00:00:00Z',
         products: [
-          { id: 1, name: 'Product 1', description: 'Desc', sku: 'SKU-1' },
+          { id: 1, name: 'Product 1', description: 'Desc', sku: 'SKU-1', restockThreshold: 100, createdAt: '2024-01-01T00:00:00Z' },
         ],
       },
     ];

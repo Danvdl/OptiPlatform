@@ -14,7 +14,7 @@ import {
   setUserPreference,
   hasPermission,
 } from '../userManagementApi';
-import { User, ActivityLog, UserPreference } from '../../types/user-management';
+import { User, ActivityLog, UserPreference, UserRole, UserStatus } from '../../types/user-management';
 
 // Mock modules
 vi.mock('../authStore', () => ({
@@ -46,15 +46,15 @@ describe('userManagementApi', () => {
           email: 'john@example.com',
           firstName: 'John',
           lastName: 'Doe',
-          role: 'admin',
-          status: 'active',
+          role: UserRole.ADMIN,
+          status: UserStatus.ACTIVE,
           phoneNumber: '555-1234',
           department: 'IT',
           position: 'Developer',
           avatar: 'avatar.jpg',
-          lastLoginAt: new Date('2024-01-01'),
-          createdAt: new Date('2023-01-01'),
-          updatedAt: new Date('2024-01-01'),
+          lastLoginAt: new Date('2024-01-01').toISOString(),
+          createdAt: new Date('2023-01-01').toISOString(),
+          updatedAt: new Date('2024-01-01').toISOString(),
           fullName: 'John Doe',
         },
       ];
@@ -90,11 +90,11 @@ describe('userManagementApi', () => {
         email: 'current@example.com',
         firstName: 'Current',
         lastName: 'User',
-        role: 'admin',
-        status: 'active',
+        role: UserRole.ADMIN,
+        status: UserStatus.ACTIVE,
         fullName: 'Current User',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       mockFetch.mockResolvedValue({
@@ -127,16 +127,20 @@ describe('userManagementApi', () => {
         password: 'securepassword',
         firstName: 'New',
         lastName: 'User',
-        role: 'staff' as const,
+        role: UserRole.STAFF,
       };
 
       const mockCreatedUser: User = {
         id: 2,
-        ...input,
-        status: 'active',
+        username: input.username,
+        email: input.email,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        role: input.role,
+        status: UserStatus.ACTIVE,
         fullName: 'New User',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       mockFetch.mockResolvedValue({
@@ -157,7 +161,7 @@ describe('userManagementApi', () => {
         username: 'duplicate',
         email: 'dup@example.com',
         password: 'pass',
-        role: 'staff' as const,
+        role: UserRole.STAFF,
       };
 
       mockFetch.mockResolvedValue({
@@ -184,12 +188,12 @@ describe('userManagementApi', () => {
         email: 'user1@example.com',
         firstName: 'Updated',
         lastName: 'Name',
-        role: 'staff',
-        status: 'active',
+        role: UserRole.STAFF,
+        status: UserStatus.ACTIVE,
         department: 'Sales',
         fullName: 'Updated Name',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       mockFetch.mockResolvedValue({
@@ -381,7 +385,7 @@ describe('userManagementApi', () => {
           entityId: 5,
           ipAddress: '192.168.1.1',
           userAgent: 'Mozilla/5.0',
-          createdAt: new Date('2024-01-01'),
+          createdAt: new Date('2024-01-01').toISOString(),
           user: {
             id: 5,
             username: 'testuser',
@@ -423,16 +427,16 @@ describe('userManagementApi', () => {
           userId: 10,
           preferenceType: 'theme',
           value: 'dark',
-          createdAt: new Date('2024-01-01'),
-          updatedAt: new Date('2024-01-01'),
+          createdAt: new Date('2024-01-01').toISOString(),
+          updatedAt: new Date('2024-01-01').toISOString(),
         },
         {
           id: 2,
           userId: 10,
           preferenceType: 'language',
           value: 'en',
-          createdAt: new Date('2024-01-01'),
-          updatedAt: new Date('2024-01-01'),
+          createdAt: new Date('2024-01-01').toISOString(),
+          updatedAt: new Date('2024-01-01').toISOString(),
         },
       ];
 
@@ -466,8 +470,8 @@ describe('userManagementApi', () => {
         userId: 10,
         preferenceType: 'notifications',
         value: 'enabled',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       mockFetch.mockResolvedValue({
