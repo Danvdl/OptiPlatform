@@ -4,20 +4,29 @@ import { logError } from '../utils/frontendLogger';
 export interface PurchaseOrder {
   id: number;
   poNumber: string;
-  supplierName: string;
+  supplierId: number;
+  supplier?: {
+    id: number;
+    name: string;
+  };
   status: string;
   priority: string;
   totalAmount: number;
   currency: string;
   orderDate: string;
   expectedDeliveryDate?: string;
-  itemCount: number;
+  items: Array<{ id: number }>;
 }
 
 export interface CreatePurchaseOrderInput {
-  supplierName: string;
+  supplierId: number;
   priority: 'low' | 'normal' | 'high' | 'urgent';
   expectedDeliveryDate?: string;
+  items: Array<{
+    productId: number;
+    quantityOrdered: number;
+    unitPrice: number;
+  }>;
 }
 
 export async function fetchPurchaseOrders(): Promise<PurchaseOrder[]> {
@@ -26,14 +35,20 @@ export async function fetchPurchaseOrders(): Promise<PurchaseOrder[]> {
       purchaseOrders {
         id
         poNumber
-        supplierName
+        supplierId
+        supplier {
+          id
+          name
+        }
         status
         priority
         totalAmount
         currency
         orderDate
         expectedDeliveryDate
-        itemCount
+        items {
+          id
+        }
       }
     }
   `;
@@ -52,14 +67,20 @@ export async function createPurchaseOrder(input: CreatePurchaseOrderInput): Prom
       createPurchaseOrder(input: $input) {
         id
         poNumber
-        supplierName
+        supplierId
+        supplier {
+          id
+          name
+        }
         status
         priority
         totalAmount
         currency
         orderDate
         expectedDeliveryDate
-        itemCount
+        items {
+          id
+        }
       }
     }
   `;
