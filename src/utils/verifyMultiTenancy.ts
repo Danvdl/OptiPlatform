@@ -42,7 +42,7 @@ async function checkLocalDatabase() {
   const allProducts = await db.products.toArray();
   const tenantProducts = await db.products
     .where('[tenantId+deleted]')
-    .equals([tenantId, undefined])
+    .equals([tenantId || '', undefined] as [string, undefined])
     .toArray();
   
   console.log('Total products in IndexedDB:', allProducts.length);
