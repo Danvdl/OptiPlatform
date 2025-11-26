@@ -40,9 +40,10 @@ async function checkLocalDatabase() {
   
   // Check products
   const allProducts = await db.products.toArray();
+  const currentTenant = tenantId || '';
   const tenantProducts = await db.products
     .where('[tenantId+deleted]')
-    .equals([tenantId || '', undefined] as [string, undefined])
+    .equals([currentTenant, undefined] as any) // Complex Dexie type - use any for browser console script
     .toArray();
   
   console.log('Total products in IndexedDB:', allProducts.length);
