@@ -151,7 +151,21 @@ class SyncService {
         }),
       });
 
-      const { data } = await response.json();
+      if (!response.ok) {
+        console.warn('[Sync] Products pull failed:', response.status, response.statusText);
+        // Continue with other sync operations instead of failing completely
+        return;
+      }
+
+      const result = await response.json();
+      
+      if (result.errors) {
+        console.warn('[Sync] GraphQL errors during products pull:', result.errors);
+        // Skip this sync if backend doesn't support the query
+        return;
+      }
+      
+      const { data } = result;
       if (data?.products) {
         await db.transaction('rw', db.products, async () => {
           for (const product of data.products) {

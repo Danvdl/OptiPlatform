@@ -60,8 +60,15 @@ class FrontendLogger {
    * Log an info message
    */
   logInfo(message: string, context?: Record<string, any>) {
-    // Only log in development mode and if not spammy
-    if (import.meta.env.DEV && !message.includes('RoleGuard') && !message.includes('Auth: Context initialized')) {
+    // Only log in development mode and filter out spammy messages
+    if (import.meta.env.DEV && 
+        !message.includes('RoleGuard') && 
+        !message.includes('Auth: Context initialized') &&
+        !message.includes('Auth: Token check') &&
+        !message.includes('Auth: Fetching current user') &&
+        !message.includes('Auth: User loaded') &&
+        !message.includes('Auth: Fetching user permissions') &&
+        !message.includes('Auth: Permissions loaded')) {
       console.log('[Info]', message, context);
     }
 
@@ -72,6 +79,12 @@ class FrontendLogger {
    * Log a warning
    */
   logWarning(message: string, context?: Record<string, any>) {
+    // Filter out known non-critical warnings
+    if (message.includes('Firebase messaging not configured')) {
+      // Skip this warning - it's expected when Firebase is not set up
+      return;
+    }
+    
     console.warn('[Warning]', message, context);
     
     // Could track warnings for analysis
