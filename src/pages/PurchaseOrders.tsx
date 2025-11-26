@@ -8,9 +8,10 @@ export default function PurchaseOrders() {
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newPO, setNewPO] = useState({
-    supplierName: '',
+    supplierId: 0,
     priority: 'normal' as 'low' | 'normal' | 'high' | 'urgent',
-    expectedDeliveryDate: ''
+    expectedDeliveryDate: '',
+    items: [] as Array<{ productId: number; quantityOrdered: number; unitPrice: number }>
   });
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -345,12 +346,12 @@ export default function PurchaseOrders() {
                         fontSize: '0.875rem', 
                         color: '#6b7280'
                       }}>
-                        {order.itemCount} items
+                        {order.items?.length || 0} items
                       </div>
                     </div>
                   </td>
                   <td style={{ padding: '1rem', color: '#374151' }}>
-                    {order.supplierName}
+                    {order.supplier?.name || `Supplier #${order.supplierId}`}
                   </td>
                   <td style={{ padding: '1rem' }}>
                     <span style={{
