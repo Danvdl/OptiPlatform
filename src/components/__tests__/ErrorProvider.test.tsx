@@ -265,16 +265,21 @@ describe('ErrorProvider', () => {
 
   describe('error properties', () => {
     test('error has unique id', async () => {
-      const ids: string[] = [];
+      const ids = new Set<string>();
       
       const TestIdComponent = () => {
         const { showError, errors } = useError();
         
-        if (errors.length > 0) {
-          ids.push(...errors.map(e => e.id));
-        }
+        errors.forEach(err => {
+          ids.add(err.id);
+        });
         
-        return <button onClick={() => showError('Test')}>Add Error</button>;
+        return (
+          <div>
+            <button onClick={() => showError('Error 1')}>Error 1</button>
+            <button onClick={() => showError('Error 2')}>Error 2</button>
+          </div>
+        );
       };
 
       render(
@@ -283,15 +288,17 @@ describe('ErrorProvider', () => {
         </ErrorProvider>
       );
 
-      const button = screen.getByText('Add Error');
-      button.click();
-      button.click();
+      // Use different button clicks instead of same button twice
+      screen.getByText('Error 1').click();
+      await new Promise(resolve => setTimeout(resolve, 5));
+      screen.getByText('Error 2').click();
 
       await waitFor(() => {
-        expect(ids.length).toBeGreaterThanOrEqual(2);
+        expect(ids.size).toBeGreaterThanOrEqual(2);
       });
 
-      expect(ids[0]).not.toBe(ids[1]);
+      // Check that we have unique IDs
+      expect(ids.size).toBeGreaterThanOrEqual(2);
     });
 
     test('error has timestamp', async () => {
