@@ -126,6 +126,10 @@ export class InventoryTransaction {
   @Column({ type: 'timestamp', name: 'reservation_expires_at', nullable: true })
   reservationExpiresAt?: Date;
 
+  @Field({ nullable: true })
+  @Column({ type: 'uuid', name: 'tenant_id', nullable: true })
+  tenantId?: string;
+
   @Field()
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'occurred_at' })
   occurredAt: Date;

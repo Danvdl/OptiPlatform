@@ -27,7 +27,7 @@ export class AuthService {
       console.log('🔍 Validating user:', { username, hasPassword: !!pass });
       const user = await this.users.findOne({ 
         where: { username },
-        select: ['id', 'username', 'email', 'role', 'password']
+        select: ['id', 'username', 'email', 'role', 'password', 'tenantId', 'tenantRole']
       });
       console.log('🔍 Found user:', { found: !!user, hasPassword: !!user?.password });
       
@@ -112,7 +112,13 @@ export class AuthService {
       // Update last login time and log activity
       await this.userService.updateLastLogin(user.id);
       
-      const payload = { username: user.username, sub: user.id };
+      // Include tenantId in JWT payload
+      const payload = { 
+        username: user.username, 
+        sub: user.id,
+        tenantId: user.tenantId,
+        tenantRole: user.tenantRole 
+      };
       console.log('🔑 Login payload:', payload);
       const token = this.jwtService.sign(payload);
       console.log('🔑 Generated token:', token.substring(0, 50) + '...');

@@ -17,9 +17,17 @@ export class Category {
   @Column({ nullable: true })
   description?: string;
 
+  @Field({ nullable: true })
+  @Column({ type: 'uuid', name: 'tenant_id', nullable: true })
+  tenantId?: string;
+
   @Field()
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
   createdAt: Date;
+
+  @Field({ nullable: true })
+  @Column({ type: 'timestamp', nullable: true, name: 'updated_at' })
+  updatedAt?: Date;
 
   @Field(() => [Product], { nullable: true })
   @OneToMany(() => Product, product => product.category)

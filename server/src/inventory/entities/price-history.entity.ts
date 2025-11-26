@@ -38,6 +38,10 @@ export class PriceHistory {
   @Column({ type: 'text', nullable: true })
   reason?: string;
 
+  @Field({ nullable: true })
+  @Column({ type: 'uuid', name: 'tenant_id', nullable: true })
+  tenantId?: string;
+
   @Field()
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'changed_at' })
   changedAt: Date;

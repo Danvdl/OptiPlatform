@@ -129,6 +129,10 @@ export class PurchaseOrderItem {
   @Column({ default: false, name: 'quality_approved' })
   qualityApproved: boolean;
 
+  @Field({ nullable: true })
+  @Column({ type: 'uuid', name: 'tenant_id', nullable: true })
+  tenantId?: string;
+
   // Timestamps
   @Field()
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })

@@ -45,9 +45,17 @@ export class Product {
   @Column({ nullable: true })
   currency?: string;
 
+  @Field({ nullable: true })
+  @Column({ type: 'uuid', name: 'tenant_id', nullable: true })
+  tenantId?: string;
+
   @Field()
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
   createdAt: Date;
+
+  @Field({ nullable: true })
+  @Column({ type: 'timestamp', nullable: true, name: 'updated_at' })
+  updatedAt?: Date;
 
   @Field(() => Category, { nullable: true })
   @ManyToOne(() => Category, category => category.products)

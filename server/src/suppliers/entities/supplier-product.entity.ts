@@ -70,6 +70,10 @@ export class SupplierProduct {
   @Column({ type: 'date', nullable: true, name: 'last_price_update' })
   lastPriceUpdate?: Date;
 
+  @Field({ nullable: true })
+  @Column({ type: 'uuid', name: 'tenant_id', nullable: true })
+  tenantId?: string;
+
   @Field()
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
   createdAt: Date;

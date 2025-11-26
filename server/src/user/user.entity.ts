@@ -88,6 +88,14 @@ export class User {
   @Column({ name: 'last_login_at', type: 'timestamp', nullable: true })
   lastLoginAt?: Date;
 
+  @Field({ nullable: true })
+  @Column({ type: 'uuid', name: 'tenant_id', nullable: true })
+  tenantId?: string;
+
+  @Field({ nullable: true })
+  @Column({ name: 'tenant_role', nullable: true })
+  tenantRole?: string; // owner, admin, member
+
   @Field(() => Date)
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
