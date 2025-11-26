@@ -1,13 +1,14 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { describe, test, expect, vi } from 'vitest';
 import { AuthProvider, useAuth } from '../AuthContext';
 
-jest.mock('../../utils/userManagementApi', () => ({
-  fetchCurrentUser: jest.fn(async () => ({ id: 42, username: 'Casey', role: 'MANAGER' })),
-  fetchUserPermissions: jest.fn(async () => ['USER_READ', 'INVENTORY_WRITE']),
+vi.mock('../../utils/userManagementApi', () => ({
+  fetchCurrentUser: vi.fn(async () => ({ id: 42, username: 'Casey', role: 'MANAGER' })),
+  fetchUserPermissions: vi.fn(async () => ['USER_READ', 'INVENTORY_WRITE']),
 }));
-jest.mock('../../utils/authStore', () => ({
-  getToken: jest.fn(async () => 'token'),
+vi.mock('../../utils/authStore', () => ({
+  getToken: vi.fn(async () => 'token'),
 }));
 
 function ShowAuth() {

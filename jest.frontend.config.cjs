@@ -6,6 +6,16 @@ module.exports = {
     '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: 'tsconfig.jest.json' }],
   },
   setupFilesAfterEnv: ['<rootDir>/jest-setup.ts'],
+  globals: {
+    'import.meta': {
+      env: {
+        VITE_BACKEND_URL: 'http://localhost:3001',
+        DEV: false,
+        PROD: true,
+        MODE: 'test',
+      },
+    },
+  },
   moduleNameMapper: {
     // CSS modules
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',

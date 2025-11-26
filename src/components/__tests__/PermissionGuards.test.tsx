@@ -1,19 +1,16 @@
-import { describe, test, expect, jest } from '@jest/globals';
-import '@testing-library/jest-dom';
-import { toBeInTheDocument } from '@testing-library/jest-dom/matchers';
-expect.extend({ toBeInTheDocument });
+import { describe, test, expect, vi } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { PermissionGuard, RoleGuard, AccessGuard } from '../PermissionGuards';
 import { AuthProvider } from '../../contexts/AuthContext';
 
 // Mock API clients used by AuthContext
-jest.mock('../../utils/userManagementApi', () => ({
-  fetchCurrentUser: jest.fn(async () => ({ id: '1', username: 'admin', role: 'ADMIN' })),
-  fetchUserPermissions: jest.fn(async () => ['USER_READ', 'INVENTORY_READ']),
+vi.mock('../../utils/userManagementApi', () => ({
+  fetchCurrentUser: vi.fn(async () => ({ id: '1', username: 'admin', role: 'ADMIN' })),
+  fetchUserPermissions: vi.fn(async () => ['USER_READ', 'INVENTORY_READ']),
 }));
-jest.mock('../../utils/authStore', () => ({
-  getToken: jest.fn(async () => 'token'),
+vi.mock('../../utils/authStore', () => ({
+  getToken: vi.fn(async () => 'token'),
 }));
 
 function withAuth(children: React.ReactNode) {
