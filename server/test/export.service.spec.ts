@@ -79,7 +79,7 @@ describe('ExportService', () => {
     it('should use default filename when not provided', async () => {
       await service.exportReport(sampleData, { format: 'csv' }, mockResponse as Response);
 
-      const setHeaderCalls = (mockResponse.setHeader as vi.Mock).mock.calls;
+      const setHeaderCalls = (mockResponse.setHeader as any).mock.calls;
       const dispositionCall = setHeaderCalls.find(call => call[0] === 'Content-Disposition');
       expect(dispositionCall[1]).toMatch(/^attachment; filename="report_\d{4}-\d{2}-\d{2}\.csv"$/);
     });
@@ -121,7 +121,7 @@ describe('ExportService', () => {
 
       await service.exportReport(data, { format: 'csv' }, mockResponse as Response);
 
-      const csvContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      const csvContent = (mockResponse.send as any).mock.calls[0][0];
       expect(csvContent).toContain('id,name,price');
       expect(csvContent).toContain('1,Product A,100');
       expect(csvContent).toContain('2,Product B,200');
@@ -132,7 +132,7 @@ describe('ExportService', () => {
 
       await service.exportReport(data, { format: 'csv' }, mockResponse as Response);
 
-      const csvContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      const csvContent = (mockResponse.send as any).mock.calls[0][0];
       expect(csvContent).toContain('"Product, Inc."');
     });
 
@@ -141,7 +141,7 @@ describe('ExportService', () => {
 
       await service.exportReport(data, { format: 'csv' }, mockResponse as Response);
 
-      const csvContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      const csvContent = (mockResponse.send as any).mock.calls[0][0];
       expect(csvContent).toContain('""');
     });
 
@@ -150,7 +150,7 @@ describe('ExportService', () => {
 
       await service.exportReport(data, { format: 'csv' }, mockResponse as Response);
 
-      const csvContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      const csvContent = (mockResponse.send as any).mock.calls[0][0];
       expect(csvContent).toContain('1,,');
     });
 
@@ -176,7 +176,7 @@ describe('ExportService', () => {
 
       await service.exportReport(data, { format: 'excel' }, mockResponse as Response);
 
-      const excelContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      const excelContent = (mockResponse.send as any).mock.calls[0][0];
       expect(excelContent).toContain('id\tname\tprice');
       expect(excelContent).toContain('1\tProduct A\t100');
     });
@@ -192,7 +192,7 @@ describe('ExportService', () => {
 
       await service.exportReport(data, { format: 'excel' }, mockResponse as Response);
 
-      const excelContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      const excelContent = (mockResponse.send as any).mock.calls[0][0];
       expect(excelContent).toContain('1\t');
     });
   });
@@ -210,7 +210,7 @@ describe('ExportService', () => {
         mockResponse as Response
       );
 
-      const htmlContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      const htmlContent = (mockResponse.send as any).mock.calls[0][0];
       expect(htmlContent).toContain('<h1>Product Report</h1>');
       expect(htmlContent).toContain('<table>');
       expect(htmlContent).toContain('Product A');
@@ -230,7 +230,7 @@ describe('ExportService', () => {
         mockResponse as Response
       );
 
-      const htmlContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      const htmlContent = (mockResponse.send as any).mock.calls[0][0];
       expect(htmlContent).toContain('<h2>Summary</h2>');
       expect(htmlContent).toContain('<h2>Top Performers</h2>');
       expect(htmlContent).toContain('<h2>Alerts</h2>');
@@ -241,7 +241,7 @@ describe('ExportService', () => {
 
       await service.exportReport(data, { format: 'pdf' }, mockResponse as Response);
 
-      const htmlContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      const htmlContent = (mockResponse.send as any).mock.calls[0][0];
       expect(htmlContent).toContain('$1,234.56');
       expect(htmlContent).toContain('$10,000.00');
     });
@@ -251,7 +251,7 @@ describe('ExportService', () => {
 
       await service.exportReport(data, { format: 'pdf' }, mockResponse as Response);
 
-      const htmlContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      const htmlContent = (mockResponse.send as any).mock.calls[0][0];
       expect(htmlContent).toContain('25.50%');
       expect(htmlContent).toContain('10.25%');
     });
@@ -264,7 +264,7 @@ describe('ExportService', () => {
 
       await service.exportReport(data, { format: 'pdf' }, mockResponse as Response);
 
-      const htmlContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      const htmlContent = (mockResponse.send as any).mock.calls[0][0];
       expect(htmlContent).toContain('class="number positive"');
       expect(htmlContent).toContain('class="number negative"');
     });
@@ -272,14 +272,14 @@ describe('ExportService', () => {
     it('should detect report types', async () => {
       const turnoverData = [{ name: 'Product', turnoverRatio: 5.5 }];
       await service.exportReport(turnoverData, { format: 'pdf' }, mockResponse as Response);
-      let htmlContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      let htmlContent = (mockResponse.send as any).mock.calls[0][0];
       expect(htmlContent).toContain('Inventory Turnover Report');
 
       vi.clearAllMocks();
 
       const velocityData = [{ name: 'Product', velocityPerDay: 10 }];
       await service.exportReport(velocityData, { format: 'pdf' }, mockResponse as Response);
-      htmlContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      htmlContent = (mockResponse.send as any).mock.calls[0][0];
       expect(htmlContent).toContain('Stock Movement Analytics');
     });
 
@@ -288,7 +288,7 @@ describe('ExportService', () => {
 
       await service.exportReport(data, { format: 'pdf' }, mockResponse as Response);
 
-      const htmlContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      const htmlContent = (mockResponse.send as any).mock.calls[0][0];
       expect(htmlContent).toContain('Product Name');
       expect(htmlContent).toContain('Unit Price');
     });
@@ -298,7 +298,7 @@ describe('ExportService', () => {
 
       await service.exportReport(data, { format: 'pdf' }, mockResponse as Response);
 
-      const htmlContent = (mockResponse.send as vi.Mock).mock.calls[0][0];
+      const htmlContent = (mockResponse.send as any).mock.calls[0][0];
       expect(htmlContent).toContain('Generated:');
     });
   });

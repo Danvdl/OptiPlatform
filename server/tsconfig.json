@@ -19,7 +19,7 @@
     "downlevelIteration": true,
     "types": [
       "node",
-      "jest"
+      "vitest/globals"
     ]
   },
   "include": [

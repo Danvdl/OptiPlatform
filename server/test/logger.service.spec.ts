@@ -16,9 +16,9 @@ describe('LoggerService', () => {
     service = module.get<LoggerService>(LoggerService);
     
     // Mock fs methods
-    (fs.existsSync as vi.Mock).mockReturnValue(true);
-    (fs.mkdirSync as vi.Mock).mockImplementation();
-    (fs.appendFileSync as vi.Mock).mockImplementation();
+    (fs.existsSync as any).mockReturnValue(true);
+    (fs.mkdirSync as any).mockImplementation();
+    (fs.appendFileSync as any).mockImplementation();
   });
 
   afterEach(() => {
