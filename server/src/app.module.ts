@@ -5,6 +5,7 @@ import { GraphQLError } from 'graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
+import GraphQLJSON from 'graphql-type-json';
 import { AuthModule } from './auth/auth.module';
 import { AppResolver } from './app.resolver';
 import { User } from './user/user.entity';
@@ -34,6 +35,7 @@ import { ErrorHandlingModule } from './errors/error-handling.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'schema.gql'),
+      resolvers: { JSON: GraphQLJSON }, // Register JSON scalar
       context: ({ req }) => {
         console.log('🔍 GraphQL Context - Request headers:', {
           authorization: req.headers?.authorization,
