@@ -118,6 +118,16 @@ class SyncService {
       return;
     }
 
+    // Extract tenantId from JWT token
+    let tenantId = '';
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      tenantId = payload.tenantId || '';
+    } catch (e) {
+      console.error('[Sync] Failed to extract tenantId from token');
+      return;
+    }
+
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
@@ -135,8 +145,8 @@ class SyncService {
     // Pull products
     if (await this.shouldPull('products', lastSyncTimes.products)) {
       const query = `
-        query GetProducts($since: String) {
-          products(since: $since) {
+        query GetProducts {
+          products {
             id name description sku categoryId quantity restockThreshold price cost updatedAt
           }
         }
@@ -145,10 +155,7 @@ class SyncService {
       const response = await fetch(`${backendUrl}/graphql`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ 
-          query, 
-          variables: { since: lastSyncTimes.products ? new Date(lastSyncTimes.products).toISOString() : null }
-        }),
+        body: JSON.stringify({ query }),
       });
 
       if (!response.ok) {
@@ -170,7 +177,7 @@ class SyncService {
           for (const product of data.products) {
             await db.products.put({
               ...product,
-              tenantId: 'current', // Will be replaced with actual tenant context
+              tenantId: tenantId,
               synced: true,
               lastModified: new Date(product.updatedAt).getTime(),
               deleted: false,
