@@ -17,6 +17,9 @@ import { UserPreferences } from './user-preferences.entity';
     ])
   ],
   providers: [UserService, UserResolver],
-  exports: [UserService]
+  exports: [
+    UserService,
+    TypeOrmModule // Export repositories so they're available in other modules
+  ]
 })
 export class UserModule {}
