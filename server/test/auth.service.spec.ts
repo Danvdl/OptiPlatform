@@ -12,7 +12,11 @@ vi.mock('bcrypt', () => ({
 
 // simple mock JwtService
 const jwtService: JwtService = {
-  sign: vi.fn().mockReturnValue('signed-token'),
+  sign: vi.fn(() => 'signed-token'),
+  signAsync: vi.fn(),
+  verify: vi.fn(),
+  verifyAsync: vi.fn(),
+  decode: vi.fn(),
 } as any;
 
 // mock User repository
@@ -28,7 +32,9 @@ const usersRepo = {
 } as any;
 
 describe('AuthService', () => {
-  const mockUserService = { updateLastLogin: vi.fn() } as unknown as UserService;
+  const mockUserService = { 
+    updateLastLogin: vi.fn().mockResolvedValue(undefined) 
+  } as unknown as UserService;
   const service = new AuthService(jwtService, usersRepo, mockUserService);
 
 
