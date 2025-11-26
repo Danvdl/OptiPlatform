@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { logWarning, logError } from './frontendLogger';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -20,13 +21,13 @@ if (isFirebaseConfigured) {
     app = initializeApp(firebaseConfig);
     messaging = getMessaging(app);
   } catch (error) {
-    console.warn('Firebase initialization failed:', error);
+    logWarning('Firebase initialization failed', { error });
   }
 }
 
 export async function registerFCM(register: (token: string) => Promise<void>) {
   if (!messaging) {
-    console.warn('Firebase messaging not configured - skipping FCM registration');
+    logWarning('Firebase messaging not configured - skipping FCM registration');
     return;
   }
   
@@ -38,13 +39,13 @@ export async function registerFCM(register: (token: string) => Promise<void>) {
       await register(token);
     }
   } catch (err) {
-    console.error('FCM registration failed', err);
+    logError(err instanceof Error ? err : new Error('FCM registration failed'), { context: 'registerFCM' });
   }
 }
 
 export function onForegroundMessage(cb: (payload: any) => void) {
   if (!messaging) {
-    console.warn('Firebase messaging not configured - skipping message listener');
+    logWarning('Firebase messaging not configured - skipping message listener');
     return;
   }
   onMessage(messaging, cb);

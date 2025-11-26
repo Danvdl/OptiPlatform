@@ -1,4 +1,5 @@
 import { graphql } from './apiClient';
+import { logError } from '../utils/frontendLogger';
 
 export interface PurchaseOrder {
   id: number;
@@ -40,7 +41,7 @@ export async function fetchPurchaseOrders(): Promise<PurchaseOrder[]> {
     const data = await graphql<{ purchaseOrders: PurchaseOrder[] }>(query);
     return data.purchaseOrders;
   } catch (error) {
-    console.error('Error fetching purchase orders:', error);
+    logError(error instanceof Error ? error : new Error('Error fetching purchase orders'), { context: 'fetchPurchaseOrders' });
     return [];
   }
 }
@@ -66,7 +67,7 @@ export async function createPurchaseOrder(input: CreatePurchaseOrderInput): Prom
     const data = await graphql<{ createPurchaseOrder: PurchaseOrder }>(mutation, { input });
     return data.createPurchaseOrder;
   } catch (error) {
-    console.error('Error creating purchase order:', error);
+    logError(error instanceof Error ? error : new Error('Error creating purchase order'), { context: 'createPurchaseOrder', input });
     throw error;
   }
 }

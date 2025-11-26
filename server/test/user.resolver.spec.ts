@@ -1,19 +1,20 @@
 import { UserResolver } from '../src/user/user.resolver';
+import { vi } from 'vitest';
 import { UserRole } from '../src/user/user.entity';
 import { Permission } from '../src/user/user-permission.entity';
 
 describe('UserResolver - access checks', () => {
   const userService = {
-    hasPermission: jest.fn(),
-    findAll: jest.fn(async () => []),
-    getUserPermissions: jest.fn(async () => []),
+    hasPermission: vi.fn(),
+    findAll: vi.fn(async () => []),
+    getUserPermissions: vi.fn(async () => []),
   } as any;
 
-  const loggingService = { logInfo: jest.fn() } as any;
+  const loggingService = { logInfo: vi.fn() } as any;
   const resolver = new UserResolver(userService, loggingService);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const ctx = (user: any) => ({ req: { user } });

@@ -77,7 +77,7 @@ export async function fetchSuppliers(): Promise<Supplier[]> {
       onTimeDeliveryRate: s.onTimeDeliveryRate,
     }));
   } catch (error) {
-    console.error('Error fetching suppliers:', error);
+    logError(error instanceof Error ? error : new Error('Error fetching suppliers'), { context: 'fetchSuppliers' });
     return [];
   }
 }
@@ -162,7 +162,7 @@ export async function createSupplier(input: CreateSupplierInput): Promise<Suppli
       onTimeDeliveryRate: s.onTimeDeliveryRate,
     };
   } catch (error) {
-    console.error('Error creating supplier:', error);
+    logError(error instanceof Error ? error : new Error('Error creating supplier'), { context: 'createSupplier', input });
     throw error;
   }
 }

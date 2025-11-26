@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { vi } from 'vitest';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ReportsService } from '../src/reports/reports.service';
@@ -14,21 +15,21 @@ describe('ReportsService', () => {
   let categoryRepo: Repository<Category>;
   let priceHistoryRepo: Repository<PriceHistory>;
 
-  const mockQueryBuilder = {
-    select: jest.fn().mockReturnThis(),
-    addSelect: jest.fn().mockReturnThis(),
-    leftJoin: jest.fn().mockReturnThis(),
-    innerJoin: jest.fn().mockReturnThis(),
-    where: jest.fn().mockReturnThis(),
-    andWhere: jest.fn().mockReturnThis(),
-    groupBy: jest.fn().mockReturnThis(),
-    orderBy: jest.fn().mockReturnThis(),
-    having: jest.fn().mockReturnThis(),
-    getRawMany: jest.fn().mockResolvedValue([]),
-    getMany: jest.fn().mockResolvedValue([]),
-    getOne: jest.fn().mockResolvedValue(null),
-    getRawOne: jest.fn().mockResolvedValue({ sum: 0 }),
-  };
+  const createMockQueryBuilder = () => ({
+    select: vi.fn().mockReturnThis(),
+    addSelect: vi.fn().mockReturnThis(),
+    leftJoin: vi.fn().mockReturnThis(),
+    innerJoin: vi.fn().mockReturnThis(),
+    where: vi.fn().mockReturnThis(),
+    andWhere: vi.fn().mockReturnThis(),
+    groupBy: vi.fn().mockReturnThis(),
+    orderBy: vi.fn().mockReturnThis(),
+    having: vi.fn().mockReturnThis(),
+    getRawMany: vi.fn().mockResolvedValue([]),
+    getMany: vi.fn().mockResolvedValue([]),
+    getOne: vi.fn().mockResolvedValue(null),
+    getRawOne: vi.fn().mockResolvedValue({ sum: 0 }),
+  });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -37,33 +38,33 @@ describe('ReportsService', () => {
         {
           provide: getRepositoryToken(Product),
           useValue: {
-            find: jest.fn(),
-            findOne: jest.fn(),
-            createQueryBuilder: jest.fn(() => mockQueryBuilder),
+            find: vi.fn(),
+            findOne: vi.fn(),
+            createQueryBuilder: vi.fn(() => createMockQueryBuilder()),
           },
         },
         {
           provide: getRepositoryToken(InventoryTransaction),
           useValue: {
-            find: jest.fn(),
-            findOne: jest.fn(),
-            createQueryBuilder: jest.fn(() => mockQueryBuilder),
+            find: vi.fn(),
+            findOne: vi.fn(),
+            createQueryBuilder: vi.fn(() => createMockQueryBuilder()),
           },
         },
         {
           provide: getRepositoryToken(Category),
           useValue: {
-            find: jest.fn(),
-            findOne: jest.fn(),
-            createQueryBuilder: jest.fn(() => mockQueryBuilder),
+            find: vi.fn(),
+            findOne: vi.fn(),
+            createQueryBuilder: vi.fn(() => createMockQueryBuilder()),
           },
         },
         {
           provide: getRepositoryToken(PriceHistory),
           useValue: {
-            find: jest.fn(),
-            findOne: jest.fn(),
-            createQueryBuilder: jest.fn(() => mockQueryBuilder),
+            find: vi.fn(),
+            findOne: vi.fn(),
+            createQueryBuilder: vi.fn(() => createMockQueryBuilder()),
           },
         },
       ],
@@ -77,7 +78,7 @@ describe('ReportsService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -98,9 +99,8 @@ describe('ReportsService', () => {
         { quantity: -10, totalCost: 100 },
       ];
 
-      jest.spyOn(productRepo, 'find').mockResolvedValue(mockProducts as any);
-      jest.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
-      mockQueryBuilder.getMany.mockResolvedValue(mockProducts);
+      vi.spyOn(productRepo, 'find').mockResolvedValue(mockProducts as any);
+      vi.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
 
       const dateRange = {
         startDate: new Date('2025-01-01'),
@@ -129,9 +129,8 @@ describe('ReportsService', () => {
         { quantity: -5, transactionType: 'sale' },
       ];
 
-      jest.spyOn(productRepo, 'find').mockResolvedValue(mockProducts as any);
-      jest.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
-      mockQueryBuilder.getMany.mockResolvedValue(mockProducts);
+      vi.spyOn(productRepo, 'find').mockResolvedValue(mockProducts as any);
+      vi.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
 
       const dateRange = {
         startDate: new Date('2025-01-01'),
@@ -161,10 +160,9 @@ describe('ReportsService', () => {
         { quantity: -1, transactionDate: new Date() },
       ];
 
-      jest.spyOn(productRepo, 'find').mockResolvedValue(mockProducts as any);
-      jest.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
-      jest.spyOn(productRepo, 'findOne').mockResolvedValue(mockProducts[0] as any);
-      mockQueryBuilder.getMany.mockResolvedValue(mockProducts);
+      vi.spyOn(productRepo, 'find').mockResolvedValue(mockProducts as any);
+      vi.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
+      vi.spyOn(productRepo, 'findOne').mockResolvedValue(mockProducts[0] as any);
 
       const result = await service.getLowStockTrendAnalysis();
 
@@ -191,9 +189,9 @@ describe('ReportsService', () => {
         { quantity: -10, totalCost: 100 },
       ];
 
-      jest.spyOn(categoryRepo, 'find').mockResolvedValue(mockCategories as any);
-      jest.spyOn(productRepo, 'find').mockResolvedValue(mockProducts as any);
-      jest.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
+      vi.spyOn(categoryRepo, 'find').mockResolvedValue(mockCategories as any);
+      vi.spyOn(productRepo, 'find').mockResolvedValue(mockProducts as any);
+      vi.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
 
       const dateRange = {
         startDate: new Date('2025-01-01'),
@@ -226,7 +224,7 @@ describe('ReportsService', () => {
         }
       ];
 
-      jest.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
+      vi.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
 
       const dateRange = {
         startDate: new Date('2025-01-01'),

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { vi } from 'vitest';
 import { AuthController } from '../src/auth/auth.controller';
 import { AuthService } from '../src/auth/auth.service';
 
@@ -13,7 +14,7 @@ describe('AuthController', () => {
         {
           provide: AuthService,
           useValue: {
-            oauthLogin: jest.fn(),
+            oauthLogin: vi.fn(),
           },
         },
       ],
@@ -24,7 +25,7 @@ describe('AuthController', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -44,10 +45,10 @@ describe('AuthController', () => {
       const mockToken = 'test-jwt-token';
       const mockReq = { user: mockUser };
       const mockRes = {
-        send: jest.fn(),
+        send: vi.fn(),
       };
 
-      jest.spyOn(authService, 'oauthLogin').mockResolvedValue(mockToken);
+      vi.spyOn(authService, 'oauthLogin').mockResolvedValue(mockToken);
 
       await controller.googleAuthRedirect(mockReq, mockRes as any);
 
@@ -69,10 +70,10 @@ describe('AuthController', () => {
       const mockToken = 'test-jwt-token';
       const mockReq = { user: mockUser };
       const mockRes = {
-        send: jest.fn(),
+        send: vi.fn(),
       };
 
-      jest.spyOn(authService, 'oauthLogin').mockResolvedValue(mockToken);
+      vi.spyOn(authService, 'oauthLogin').mockResolvedValue(mockToken);
 
       await controller.githubAuthRedirect(mockReq, mockRes as any);
 

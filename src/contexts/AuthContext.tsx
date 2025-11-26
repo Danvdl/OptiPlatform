@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchCurrentUser, hasPermission, fetchUserPermissions } from '../utils/userManagementApi';
 import { getToken } from '../utils/authStore';
 import { User, UserRole } from '../types/user-management';
+import { logInfo, logError } from '../utils/frontendLogger';
 
 interface AuthContextType {
   user: User | null;
@@ -34,14 +35,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // Check if there's a token before making API calls
       const token = await getToken();
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('🔑 Auth Debug - Token found:', !!token);
-      }
+      logInfo('Auth: Token check', { hasToken: !!token });
       
       if (!token) {
-        if (process.env.NODE_ENV !== 'production') {
-          console.log('❌ Auth Debug - No token found, setting user to null');
-        }
+        logInfo('Auth: No token found, setting user to null');
         setUser(null);
         setPermissions([]);
         setLoading(false);
@@ -49,22 +46,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       setLoading(true);
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('📡 Auth Debug - Fetching current user...');
-      }
+      logInfo('Auth: Fetching current user');
       
       const currentUser = await fetchCurrentUser();
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('👤 Auth Debug - Current user:', currentUser);
-        console.log('🎭 Auth Debug - User role:', currentUser?.role, typeof currentUser?.role);
-      }
+      logInfo('Auth: User loaded', { 
+        userId: currentUser?.id, 
+        username: currentUser?.username, 
+        role: currentUser?.role 
+      });
       
       setUser(currentUser);
       
       // Load user permissions
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('🔐 Auth Debug - Fetching user permissions...');
-      }
+      logInfo('Auth: Fetching user permissions');
       
       const rawPermissions = await fetchUserPermissions();
       // Normalize GraphQL enum names (e.g., USER_READ) to code format (e.g., user:read)
@@ -73,16 +67,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .toLowerCase()
           .replace(/_/g, ':')
       );
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('🔐 Auth Debug - Raw permissions:', rawPermissions);
-        console.log('🔐 Auth Debug - Normalized permissions:', normalizedPermissions);
-      }
+      logInfo('Auth: Permissions loaded', { 
+        count: normalizedPermissions.length,
+        permissions: normalizedPermissions 
+      });
       
       setPermissions(normalizedPermissions);
     } catch (error) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.error('Error loading user:', error);
-      }
+      logError(error instanceof Error ? error : new Error(String(error)), { 
+        context: 'Auth: Failed to load user' 
+      });
       setUser(null);
       setPermissions([]);
     } finally {
@@ -95,10 +89,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ? permission
       : permission.toLowerCase().replace(/_/g, ':'));
     const has = permissions.includes(normalized);
-    // Debug single check
-    if (permission && process.env.NODE_ENV !== 'production') {
-      console.log('🔎 Permission check:', { input: permission, normalized, has, permissions });
-    }
+    logInfo('Auth: Permission check', { 
+      permission: normalized, 
+      granted: has 
+    });
     return has;
   };
 
@@ -117,15 +111,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refreshUser: loadUser
   };
 
-  // Debug logging
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('🎭 Auth Context Values:', {
-      user: user ? { id: user.id, username: user.username, role: user.role } : null,
-      loading,
-      isAdmin: user?.role === UserRole.ADMIN,
-      userRole: user?.role,
-      UserRoleADMIN: UserRole.ADMIN,
-      roleComparison: user?.role === UserRole.ADMIN
+  // Log context state for debugging
+  if (user) {
+    logInfo('Auth: Context initialized', {
+      userId: user.id,
+      username: user.username,
+      role: user.role,
+      isAdmin: value.isAdmin,
+      isManager: value.isManager,
+      isStaff: value.isStaff,
+      permissionsCount: permissions.length
     });
   }
 

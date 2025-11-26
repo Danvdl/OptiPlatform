@@ -1,41 +1,44 @@
 import { UserService } from '../src/user/user.service';
+import { vi } from 'vitest';
 import { User, UserRole, UserStatus } from '../src/user/user.entity';
 import { UserPermission, Permission } from '../src/user/user-permission.entity';
 import { ActivityLog } from '../src/user/activity-log.entity';
 import { UserPreferences } from '../src/user/user-preferences.entity';
 
-import * as bcrypt from 'bcrypt';
+vi.mock('bcrypt', () => ({
+  hash: vi.fn(async () => 'hashed'),
+}));
 
 // Simple in-memory repos
 function createUserRepo() {
   let seq = 1;
   const items: any[] = [];
   return {
-  create: jest.fn((u: any) => ({ ...u })),
-    find: jest.fn(async () => items),
-    findOne: jest.fn(async ({ where }: any) => {
+  create: vi.fn((u: any) => ({ ...u })),
+    find: vi.fn(async () => items),
+    findOne: vi.fn(async ({ where }: any) => {
       if (!where) return null;
       const key = Object.keys(where)[0];
       const val = where[key];
       return items.find((u) => (u as any)[key] === val) || null;
     }),
-    findOneBy: jest.fn(async (criteria: any) => {
+    findOneBy: vi.fn(async (criteria: any) => {
       const key = Object.keys(criteria)[0];
       const val = (criteria as any)[key];
       return items.find((u) => (u as any)[key] === val) || null;
     }),
-    save: jest.fn(async (u: any) => {
+    save: vi.fn(async (u: any) => {
       if (!u.id) u.id = seq++;
       const idx = items.findIndex((x) => x.id === u.id);
       if (idx >= 0) items[idx] = { ...items[idx], ...u };
       else items.push(u);
       return u;
     }),
-    remove: jest.fn(async (u: any) => {
+    remove: vi.fn(async (u: any) => {
       const idx = items.findIndex((x) => x.id === u.id);
       if (idx >= 0) items.splice(idx, 1);
     }),
-    update: jest.fn(async (id: number, patch: any) => {
+    update: vi.fn(async (id: number, patch: any) => {
       const item = items.find((x) => x.id === id);
       if (item) Object.assign(item, patch);
     }),
@@ -45,32 +48,32 @@ function createUserRepo() {
 function createPermissionRepo() {
   const items: Array<Partial<UserPermission>> = [];
   return {
-  create: jest.fn((d: any) => d),
-    find: jest.fn(async ({ where, select }: any) => {
+  create: vi.fn((d: any) => d),
+    find: vi.fn(async ({ where, select }: any) => {
       const res = items.filter((i) => (where?.userId ? i.userId === where.userId : true));
       if (select?.includes?.('permission')) {
         return res.map((r) => ({ permission: r.permission }));
       }
       return res as any;
     }),
-    findOne: jest.fn(async ({ where }: any) => {
+    findOne: vi.fn(async ({ where }: any) => {
       return (
         items.find(
           (i) => i.userId === where.userId && i.permission === where.permission
         ) || null
       ) as any;
     }),
-    save: jest.fn(async (records: any) => {
+    save: vi.fn(async (records: any) => {
       const arr = Array.isArray(records) ? records : [records];
       arr.forEach((r) => items.push({ ...r, id: items.length + 1 }));
       return arr as any;
     }),
-    delete: jest.fn(async ({ userId }: any) => {
+    delete: vi.fn(async ({ userId }: any) => {
       for (let i = items.length - 1; i >= 0; i--) {
         if (items[i].userId === userId) items.splice(i, 1);
       }
     }),
-    remove: jest.fn(async (record: any) => {
+    remove: vi.fn(async (record: any) => {
       const idx = items.findIndex(
         (i) => i.userId === record.userId && i.permission === record.permission
       );
@@ -82,9 +85,9 @@ function createPermissionRepo() {
 
 function createActivityLogRepo() {
   return {
-    create: jest.fn((d) => d),
-    save: jest.fn(async (d) => ({ id: Math.random(), ...d })),
-    createQueryBuilder: jest.fn(() => ({
+    create: vi.fn((d) => d),
+    save: vi.fn(async (d) => ({ id: Math.random(), ...d })),
+    createQueryBuilder: vi.fn(() => ({
       leftJoinAndSelect: () => ({
         orderBy: () => ({ limit: () => ({ offset: () => ({ getMany: async () => [] }) }) }),
       }),
@@ -94,13 +97,11 @@ function createActivityLogRepo() {
 
 function createPreferencesRepo() {
   return {
-    find: jest.fn(async () => []),
-    findOne: jest.fn(async () => null),
-    save: jest.fn(async (d) => d),
+    find: vi.fn(async () => []),
+    findOne: vi.fn(async () => null),
+    save: vi.fn(async (d) => d),
   } as any;
 }
-
-jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed');
 
 describe('UserService - permissions and roles', () => {
   let service: UserService;
@@ -121,7 +122,7 @@ describe('UserService - permissions and roles', () => {
   it('hasPermission returns true for ADMIN without hitting permission repo', async () => {
     // Arrange admin user
     await userRepo.save({ id: 1, username: 'admin', role: UserRole.ADMIN, status: UserStatus.ACTIVE });
-    const spy = jest.spyOn(permRepo, 'findOne');
+    const spy = vi.spyOn(permRepo, 'findOne');
 
     // Act
     const result = await service.hasPermission(1, Permission.USER_READ);

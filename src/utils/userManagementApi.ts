@@ -9,6 +9,7 @@ import {
   UpdateUserInput, 
   ChangePasswordInput 
 } from '../types/user-management';
+import { logError } from './frontendLogger';
 
 // User Management API Functions
 export async function fetchUsers(): Promise<User[]> {
@@ -38,7 +39,7 @@ export async function fetchUsers(): Promise<User[]> {
     const data = await graphql<{ users: User[] }>(query);
     return data.users;
   } catch (error) {
-    console.error('Error fetching users:', error);
+    logError(error instanceof Error ? error : new Error('Error fetching users'), { context: 'fetchUsers' });
   return [];
   }
 }
@@ -70,7 +71,7 @@ export async function fetchCurrentUser(): Promise<User> {
     const data = await graphql<{ currentUser: User }>(query);
     return data.currentUser;
   } catch (error) {
-    console.error('Error fetching current user:', error);
+    logError(error instanceof Error ? error : new Error('Error fetching current user'), { context: 'fetchCurrentUser' });
   throw error;
   }
 }
@@ -100,7 +101,7 @@ export async function createUser(input: CreateUserInput): Promise<User> {
     const data = await graphql<{ createUser: User }>(mutation, { input });
     return data.createUser;
   } catch (error) {
-    console.error('Error creating user:', error);
+    logError(error instanceof Error ? error : new Error('Error creating user'), { context: 'createUser', input });
   throw error;
   }
 }
@@ -132,7 +133,7 @@ export async function updateUser(input: UpdateUserInput): Promise<User> {
     const data = await graphql<{ updateUser: User }>(mutation, { input });
     return data.updateUser;
   } catch (error) {
-    console.error('Error updating user:', error);
+    logError(error instanceof Error ? error : new Error('Error updating user'), { context: 'updateUser', userId: id });
     throw error;
   }
 }
@@ -148,7 +149,7 @@ export async function changePassword(input: ChangePasswordInput): Promise<boolea
     const data = await graphql<{ changePassword: boolean }>(mutation, { input });
     return data.changePassword;
   } catch (error) {
-    console.error('Error changing password:', error);
+    logError(error instanceof Error ? error : new Error('Error changing password'), { context: 'changePassword', userId: id });
     throw error;
   }
 }
@@ -164,7 +165,7 @@ export async function deleteUser(id: number): Promise<boolean> {
     const data = await graphql<{ deleteUser: boolean }>(mutation, { id });
     return data.deleteUser;
   } catch (error) {
-    console.error('Error deleting user:', error);
+    logError(error instanceof Error ? error : new Error('Error deleting user'), { context: 'deleteUser', userId: id });
     throw error;
   }
 }
@@ -181,8 +182,8 @@ export async function fetchUserPermissions(userId?: number): Promise<string[]> {
     const data = await graphql<{ userPermissions: string[] }>(query, { userId });
     return data.userPermissions;
   } catch (error) {
-    console.error('Error fetching user permissions:', error);
-  return [];
+    logError(error instanceof Error ? error : new Error('Error fetching user permissions'), { context: 'fetchUserPermissions' });
+    return [];
   }
 }
 
@@ -199,7 +200,7 @@ export async function grantPermission(userId: number, permission: string): Promi
     });
     return data.grantPermission;
   } catch (error) {
-    console.error('Error granting permission:', error);
+    logError(error instanceof Error ? error : new Error('Error granting permission'), { context: 'grantPermission', userId, permission });
     return false;
   }
 }
@@ -217,7 +218,7 @@ export async function revokePermission(userId: number, permission: string): Prom
     });
     return data.revokePermission;
   } catch (error) {
-    console.error('Error revoking permission:', error);
+    logError(error instanceof Error ? error : new Error('Error revoking permission'), { context: 'revokePermission', userId, permission });
     return false;
   }
 }
@@ -258,7 +259,7 @@ export async function fetchActivityLogs(filter: {
     const data = await graphql<{ activityLogs: ActivityLog[] }>(query, { filter });
     return data.activityLogs;
   } catch (error) {
-    console.error('Error fetching activity logs:', error);
+    logError(error instanceof Error ? error : new Error('Error fetching activity logs'), { context: 'fetchActivityLogs', filter });
   // Return empty array instead of demo data
   return [];
   }
@@ -283,7 +284,7 @@ export async function fetchUserPreferences(): Promise<UserPreference[]> {
     const data = await graphql<{ userPreferences: UserPreference[] }>(query);
     return data.userPreferences;
   } catch (error) {
-    console.error('Error fetching user preferences:', error);
+    logError(error instanceof Error ? error : new Error('Error fetching user preferences'), { context: 'fetchUserPreferences' });
     return [];
   }
 }
@@ -308,7 +309,7 @@ export async function setUserPreference(preferenceType: string, value: string): 
     });
     return data.setUserPreference;
   } catch (error) {
-    console.error('Error setting user preference:', error);
+    logError(error instanceof Error ? error : new Error('Error setting user preference'), { context: 'setUserPreference', key, value });
     throw error;
   }
 }
@@ -324,7 +325,7 @@ export async function hasPermission(permission: string): Promise<boolean> {
     const data = await graphql<{ hasPermission: boolean }>(query, { permission });
     return data.hasPermission;
   } catch (error) {
-    console.error('Error checking permission:', error);
+    logError(error instanceof Error ? error : new Error('Error checking permission'), { context: 'hasPermission', permission });
     return false;
   }
 }

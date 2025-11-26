@@ -1,4 +1,5 @@
 import { graphql } from './apiClient';
+import { logError } from '../utils/frontendLogger';
 
 export async function fetchDashboardMetrics(periodDays: number): Promise<any> {
   const query = `
@@ -10,7 +11,7 @@ export async function fetchDashboardMetrics(periodDays: number): Promise<any> {
     const data = await graphql<{ dashboardMetrics: string }>(query, { period: periodDays });
     return JSON.parse(data.dashboardMetrics || '{}');
   } catch (error) {
-    console.error('Error fetching dashboard metrics:', error);
+    logError(error instanceof Error ? error : new Error('Error fetching dashboard metrics'), { context: 'fetchDashboardMetrics', periodDays });
     return {};
   }
 }

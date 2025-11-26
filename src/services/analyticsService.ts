@@ -57,7 +57,7 @@ export async function fetchProductHealthScore(productId: number): Promise<Produc
     const response = await graphql<{ productHealthScore: string }>(query, { productId });
     return JSON.parse(response.productHealthScore);
   } catch (error) {
-    console.error('Failed to fetch product health score:', error);
+    logError(error instanceof Error ? error : new Error('Failed to fetch product health score'), { context: 'fetchProductHealthScore', productId });
     throw error;
   }
 }
@@ -84,7 +84,7 @@ export async function fetchDemandForecast(
     
     return forecast;
   } catch (error) {
-    console.error('Failed to fetch demand forecast:', error);
+    logError(error instanceof Error ? error : new Error('Failed to fetch demand forecast'), { context: 'fetchDemandForecast', productId, daysAhead });
     throw error;
   }
 }

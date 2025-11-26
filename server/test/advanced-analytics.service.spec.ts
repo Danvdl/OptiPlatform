@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { vi } from 'vitest';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AdvancedAnalyticsService } from '../src/analytics/advanced-analytics.service';
@@ -17,14 +18,14 @@ describe('AdvancedAnalyticsService', () => {
         {
           provide: getRepositoryToken(Product),
           useValue: {
-            findOne: jest.fn(),
-            find: jest.fn(),
+            findOne: vi.fn(),
+            find: vi.fn(),
           },
         },
         {
           provide: getRepositoryToken(InventoryTransaction),
           useValue: {
-            find: jest.fn(),
+            find: vi.fn(),
           },
         },
       ],
@@ -36,7 +37,7 @@ describe('AdvancedAnalyticsService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -73,8 +74,8 @@ describe('AdvancedAnalyticsService', () => {
         },
       ];
 
-      jest.spyOn(productRepo, 'findOne').mockResolvedValue(mockProduct as any);
-      jest.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
+      vi.spyOn(productRepo, 'findOne').mockResolvedValue(mockProduct as any);
+      vi.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
 
       const result = await service.calculateProductHealthScore(1);
 
@@ -86,7 +87,7 @@ describe('AdvancedAnalyticsService', () => {
     });
 
     it('should handle product not found', async () => {
-      jest.spyOn(productRepo, 'findOne').mockResolvedValue(null);
+      vi.spyOn(productRepo, 'findOne').mockResolvedValue(null);
 
       await expect(service.calculateProductHealthScore(999)).rejects.toThrow();
     });
@@ -124,8 +125,8 @@ describe('AdvancedAnalyticsService', () => {
         },
       ];
 
-      jest.spyOn(productRepo, 'findOne').mockResolvedValue(mockProduct as any);
-      jest.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
+      vi.spyOn(productRepo, 'findOne').mockResolvedValue(mockProduct as any);
+      vi.spyOn(transactionRepo, 'find').mockResolvedValue(mockTransactions as any);
 
       const result = await service.forecastDemand(1, 7);
 
@@ -141,8 +142,8 @@ describe('AdvancedAnalyticsService', () => {
         quantity: 100,
       };
 
-      jest.spyOn(productRepo, 'findOne').mockResolvedValue(mockProduct as any);
-      jest.spyOn(transactionRepo, 'find').mockResolvedValue([]);
+      vi.spyOn(productRepo, 'findOne').mockResolvedValue(mockProduct as any);
+      vi.spyOn(transactionRepo, 'find').mockResolvedValue([]);
 
       const result = await service.forecastDemand(1, 14);
 

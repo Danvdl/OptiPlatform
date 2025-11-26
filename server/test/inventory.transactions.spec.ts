@@ -1,31 +1,32 @@
 import { InventoryService } from '../src/inventory/inventory.service';
+import { vi } from 'vitest';
 import { InventoryTransaction, TransactionType } from '../src/inventory/entities/inventory-transaction.entity';
 
 describe('InventoryService - transactions', () => {
   const productRepo = {
-    findOneBy: jest.fn(async ({ id }) => ({ id, name: 'Widget', restockThreshold: 5 })),
+    findOneBy: vi.fn(async ({ id }) => ({ id, name: 'Widget', restockThreshold: 5 })),
   } as any;
 
   const txRepo = {
-    create: jest.fn((d) => d),
-    save: jest.fn(async (d) => d),
-    createQueryBuilder: jest.fn(() => ({
+    create: vi.fn((d) => d),
+    save: vi.fn(async (d) => d),
+    createQueryBuilder: vi.fn(() => ({
       select: () => ({ where: () => ({ getRawOne: async () => ({ sum: '3' }) }) }),
     })),
-    find: jest.fn(),
-    findOneBy: jest.fn(),
+    find: vi.fn(),
+    findOneBy: vi.fn(),
   } as any;
 
   const categoryRepo = { } as any;
   const productNoteRepo = { } as any;
-  const notifications = { sendLowStockAlert: jest.fn(), sendWasteAlert: jest.fn() } as any;
-  const priceHistoryService = { trackPriceChange: jest.fn() } as any;
+  const notifications = { sendLowStockAlert: vi.fn(), sendWasteAlert: vi.fn() } as any;
+  const priceHistoryService = { trackPriceChange: vi.fn() } as any;
 
-  const config = { get: jest.fn(() => undefined) } as any;
+  const config = { get: vi.fn(() => undefined) } as any;
   const service = new InventoryService(productRepo, categoryRepo, productNoteRepo, txRepo, notifications, priceHistoryService, config);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('computes totalCost from unitCost and quantity', async () => {

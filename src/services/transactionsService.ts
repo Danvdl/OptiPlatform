@@ -1,4 +1,5 @@
 import { graphql } from './apiClient';
+import { logError } from '../utils/frontendLogger';
 
 export interface AdvancedTransaction {
   id: number;
@@ -80,7 +81,7 @@ export async function fetchAdvancedTransactions(): Promise<AdvancedTransaction[]
       reference: t.referenceTransactionId ? `#${t.referenceTransactionId}` : undefined,
     }));
   } catch (error) {
-    console.error('Error fetching transactions:', error);
+    logError(error instanceof Error ? error : new Error('Error fetching transactions'), { context: 'fetchTransactions' });
     return [];
   }
 }
@@ -106,7 +107,7 @@ export async function createAdvancedTransaction(input: CreateTransactionInput): 
     const data = await graphql<{ createAdvancedTransaction: AdvancedTransaction }>(mutation, { input });
     return data.createAdvancedTransaction;
   } catch (error) {
-    console.error('Error creating transaction:', error);
+    logError(error instanceof Error ? error : new Error('Error creating transaction'), { context: 'createTransaction', input });
     throw error;
   }
 }

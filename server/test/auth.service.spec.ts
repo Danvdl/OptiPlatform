@@ -1,33 +1,34 @@
 import { AuthService } from '../src/auth/auth.service';
+import { vi } from 'vitest';
 import type { JwtService } from '@nestjs/jwt';
 import { UserService } from '../src/user/user.service';
 
 import { Repository } from 'typeorm';
 import { User } from '../src/user/user.entity';
 
-import * as bcrypt from 'bcrypt';
+vi.mock('bcrypt', () => ({
+  compare: vi.fn(async (pass: string) => pass === 'test'),
+}));
 
 // simple mock JwtService
 const jwtService: JwtService = {
-  sign: jest.fn().mockReturnValue('signed-token'),
+  sign: vi.fn().mockReturnValue('signed-token'),
 } as any;
 
 // mock User repository
 const usersRepo = {
-  findOne: jest.fn(async ({ where: { username } }) => {
+  findOne: vi.fn(async ({ where: { username } }) => {
     if (username === 'test') {
       return { id: 1, username: 'test', password: 'hashed' };
     }
     return null;
   }),
-  create: jest.fn((u) => u),
-  save: jest.fn(async (u) => u),
+  create: vi.fn((u) => u),
+  save: vi.fn(async (u) => u),
 } as any;
 
-jest.spyOn(bcrypt, 'compare').mockImplementation(async (pass: string) => pass === 'test');
-
 describe('AuthService', () => {
-  const mockUserService = { updateLastLogin: jest.fn() } as unknown as UserService;
+  const mockUserService = { updateLastLogin: vi.fn() } as unknown as UserService;
   const service = new AuthService(jwtService, usersRepo, mockUserService);
 
 

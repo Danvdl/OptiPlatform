@@ -8,7 +8,10 @@
     "start:prod": "npm run build && node dist/main.js",
     "dev": "nest start --watch",
     "build": "nest build",
-    "test": "node node_modules/jest/bin/jest.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
     "seed:analytics": "ts-node src/scripts/seed-analytics.ts"
   },
   "dependencies": {
@@ -42,10 +45,13 @@
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.4.20",
-    "@types/jest": "^29.5.3",
-    "jest": "^29.6.1",
-    "ts-jest": "^29.1.1",
+    "@swc/core": "^1.15.3",
+    "@vitest/coverage-v8": "^4.0.14",
+    "@vitest/ui": "^4.0.14",
     "ts-node": "^10.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "unplugin-swc": "^1.5.9",
+    "vite": "^7.2.4",
+    "vitest": "^4.0.14"
   }
 }

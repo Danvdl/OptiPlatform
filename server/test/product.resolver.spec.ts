@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { vi } from 'vitest';
 import { ProductResolver } from '../src/inventory/product.resolver';
 import { InventoryService } from '../src/inventory/inventory.service';
 
@@ -13,14 +14,14 @@ describe('ProductResolver', () => {
         {
           provide: InventoryService,
           useValue: {
-            createProduct: jest.fn(),
-            updateProduct: jest.fn(),
-            removeProduct: jest.fn(),
-            findAllProducts: jest.fn(),
-            findProduct: jest.fn(),
-            getProductProfitability: jest.fn(),
-            getTopProfitableProducts: jest.fn(),
-            getInventoryValuation: jest.fn(),
+            createProduct: vi.fn(),
+            updateProduct: vi.fn(),
+            removeProduct: vi.fn(),
+            findAllProducts: vi.fn(),
+            findProduct: vi.fn(),
+            getProductProfitability: vi.fn(),
+            getTopProfitableProducts: vi.fn(),
+            getInventoryValuation: vi.fn(),
           },
         },
       ],
@@ -31,7 +32,7 @@ describe('ProductResolver', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -43,7 +44,7 @@ describe('ProductResolver', () => {
       const mockProduct = { id: 1, name: 'Test Product', sku: 'TEST-001' };
       const createProductInput = { name: 'Test Product', sku: 'TEST-001' };
 
-      jest.spyOn(service, 'createProduct').mockResolvedValue(mockProduct as any);
+      vi.spyOn(service, 'createProduct').mockResolvedValue(mockProduct as any);
 
       const result = await resolver.createProduct(createProductInput as any);
 
@@ -57,7 +58,7 @@ describe('ProductResolver', () => {
       const mockProduct = { id: 1, name: 'Updated Product' };
       const updateProductInput = { id: 1, name: 'Updated Product' };
 
-      jest.spyOn(service, 'updateProduct').mockResolvedValue(mockProduct as any);
+      vi.spyOn(service, 'updateProduct').mockResolvedValue(mockProduct as any);
 
       const result = await resolver.updateProduct(updateProductInput as any);
 
@@ -68,7 +69,7 @@ describe('ProductResolver', () => {
 
   describe('removeProduct', () => {
     it('should remove a product', async () => {
-      jest.spyOn(service, 'removeProduct').mockResolvedValue(undefined);
+      vi.spyOn(service, 'removeProduct').mockResolvedValue(undefined);
 
       const result = await resolver.removeProduct(1);
 
@@ -84,7 +85,7 @@ describe('ProductResolver', () => {
         { id: 2, name: 'Product 2' },
       ];
 
-      jest.spyOn(service, 'findAllProducts').mockResolvedValue(mockProducts as any);
+      vi.spyOn(service, 'findAllProducts').mockResolvedValue(mockProducts as any);
 
       const result = await resolver.products();
 
@@ -97,7 +98,7 @@ describe('ProductResolver', () => {
     it('should return a single product', async () => {
       const mockProduct = { id: 1, name: 'Test Product' };
 
-      jest.spyOn(service, 'findProduct').mockResolvedValue(mockProduct as any);
+      vi.spyOn(service, 'findProduct').mockResolvedValue(mockProduct as any);
 
       const result = await resolver.product(1);
 
@@ -110,7 +111,7 @@ describe('ProductResolver', () => {
     it('should return product profitability', async () => {
       const mockProfitability = { profit: 1000, margin: 0.25 };
 
-      jest.spyOn(service, 'getProductProfitability').mockResolvedValue(mockProfitability as any);
+      vi.spyOn(service, 'getProductProfitability').mockResolvedValue(mockProfitability as any);
 
       const result = await resolver.productProfitability(1);
 
@@ -126,7 +127,7 @@ describe('ProductResolver', () => {
         { id: 2, name: 'Product 2', profit: 800 },
       ];
 
-      jest.spyOn(service, 'getTopProfitableProducts').mockResolvedValue(mockProducts as any);
+      vi.spyOn(service, 'getTopProfitableProducts').mockResolvedValue(mockProducts as any);
 
       const result = await resolver.topProfitableProducts(10);
 
@@ -139,7 +140,7 @@ describe('ProductResolver', () => {
     it('should return inventory valuation', async () => {
       const mockValuation = { total: 50000, byCategory: {} };
 
-      jest.spyOn(service, 'getInventoryValuation').mockResolvedValue(mockValuation as any);
+      vi.spyOn(service, 'getInventoryValuation').mockResolvedValue(mockValuation as any);
 
       const result = await resolver.inventoryValuation();
 

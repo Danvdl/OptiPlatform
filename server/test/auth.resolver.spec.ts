@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { vi } from 'vitest';
 import { AuthResolver } from '../src/auth/auth.resolver';
 import { AuthService } from '../src/auth/auth.service';
 
@@ -13,9 +14,9 @@ describe('AuthResolver', () => {
         {
           provide: AuthService,
           useValue: {
-            validateUser: jest.fn(),
-            registerUser: jest.fn(),
-            login: jest.fn(),
+            validateUser: vi.fn(),
+            registerUser: vi.fn(),
+            login: vi.fn(),
           },
         },
       ],
@@ -26,7 +27,7 @@ describe('AuthResolver', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -43,8 +44,8 @@ describe('AuthResolver', () => {
       const mockUser = { id: 1, username: 'testuser' };
       const mockToken = 'jwt-token-123';
 
-      jest.spyOn(authService, 'validateUser').mockResolvedValue(mockUser as any);
-      jest.spyOn(authService, 'login').mockResolvedValue(mockToken);
+      vi.spyOn(authService, 'validateUser').mockResolvedValue(mockUser as any);
+      vi.spyOn(authService, 'login').mockResolvedValue(mockToken);
 
       const result = await resolver.login(loginInput);
 
@@ -59,7 +60,7 @@ describe('AuthResolver', () => {
         password: 'wrongpassword',
       };
 
-      jest.spyOn(authService, 'validateUser').mockResolvedValue(null);
+      vi.spyOn(authService, 'validateUser').mockResolvedValue(null);
 
       await expect(resolver.login(loginInput)).rejects.toThrow('Invalid credentials');
     });
@@ -75,8 +76,8 @@ describe('AuthResolver', () => {
       const mockUser = { id: 1, username: 'newuser' };
       const mockToken = 'jwt-token-123';
 
-      jest.spyOn(authService, 'registerUser').mockResolvedValue(mockUser as any);
-      jest.spyOn(authService, 'login').mockResolvedValue(mockToken);
+      vi.spyOn(authService, 'registerUser').mockResolvedValue(mockUser as any);
+      vi.spyOn(authService, 'login').mockResolvedValue(mockToken);
 
       const result = await resolver.register(registerInput);
 

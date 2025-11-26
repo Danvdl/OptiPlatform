@@ -1,3 +1,5 @@
+import { logWarning, logError } from './frontendLogger';
+
 // Check if we're running in Tauri environment
 const isTauri = typeof window !== 'undefined' && (window as any).__TAURI__;
 
@@ -12,7 +14,7 @@ async function initializeStore() {
         const { LazyStore } = await import('@tauri-apps/plugin-store');
         store = new LazyStore('auth.json');
       } catch (error) {
-        console.warn('Tauri store not available, falling back to localStorage');
+        logWarning('Tauri store not available, falling back to localStorage');
       }
     })();
   }
@@ -33,7 +35,7 @@ export async function saveToken(token: string) {
       localStorage.setItem('jwt', token);
     }
   } catch (error) {
-    console.error('Failed to save token:', error);
+    logError(error instanceof Error ? error : new Error('Failed to save token'), { context: 'saveToken' });
     // Fallback to localStorage if Tauri fails
     localStorage.setItem('jwt', token);
   }
@@ -51,7 +53,7 @@ export async function getToken(): Promise<string | null> {
       return localStorage.getItem('jwt');
     }
   } catch (error) {
-    console.error('Failed to get token:', error);
+    logError(error instanceof Error ? error : new Error('Failed to get token'), { context: 'getToken' });
     // Fallback to localStorage if Tauri fails
     return localStorage.getItem('jwt');
   }
@@ -69,7 +71,7 @@ export async function clearToken() {
       localStorage.removeItem('jwt');
     }
   } catch (error) {
-    console.error('Failed to clear token:', error);
+    logError(error instanceof Error ? error : new Error('Failed to clear token'), { context: 'clearToken' });
     // Fallback to localStorage if Tauri fails
     localStorage.removeItem('jwt');
   }

@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { saveToken } from '../utils/authStore';
 import { useError } from '../components/ErrorProvider';
 import { getErrorMessage, ErrorCode } from '../utils/errorCodes';
+import { logError } from '../utils/frontendLogger';
 import './Login.css';
 
 export default function Login() {
@@ -41,12 +42,6 @@ export default function Login() {
       const mutation = isRegister ? 'register' : 'login';
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
       
-      if (import.meta.env.MODE !== 'production') {
-        console.log('Making request to:', `${backendUrl}/graphql`);
-        console.log('Mutation:', mutation);
-        console.log('Data:', { username, password });
-      }
-      
       const res = await fetch(`${backendUrl}/graphql`, {
         method: 'POST',
         headers: { 
@@ -59,15 +54,7 @@ export default function Login() {
         }),
       });
       
-      if (import.meta.env.MODE !== 'production') {
-        console.log('Response status:', res.status);
-        console.log('Response headers:', res.headers);
-      }
-      
       const json = await res.json();
-      if (import.meta.env.MODE !== 'production') {
-        console.log('Response data:', json);
-      }
       
       if (json.errors) {
         const code = json.errors[0].extensions?.code || ErrorCode.UNKNOWN;
@@ -85,7 +72,7 @@ export default function Login() {
         setError('Authentication failed');
       }
     } catch (err: any) {
-      console.error('Network error details:', err);
+      logError(err instanceof Error ? err : new Error('Network error during login'), { context: 'login', username });
       const code = err?.code || ErrorCode.NETWORK;
       showError(getErrorMessage(code));
       setError(`Network error: ${err instanceof Error ? err.message : 'Please try again.'}`);

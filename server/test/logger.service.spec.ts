@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { vi } from 'vitest';
 import { LoggerService } from '../src/common/logger.service';
 import * as fs from 'fs';
 
-jest.mock('fs');
+vi.mock('fs');
 
 describe('LoggerService', () => {
   let service: LoggerService;
@@ -15,13 +16,13 @@ describe('LoggerService', () => {
     service = module.get<LoggerService>(LoggerService);
     
     // Mock fs methods
-    (fs.existsSync as jest.Mock).mockReturnValue(true);
-    (fs.mkdirSync as jest.Mock).mockImplementation();
-    (fs.appendFileSync as jest.Mock).mockImplementation();
+    (fs.existsSync as vi.Mock).mockReturnValue(true);
+    (fs.mkdirSync as vi.Mock).mockImplementation();
+    (fs.appendFileSync as vi.Mock).mockImplementation();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
