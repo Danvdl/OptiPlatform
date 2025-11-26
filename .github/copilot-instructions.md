@@ -130,13 +130,31 @@ server/src/
 
 ---
 
-## 🚦PR Checklist
+## 🚦 PR Checklist
 
 * [ ] Types are explicit.
 * [ ] Tests added/updated.
+* [ ] **TypeScript type check passes**: Run `npx tsc -p tsconfig.json --noEmit` before committing.
 * [ ] Lint + Prettier pass.
 * [ ] No secrets committed.
 * [ ] GraphQL schema changes documented.
+* [ ] Frontend types match backend GraphQL schema (`server/schema.gql`).
+
+---
+
+## ✅ Type Checking
+
+**ALWAYS run TypeScript type check before committing:**
+
+```bash
+npx tsc -p tsconfig.json --noEmit
+```
+
+**Common type issues to watch for:**
+* Frontend types must match backend GraphQL schema
+* Check `server/schema.gql` for correct field names and types
+* Example: `PurchaseOrder` has `supplierId` (number) + `supplier` (relation), NOT `supplierName`
+* Example: `Product` has `purchasePrice`/`salePrice`, NOT `price`/`cost`
 
 ---
 
@@ -150,5 +168,7 @@ server/src/
 * “Follow NestJS GraphQL conventions.”
 
 ---
+**PUSHING TO REPO**
+never push direl
 
 **End of simplified guidelines.**
