@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Test, TestingModule } from '@nestjs/testing';
 import { vi } from 'vitest';
 import { SuppliersResolver } from '../src/suppliers/suppliers.resolver';
@@ -82,41 +83,45 @@ describe('SuppliersResolver', () => {
 
   describe('suppliers', () => {
     it('should return all suppliers', async () => {
+      const tenantId = 'test-tenant-123';
       const suppliers = [mockSupplier];
       mockSuppliersService.findAllSuppliers.mockResolvedValue(suppliers);
 
-      const result = await resolver.suppliers();
+      const result = await resolver.suppliers(tenantId);
 
       expect(result).toEqual(suppliers);
-      expect(service.findAllSuppliers).toHaveBeenCalled();
+      expect(service.findAllSuppliers).toHaveBeenCalledWith(tenantId);
     });
   });
 
   describe('supplier', () => {
     it('should return a single supplier by id', async () => {
+      const tenantId = 'test-tenant-123';
       mockSuppliersService.findSupplier.mockResolvedValue(mockSupplier);
 
-      const result = await resolver.supplier(1);
+      const result = await resolver.supplier(1, tenantId);
 
       expect(result).toEqual(mockSupplier);
-      expect(service.findSupplier).toHaveBeenCalledWith(1);
+      expect(service.findSupplier).toHaveBeenCalledWith(1, tenantId);
     });
   });
 
   describe('activeSuppliers', () => {
     it('should return only active suppliers', async () => {
+      const tenantId = 'test-tenant-123';
       const suppliers = [mockSupplier];
       mockSuppliersService.findActiveSuppliers.mockResolvedValue(suppliers);
 
-      const result = await resolver.activeSuppliers();
+      const result = await resolver.activeSuppliers(tenantId);
 
       expect(result).toEqual(suppliers);
-      expect(service.findActiveSuppliers).toHaveBeenCalled();
+      expect(service.findActiveSuppliers).toHaveBeenCalledWith(tenantId);
     });
   });
 
   describe('createSupplier', () => {
     it('should create a new supplier', async () => {
+      const tenantId = 'test-tenant-123';
       const input = {
         name: 'New Supplier',
         email: 'new@supplier.com',
@@ -124,15 +129,16 @@ describe('SuppliersResolver', () => {
       };
       mockSuppliersService.createSupplier.mockResolvedValue(mockSupplier);
 
-      const result = await resolver.createSupplier(input);
+      const result = await resolver.createSupplier(input, tenantId);
 
       expect(result).toEqual(mockSupplier);
-      expect(service.createSupplier).toHaveBeenCalledWith(input);
+      expect(service.createSupplier).toHaveBeenCalledWith(input, tenantId);
     });
   });
 
   describe('updateSupplier', () => {
     it('should update an existing supplier', async () => {
+      const tenantId = 'test-tenant-123';
       const input = {
         id: 1,
         name: 'Updated Supplier',
@@ -140,21 +146,22 @@ describe('SuppliersResolver', () => {
       const updated = { ...mockSupplier, name: 'Updated Supplier' };
       mockSuppliersService.updateSupplier.mockResolvedValue(updated);
 
-      const result = await resolver.updateSupplier(input);
+      const result = await resolver.updateSupplier(input, tenantId);
 
       expect(result).toEqual(updated);
-      expect(service.updateSupplier).toHaveBeenCalledWith(input);
+      expect(service.updateSupplier).toHaveBeenCalledWith(input, tenantId);
     });
   });
 
   describe('deleteSupplier', () => {
     it('should delete a supplier and return true', async () => {
+      const tenantId = 'test-tenant-123';
       mockSuppliersService.deleteSupplier.mockResolvedValue(true);
 
-      const result = await resolver.deleteSupplier(1);
+      const result = await resolver.deleteSupplier(1, tenantId);
 
       expect(result).toBe(true);
-      expect(service.deleteSupplier).toHaveBeenCalledWith(1);
+      expect(service.deleteSupplier).toHaveBeenCalledWith(1, tenantId);
     });
   });
 

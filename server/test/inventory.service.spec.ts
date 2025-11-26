@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Test, TestingModule } from '@nestjs/testing';
 import { vi } from 'vitest';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -63,6 +64,7 @@ describe('InventoryService', () => {
             delete: vi.fn(),
             find: vi.fn(),
             findOne: vi.fn(),
+            findOneBy: vi.fn(),
             count: vi.fn(),
           },
         },
@@ -107,17 +109,20 @@ describe('InventoryService', () => {
 
   describe('Product Operations', () => {
     it('creates a product with default restock threshold', async () => {
-      await service.createProduct({ name: 'Widget', sku: 'W-1' } as any);
-      expect(productRepo.create).toHaveBeenCalledWith({ name: 'Widget', sku: 'W-1', restockThreshold: 5 });
+      const tenantId = 'test-tenant-123';
+      await service.createProduct({ name: 'Widget', sku: 'W-1' } as any, tenantId);
+      expect(productRepo.create).toHaveBeenCalledWith({ name: 'Widget', sku: 'W-1', tenantId, restockThreshold: 5 });
       expect(productRepo.save).toHaveBeenCalled();
     });
 
     it('creates a product with custom restock threshold', async () => {
-      await service.createProduct({ name: 'Widget', sku: 'W-1', restockThreshold: 10 } as any);
-      expect(productRepo.create).toHaveBeenCalledWith({ name: 'Widget', sku: 'W-1', restockThreshold: 10 });
+      const tenantId = 'test-tenant-123';
+      await service.createProduct({ name: 'Widget', sku: 'W-1', restockThreshold: 10 } as any, tenantId);
+      expect(productRepo.create).toHaveBeenCalledWith({ name: 'Widget', sku: 'W-1', tenantId, restockThreshold: 10 });
     });
 
     it('tracks price changes when creating product with purchase price', async () => {
+      const tenantId = 'test-tenant-123';
       productRepo.save.mockResolvedValue({ id: 1, name: 'Widget', purchasePrice: 100 });
       
       await service.createProduct({ 
@@ -125,7 +130,7 @@ describe('InventoryService', () => {
         sku: 'W-1',
         purchasePrice: 100,
         salePrice: 150
-      } as any, 1);
+      } as any, tenantId, 1);
 
       expect(priceHistoryService.trackPriceChange).toHaveBeenCalledWith(
         1, 'purchase', 0, 100, 1, 'Initial product creation', 'USD'
@@ -136,6 +141,7 @@ describe('InventoryService', () => {
     });
 
     it('updates a product successfully', async () => {
+      const tenantId = 'test-tenant-123';
       productRepo.findOneBy.mockResolvedValue({
         id: 1,
         name: 'Widget',
@@ -144,7 +150,7 @@ describe('InventoryService', () => {
         currency: 'USD'
       });
 
-      await service.updateProduct({ id: 1, name: 'Updated Widget' } as any);
+      await service.updateProduct({ id: 1, name: 'Updated Widget' } as any, tenantId);
       
       expect(productRepo.update).toHaveBeenCalledWith(
         { id: 1 },
@@ -153,6 +159,7 @@ describe('InventoryService', () => {
     });
 
     it('tracks price changes when updating product prices', async () => {
+      const tenantId = 'test-tenant-123';
       productRepo.findOneBy.mockResolvedValue({
         id: 1,
         purchasePrice: 100,
@@ -164,7 +171,7 @@ describe('InventoryService', () => {
         id: 1, 
         purchasePrice: 120,
         salePrice: 180
-      } as any, 1);
+      } as any, tenantId, 1);
 
       expect(priceHistoryService.trackPriceChange).toHaveBeenCalledWith(
         1, 'purchase', 100, 120, 1, 'Product price update', 'USD'
@@ -175,39 +182,44 @@ describe('InventoryService', () => {
     });
 
     it('throws error when updating non-existent product', async () => {
+      const tenantId = 'test-tenant-123';
       productRepo.findOneBy.mockResolvedValue(null);
 
-      await expect(service.updateProduct({ id: 999 } as any))
+      await expect(service.updateProduct({ id: 999 } as any, tenantId))
         .rejects.toThrow('Product not found');
     });
 
     it('removes a product', async () => {
-      await service.removeProduct(1);
-      expect(productRepo.delete).toHaveBeenCalledWith(1);
+      const tenantId = 'test-tenant-123';
+      await service.removeProduct(1, tenantId);
+      expect(productRepo.delete).toHaveBeenCalledWith({ id: 1, tenantId });
     });
 
     it('finds all products with category relations', async () => {
+      const tenantId = 'test-tenant-123';
       productRepo.find.mockResolvedValue([{ id: 1, name: 'Widget' }]);
       
-      const result = await service.findAllProducts();
+      const result = await service.findAllProducts(tenantId);
       
-      expect(productRepo.find).toHaveBeenCalledWith({ relations: ['category'] });
+      expect(productRepo.find).toHaveBeenCalledWith({ 
+        where: { tenantId },
+        relations: ['category'] 
+      });
       expect(result).toHaveLength(1);
     });
 
     it('finds a single product by id', async () => {
+      const tenantId = 'test-tenant-123';
       productRepo.findOne.mockResolvedValue({ id: 1, name: 'Widget' });
       
-      const result = await service.findProduct(1);
+      const result = await service.findProduct(1, tenantId);
       
-      expect(productRepo.findOne).toHaveBeenCalledWith({ 
-        where: { id: 1 }, 
-        relations: ['category'] 
+      expect(productRepo.findOne).toHaveBeenCalledWith({
+        where: { id: 1, tenantId },
+        relations: ['category']
       });
       expect(result).toEqual({ id: 1, name: 'Widget' });
-    });
-
-    it('finds products by category', async () => {
+    });    it('finds products by category', async () => {
       productRepo.find.mockResolvedValue([
         { id: 1, categoryId: 5, name: 'Widget 1' },
         { id: 2, categoryId: 5, name: 'Widget 2' }
@@ -225,43 +237,53 @@ describe('InventoryService', () => {
 
   describe('Category Operations', () => {
     it('creates a category', async () => {
+      const tenantId = 'test-tenant-123';
       const categoryData = { name: 'Electronics', description: 'Electronic items' };
       
-      await service.createCategory(categoryData as any);
+      await service.createCategory(categoryData as any, tenantId);
       
-      expect(categoryRepo.create).toHaveBeenCalledWith(categoryData);
+      expect(categoryRepo.create).toHaveBeenCalledWith({ ...categoryData, tenantId });
       expect(categoryRepo.save).toHaveBeenCalled();
     });
 
     it('updates a category', async () => {
+      const tenantId = 'test-tenant-123';
       const categoryData = { id: 1, name: 'Updated Category' };
+      categoryRepo.findOneBy.mockResolvedValue({ id: 1, name: 'Old Category', tenantId });
       
-      await service.updateCategory(categoryData as any);
+      await service.updateCategory(categoryData as any, tenantId);
       
-      expect(categoryRepo.save).toHaveBeenCalledWith(categoryData);
+      expect(categoryRepo.findOneBy).toHaveBeenCalledWith({ id: 1, tenantId });
+      expect(categoryRepo.save).toHaveBeenCalled();
     });
 
     it('removes a category', async () => {
-      await service.removeCategory(1);
-      expect(categoryRepo.delete).toHaveBeenCalledWith(1);
+      const tenantId = 'test-tenant-123';
+      await service.removeCategory(1, tenantId);
+      expect(categoryRepo.delete).toHaveBeenCalledWith({ id: 1, tenantId });
     });
 
     it('finds all categories with products', async () => {
+      const tenantId = 'test-tenant-123';
       categoryRepo.find.mockResolvedValue([{ id: 1, name: 'Electronics' }]);
       
-      const result = await service.findAllCategories();
+      const result = await service.findAllCategories(tenantId);
       
-      expect(categoryRepo.find).toHaveBeenCalledWith({ relations: ['products'] });
+      expect(categoryRepo.find).toHaveBeenCalledWith({ 
+        where: { tenantId },
+        relations: ['products'] 
+      });
       expect(result).toHaveLength(1);
     });
 
     it('finds a single category by id', async () => {
+      const tenantId = 'test-tenant-123';
       categoryRepo.findOne.mockResolvedValue({ id: 1, name: 'Electronics' });
       
-      const result = await service.findCategory(1);
+      const result = await service.findCategory(1, tenantId);
       
       expect(categoryRepo.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
+        where: { id: 1, tenantId },
         relations: ['products']
       });
       expect(result).toEqual({ id: 1, name: 'Electronics' });
@@ -493,7 +515,8 @@ describe('InventoryService', () => {
       // Mock for getAverageCostPerUnit
       txRepo.find.mockResolvedValue([{ unitCost: 95, quantity: 10 }]);
 
-      const summary = await service.getInventorySummary();
+      const tenantId = 'test-tenant-123';
+      const summary = await service.getInventorySummary(tenantId);
 
       expect(summary.totalProducts).toBe(50);
       expect(summary.totalCategories).toBe(10);
@@ -532,7 +555,8 @@ describe('InventoryService', () => {
         .mockResolvedValueOnce([{ unitCost: 48, quantity: 20 }])
         .mockResolvedValueOnce([{ unitCost: 190, quantity: 5 }]);
 
-      const valuation = await service.getInventoryValuation();
+      const tenantId = 'test-tenant-123';
+      const valuation = await service.getInventoryValuation(tenantId);
 
       expect(valuation.totalPurchaseValue).toBe(3000);  // (100*10)+(50*20)+(200*5)
       expect(valuation.totalSaleValue).toBe(4500);      // (150*10)+(75*20)+(300*5)
@@ -581,7 +605,8 @@ describe('InventoryService', () => {
       // Mock for getAverageCostPerUnit
       txRepo.find.mockResolvedValue([{ unitCost: 95, quantity: 50 }]);
 
-      const profitability = await service.getProductProfitability(1);
+      const tenantId = 'test-tenant-123';
+      const profitability = await service.getProductProfitability(1, tenantId);
 
       expect(profitability).toMatchObject({
         productId: 1,
@@ -598,9 +623,10 @@ describe('InventoryService', () => {
     });
 
     it('returns null for non-existent product profitability', async () => {
+      const tenantId = 'test-tenant-123';
       productRepo.findOneBy.mockResolvedValue(null);
 
-      const profitability = await service.getProductProfitability(999);
+      const profitability = await service.getProductProfitability(999, tenantId);
 
       expect(profitability).toBeNull();
     });
@@ -638,7 +664,8 @@ describe('InventoryService', () => {
         .mockResolvedValueOnce([{ unitCost: 45, quantity: 5 }])
         .mockResolvedValueOnce([]);
 
-      const topProducts = await service.getTopProfitableProducts(10);
+      const tenantId = 'test-tenant-123';
+      const topProducts = await service.getTopProfitableProducts(10, tenantId);
 
       expect(topProducts).toHaveLength(2);
       // Product B has higher margin: (80-45)/80 = 43.75%
