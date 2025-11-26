@@ -72,13 +72,13 @@ export class TenantsService {
       maxProducts: 100, // Free plan limit
       onboardingCompleted: false,
       onboardingStep: 1,
-      features: {
+      features: JSON.stringify({
         multiUser: true,
         advancedAnalytics: false,
         apiAccess: false,
         customReports: false,
         prioritySupport: false
-      }
+      })
     });
 
     const savedTenant = await this.tenants.save(tenant);
@@ -149,24 +149,29 @@ export class TenantsService {
    */
   async getTenantSettings(tenantId: string): Promise<any> {
     const tenant = await this.findTenant(tenantId);
+    const currentUsers = await this.users.count({ where: { tenantId } });
 
-    const totalUsers = await this.users.count({ where: { tenantId } });
-    
-    // Calculate days until trial ends
-    let daysUntilTrialEnds = null;
-    if (tenant.trialEndsAt) {
-      const now = new Date();
-      const diff = tenant.trialEndsAt.getTime() - now.getTime();
-      daysUntilTrialEnds = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    }
+    const trialDaysRemaining = tenant.trialEndsAt
+      ? Math.ceil((new Date(tenant.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+      : null;
 
     return {
-      tenant,
-      totalUsers,
-      totalProducts: 0, // Will be calculated from products table
-      storageUsed: 0, // Will be calculated
-      daysUntilTrialEnds
+      currentUsers,
+      maxUsers: tenant.maxUsers,
+      currentProducts: 0, // TODO: Implement product counting
+      maxProducts: tenant.maxProducts,
+      plan: tenant.plan,
+      status: tenant.status,
+      daysUntilTrialEnd: trialDaysRemaining,
+      features: tenant.features || {}
     };
+  }
+
+  /**
+   * Get business settings (alias for getTenantSettings)
+   */
+  async getBusinessSettings(tenantId: string) {
+    return this.getTenantSettings(tenantId);
   }
 
   /**
@@ -262,19 +267,22 @@ export class TenantsService {
     });
 
     if (!user) {
-      throw new AppError(ErrorCode.NOT_FOUND, 'Team member not found');
+      throw new AppError(ErrorCode.NOT_FOUND, 'User not found');
     }
 
     // Prevent changing owner role
-    if (user.tenantRole === 'owner' && input.tenantRole && input.tenantRole !== 'owner') {
-      throw new AppError(ErrorCode.VALIDATION, 'Cannot change owner role');
+    if (user.tenantRole === 'owner') {
+      throw new AppError(ErrorCode.VALIDATION, 'Cannot modify the owner role');
     }
 
-    Object.assign(user, input);
-
+    // Update fields
     if (input.tenantRole) {
+      user.tenantRole = input.tenantRole;
       user.role = this.mapTenantRoleToUserRole(input.tenantRole);
     }
+    if (input.department !== undefined) user.department = input.department;
+    if (input.position !== undefined) user.position = input.position;
+    if (input.phoneNumber !== undefined) user.phoneNumber = input.phoneNumber;
 
     return await this.users.save(user);
   }
@@ -294,10 +302,10 @@ export class TenantsService {
 
     // Prevent removing owner
     if (user.tenantRole === 'owner') {
-      throw new AppError(ErrorCode.VALIDATION, 'Cannot remove tenant owner');
+      throw new AppError(ErrorCode.VALIDATION, 'Cannot remove the owner');
     }
 
-    await this.users.delete(userId);
+    await this.users.remove(user);
     return true;
   }
 
