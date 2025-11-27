@@ -11,6 +11,8 @@ async function bootstrap() {
       ? [
           process.env.FRONTEND_URL, // Set this env var to your production frontend URL
           'http://localhost:5173', // Keep for local testing
+          'http://localhost:5174', // Alternative Vite port
+          'http://127.0.0.1:5173',
         ].filter(Boolean) // Remove undefined values
 
       : [
